@@ -31,8 +31,8 @@ namespace sg::city::map
         };
 
         static constexpr std::array<glm::vec3, SIZE> TYPE_COLOR{
-            glm::vec3(0.0f, 0.0f, 0.0f), // black:  None
-            glm::vec3(0.0f, 0.9f, 0.0f), // green:  Residential
+            glm::vec3(0.0f, 0.5f, 0.0f), // green:  None
+            glm::vec3(0.0f, 0.8f, 0.0f), // lime:   Residential
             glm::vec3(0.0f, 0.0f, 0.8f), // blue:   Commercial
             glm::vec3(0.8f, 0.8f, 0.0f), // yellow: Industrial
             glm::vec3(0.8f, 0.8f, 0.8f), // white:  Traffic Network

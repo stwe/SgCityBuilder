@@ -45,12 +45,11 @@ bool GameState::Input()
 
         if (mapPoint.x >= 0.0) // todo - if (hasResult) {}
         {
-            const auto tileIndex{ static_cast<int>(mapPoint.z) * m_map->GetMapSize() + static_cast<int>(mapPoint.x) };
+            m_tileIndex = static_cast<int>(mapPoint.z) * m_map->GetMapSize() + static_cast<int>(mapPoint.x);
 
-            auto& tile{ m_map->GetTiles()[tileIndex] };
+            auto& tile{ m_map->GetTiles()[m_tileIndex] };
             tile->SetType(m_currentTileType);
-            m_map->UpdateMap(tileIndex);
-            //SG_OGL_LOG_DEBUG("Map: x {}, z {}", tile->GetMapX(), tile->GetMapZ());
+            m_map->UpdateMap(m_tileIndex);
         }
     }
 
@@ -190,6 +189,17 @@ void GameState::RenderImGui()
     if (ImGui::Button("Road"))
     {
         m_currentTileType = sg::city::map::Tile::TRAFFIC_NETWORK;
+    }
+
+    ImGui::Spacing();
+    ImGui::Separator();
+    ImGui::Spacing();
+
+    if (m_tileIndex >= 0)
+    {
+        const auto& tile{ *m_map->GetTiles()[m_tileIndex] };
+        ImGui::Text("Current Tile x: %g", tile.GetMapX());
+        ImGui::Text("Current Tile z: %g", tile.GetMapZ());
     }
 
     ImGui::End();

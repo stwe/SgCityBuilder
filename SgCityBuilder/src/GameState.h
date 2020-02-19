@@ -60,6 +60,7 @@ private:
     MapRendererUniquePtr m_mapRenderer;
     MousePickerUniquePtr m_mousePicker;
 
+    int m_tileIndex{ -1 };
     sg::city::map::Tile::Type m_currentTileType{ sg::city::map::Tile::RESIDENTIAL };
 
     //-------------------------------------------------
