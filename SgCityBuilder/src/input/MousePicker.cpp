@@ -2,7 +2,6 @@
 #include <Window.h>
 #include <camera/Camera.h>
 #include <scene/Scene.h>
-#include <Log.h>
 #include "MousePicker.h"
 #include "map/Map.h"
 
@@ -141,7 +140,6 @@ glm::vec3 sg::city::input::MousePicker::BinarySearch(const glm::vec3& t_ray, con
     // todo: try out different values
     if (m_outsideTheMap > 50) // end - it was clicked outside the map
     {
-        SG_OGL_LOG_DEBUG("Outside");
         m_outsideTheMap = 0;
         return glm::vec3(-999.0f); // -999 means that nothing was found
     }

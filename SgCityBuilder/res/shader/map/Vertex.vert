@@ -8,7 +8,7 @@ layout (location = 2) in vec3 aColor;
 
 // Out
 
-out vec3 ourColor;
+out vec3 vColor;
 
 // Uniforms
 
@@ -19,5 +19,5 @@ uniform mat4 mvpMatrix;
 void main()
 {
     gl_Position = mvpMatrix * vec4(aPosition, 1.0);
-    ourColor = aColor;
+    vColor = aColor;
 }

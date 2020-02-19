@@ -47,7 +47,6 @@ int sg::city::map::Map::GetMapSize() const
 // Create
 //-------------------------------------------------
 
-
 /*
 
 
@@ -63,7 +62,6 @@ int sg::city::map::Map::GetMapSize() const
 
 
  */
-
 
 void sg::city::map::Map::CreateMap(const int t_mapSize)
 {
@@ -100,6 +98,17 @@ void sg::city::map::Map::CreateMap(const int t_mapSize)
 
     // set draw count
     m_mapMesh->GetVao().SetDrawCount(GetVerticesCountOfMap());
+}
+
+void sg::city::map::Map::UpdateMap(const int t_tileIndex) const
+{
+    m_mapMesh->GetVao().BindVao();
+
+    ogl::buffer::Vbo::BindVbo(m_vboId);
+    glBufferSubData(GL_ARRAY_BUFFER, t_tileIndex * Tile::SIZE_IN_BYTES_PER_TILE, Tile::SIZE_IN_BYTES_PER_TILE, m_tiles[t_tileIndex]->GetVerticesContainer().data());
+    ogl::buffer::Vbo::UnbindVbo();
+
+    ogl::buffer::Vao::UnbindVao();
 }
 
 //-------------------------------------------------

@@ -72,6 +72,13 @@ namespace sg::city::map
         //-------------------------------------------------
 
         void SetParentMap(Map* t_map);
+        void SetType(Type t_type);
+
+        //-------------------------------------------------
+        // To string
+        //-------------------------------------------------
+
+        static std::string TileTypeToString(Type t_type);
 
     protected:
 

@@ -2,7 +2,7 @@
 
 // In
 
-in vec3 ourColor;
+in vec3 vColor;
 
 // Out
 
@@ -14,5 +14,5 @@ out vec4 fragColor;
 
 void main()
 {
-    fragColor = vec4(ourColor, 1.0);
+    fragColor = vec4(vColor, 1.0);
 }

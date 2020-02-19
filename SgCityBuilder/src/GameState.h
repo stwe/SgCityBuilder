@@ -1,6 +1,7 @@
 #pragma once
 
 #include "SgOgl.h"
+#include "map/Tile.h"
 
 namespace sg::city::map
 {
@@ -59,10 +60,20 @@ private:
     MapRendererUniquePtr m_mapRenderer;
     MousePickerUniquePtr m_mousePicker;
 
+    sg::city::map::Tile::Type m_currentTileType{ sg::city::map::Tile::RESIDENTIAL };
+
     //-------------------------------------------------
     // Helper
     //-------------------------------------------------
 
     void Init();
     void CreateMapEntity();
+
+    //-------------------------------------------------
+    // ImGui
+    //-------------------------------------------------
+
+    void InitImGui() const;
+    void RenderImGui();
+    static void CleanUpImGui();
 };

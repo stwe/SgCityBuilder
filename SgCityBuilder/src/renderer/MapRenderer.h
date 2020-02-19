@@ -55,12 +55,12 @@ namespace sg::city::renderer
     protected:
         void PrepareRendering() override
         {
-            ogl::OpenGl::EnableAlphaBlending();
+            //ogl::OpenGl::EnableAlphaBlending();
             ogl::OpenGl::EnableFaceCulling();
 
             //if (modelComponent.showTriangles)
             {
-                ogl::OpenGl::EnableWireframeMode();
+                //ogl::OpenGl::EnableWireframeMode();
             }
         }
 
@@ -68,11 +68,11 @@ namespace sg::city::renderer
         {
             //if (modelComponent.showTriangles)
             {
-                ogl::OpenGl::DisableWireframeMode();
+                //ogl::OpenGl::DisableWireframeMode();
             }
 
             ogl::OpenGl::DisableFaceCulling();
-            ogl::OpenGl::DisableBlending();
+            //ogl::OpenGl::DisableBlending();
         }
 
     private:

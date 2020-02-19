@@ -61,6 +61,12 @@ namespace sg::city::map
 
         void CreateMap(int t_mapSize);
 
+        /**
+         * @brief Updates the vertex data in the Vbo of a given Tile.
+         * @param t_tileIndex The Tile index to determine the Vbo buffer-offset.
+         */
+        void UpdateMap(int t_tileIndex) const;
+
     protected:
 
     private:
