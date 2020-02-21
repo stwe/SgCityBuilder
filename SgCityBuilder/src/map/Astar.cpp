@@ -16,7 +16,7 @@ sg::city::map::Astar::Astar(Map* t_map)
 // Find
 //-------------------------------------------------
 
-bool sg::city::map::Astar::FindPath(const int t_startTileIndex, const int t_endTileIndex)
+void sg::city::map::Astar::FindPath(const int t_startTileIndex, const int t_endTileIndex)
 {
     CreateMarker(t_startTileIndex, t_endTileIndex);
 
@@ -97,17 +97,11 @@ bool sg::city::map::Astar::FindPath(const int t_startTileIndex, const int t_endT
         while (p->parent != nullptr)
         {
             SG_OGL_LOG_DEBUG("Node x: {}, z: {}", p->mapX, p->mapZ);
-            /*
-            DrawLine(p->x * nNodeSize + nNodeSize / 2, p->y * nNodeSize + nNodeSize / 2,
-                p->parent->x * nNodeSize + nNodeSize / 2, p->parent->y * nNodeSize + nNodeSize / 2, PIXEL_SOLID, FG_YELLOW);
-            */
 
-            // Set next node to this node's parent
+            // Set next node to this node's parent.
             p = p->parent;
         }
     }
-
-    return true;
 }
 
 //-------------------------------------------------
@@ -163,6 +157,28 @@ void sg::city::map::Astar::CreateNeighbours() const
             if (x < mapSize - 1)
             {
                 m_nodes[z * mapSize + x]->neighbours.push_back(m_nodes[(z + 0) * mapSize + (x + 1)]);
+            }
+
+
+            // We can also connect diagonally
+            if (z > 0 && x > 0)
+            {
+                m_nodes[z * mapSize + x]->neighbours.push_back(m_nodes[(z - 1) * mapSize + (x - 1)]);
+            }
+
+            if (z < mapSize - 1 && x > 0)
+            {
+                m_nodes[z * mapSize + x]->neighbours.push_back(m_nodes[(z + 1) * mapSize + (x - 1)]);
+            }
+
+            if (z > 0 && x < mapSize - 1)
+            {
+                m_nodes[z * mapSize + x]->neighbours.push_back(m_nodes[(z - 1) * mapSize + (x + 1)]);
+            }
+
+            if (z < mapSize - 1 && x < mapSize - 1)
+            {
+                m_nodes[z * mapSize + x]->neighbours.push_back(m_nodes[(z + 1) * mapSize + (x + 1)]);
             }
         }
     }

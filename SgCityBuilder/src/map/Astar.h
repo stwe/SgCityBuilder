@@ -26,7 +26,7 @@ namespace sg::city::map
         // Find
         //-------------------------------------------------
 
-        bool FindPath(int t_startTileIndex, int t_endTileIndex);
+        void FindPath(int t_startTileIndex, int t_endTileIndex);
 
     protected:
 
