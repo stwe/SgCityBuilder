@@ -6,6 +6,7 @@
 namespace sg::city::map
 {
     class Map;
+    class Astar;
 }
 
 namespace sg::city::renderer
@@ -59,6 +60,8 @@ private:
     MapSharedPtr m_map;
     MapRendererUniquePtr m_mapRenderer;
     MousePickerUniquePtr m_mousePicker;
+
+    std::unique_ptr<sg::city::map::Astar> m_astar;
 
     int m_tileIndex{ -1 };
     sg::city::map::Tile::Type m_currentTileType{ sg::city::map::Tile::RESIDENTIAL };

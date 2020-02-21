@@ -2,6 +2,7 @@
 #include "renderer/MapRenderer.h"
 #include "map/Map.h"
 #include "map/Tile.h"
+#include "map/Astar.h"
 #include "ecs/Components.h"
 #include "input/MousePicker.h"
 
@@ -99,10 +100,14 @@ void GameState::Init()
     m_map->rotation = glm::vec3(0.0f);
     m_map->scale = glm::vec3(1.0f);
 
+    m_astar = std::make_unique<sg::city::map::Astar>(m_map.get());
+
     CreateMapEntity();
 
     m_mousePicker = std::make_unique<sg::city::input::MousePicker>(m_scene.get(), m_map);
     m_mapRenderer = std::make_unique<sg::city::renderer::MapRenderer>(m_scene.get());
+
+    m_astar->FindPath(0, 63);
 }
 
 void GameState::CreateMapEntity()
