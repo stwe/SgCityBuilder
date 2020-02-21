@@ -6,14 +6,31 @@ namespace sg::city::map
 {
     class Map;
 
+    struct Node
+    {
+        bool obstacle{ false };
+        bool visited{ false };
+
+        float g{ INFINITY };
+        float h{ INFINITY };
+
+        float mapX{ 0.0 };
+        float mapZ{ 0.0 };
+
+        std::vector<Node*> neighbours;
+        Node* parent{ nullptr };
+    };
+
     class Astar
     {
     public:
+        using HeuristicFunction = std::function<float(Node*, Node*, float)>;
+
         //-------------------------------------------------
         // Ctors. / Dtor.
         //-------------------------------------------------
 
-        explicit Astar(Map* t_map);
+        explicit Astar(Map* t_map, bool t_diagonalMovement = false);
 
         Astar(const Astar& t_other) = delete;
         Astar(Astar&& t_other) noexcept = delete;
@@ -31,27 +48,15 @@ namespace sg::city::map
     protected:
 
     private:
-        struct Node
-        {
-            bool obstacle{ false };
-            bool visited{ false };
-
-            float g{ INFINITY };
-            float h{ INFINITY };
-
-            float mapX{ 0.0 };
-            float mapZ{ 0.0 };
-
-            std::vector<Node*> neighbours;
-            Node* parent{ nullptr };
-        };
-
         Map* m_map{ nullptr };
+        bool m_diagonalMovement{ false };
 
         std::vector<Node*> m_nodes;
 
         Node* m_nodeStart{ nullptr };
         Node* m_nodeEnd{ nullptr };
+
+        HeuristicFunction m_heuristicFunction;
 
         //-------------------------------------------------
         // Init
@@ -61,6 +66,7 @@ namespace sg::city::map
 
         void CreateNodes();
         void CreateNeighbours() const;
+        void SetHeuristicFunction();
         void CreateMarker(int t_startTileIndex, int t_endTileIndex);
         void ResetNavigationGraph();
 

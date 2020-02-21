@@ -6,8 +6,9 @@
 // Ctors. / Dtor.
 //-------------------------------------------------
 
-sg::city::map::Astar::Astar(Map* t_map)
+sg::city::map::Astar::Astar(Map* t_map, const bool t_diagonalMovement)
     : m_map{ t_map }
+    , m_diagonalMovement{ t_diagonalMovement }
 {
     Init();
 }
@@ -25,7 +26,7 @@ void sg::city::map::Astar::FindPath(const int t_startTileIndex, const int t_endT
     // Setup starting conditions.
     auto* currentNode{ m_nodeStart };
     m_nodeStart->g = 0.0f;
-    m_nodeStart->h = EuclideanDistance(m_nodeStart, m_nodeEnd);
+    m_nodeStart->h = m_heuristicFunction(m_nodeStart, m_nodeEnd, 1.0f);
 
     // Add start node to openlist - this will ensure it gets tested.
     std::list<Node*> openlist;
@@ -71,7 +72,7 @@ void sg::city::map::Astar::FindPath(const int t_startTileIndex, const int t_endT
             }
 
             // Calculate the neighbours potential lowest parent distance.
-            const auto possiblyLowerGoal{ currentNode->g + EuclideanDistance(currentNode, nodeNeighbour) };
+            const auto possiblyLowerGoal{ currentNode->g + m_heuristicFunction(currentNode, nodeNeighbour, 1.0f) };
 
             // If choosing to path through this node is a lower distance than what 
             // the neighbour currently has set, update the neighbour to use this node
@@ -86,7 +87,7 @@ void sg::city::map::Astar::FindPath(const int t_startTileIndex, const int t_endT
                 // the path algorithm, so it knows if its getting better or worse. At some
                 // point the algo will realise this path is worse and abandon it, and then go
                 // and search along the next best path.
-                nodeNeighbour->h = nodeNeighbour->g + EuclideanDistance(nodeNeighbour, m_nodeEnd);
+                nodeNeighbour->h = nodeNeighbour->g + m_heuristicFunction(nodeNeighbour, m_nodeEnd, 1.0f);
             }
         }
     }
@@ -112,6 +113,7 @@ void sg::city::map::Astar::Init()
 {
     CreateNodes();
     CreateNeighbours();
+    SetHeuristicFunction();
 }
 
 void sg::city::map::Astar::CreateNodes()
@@ -159,28 +161,41 @@ void sg::city::map::Astar::CreateNeighbours() const
                 m_nodes[z * mapSize + x]->neighbours.push_back(m_nodes[(z + 0) * mapSize + (x + 1)]);
             }
 
-
-            // We can also connect diagonally
-            if (z > 0 && x > 0)
+            if (m_diagonalMovement)
             {
-                m_nodes[z * mapSize + x]->neighbours.push_back(m_nodes[(z - 1) * mapSize + (x - 1)]);
-            }
+                if (z > 0 && x > 0)
+                {
+                    m_nodes[z * mapSize + x]->neighbours.push_back(m_nodes[(z - 1) * mapSize + (x - 1)]);
+                }
 
-            if (z < mapSize - 1 && x > 0)
-            {
-                m_nodes[z * mapSize + x]->neighbours.push_back(m_nodes[(z + 1) * mapSize + (x - 1)]);
-            }
+                if (z < mapSize - 1 && x > 0)
+                {
+                    m_nodes[z * mapSize + x]->neighbours.push_back(m_nodes[(z + 1) * mapSize + (x - 1)]);
+                }
 
-            if (z > 0 && x < mapSize - 1)
-            {
-                m_nodes[z * mapSize + x]->neighbours.push_back(m_nodes[(z - 1) * mapSize + (x + 1)]);
-            }
+                if (z > 0 && x < mapSize - 1)
+                {
+                    m_nodes[z * mapSize + x]->neighbours.push_back(m_nodes[(z - 1) * mapSize + (x + 1)]);
+                }
 
-            if (z < mapSize - 1 && x < mapSize - 1)
-            {
-                m_nodes[z * mapSize + x]->neighbours.push_back(m_nodes[(z + 1) * mapSize + (x + 1)]);
+                if (z < mapSize - 1 && x < mapSize - 1)
+                {
+                    m_nodes[z * mapSize + x]->neighbours.push_back(m_nodes[(z + 1) * mapSize + (x + 1)]);
+                }
             }
         }
+    }
+}
+
+void sg::city::map::Astar::SetHeuristicFunction()
+{
+    if (m_diagonalMovement)
+    {
+        m_heuristicFunction = std::bind(&Astar::EuclideanDistance, this, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3);
+    }
+    else
+    {
+        m_heuristicFunction = std::bind(&Astar::ManhattenDistance, this, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3);
     }
 }
 

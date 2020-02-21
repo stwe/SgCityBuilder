@@ -100,7 +100,7 @@ void GameState::Init()
     m_map->rotation = glm::vec3(0.0f);
     m_map->scale = glm::vec3(1.0f);
 
-    m_astar = std::make_unique<sg::city::map::Astar>(m_map.get());
+    m_astar = std::make_unique<sg::city::map::Astar>(m_map.get(), false);
 
     CreateMapEntity();
 
