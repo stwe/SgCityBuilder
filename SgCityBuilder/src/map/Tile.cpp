@@ -1,16 +1,17 @@
 #include "Tile.h"
-#include "Map.h"
 
 //-------------------------------------------------
 // Ctors. / Dtor.
 //-------------------------------------------------
 
 sg::city::map::Tile::Tile(
+    Map* t_map,
     const float t_mapX,
     const float t_mapZ,
-    const Type t_type
+    const Map::TileType t_type
 )
-    : m_mapX{ t_mapX }
+    : m_map{ t_map }
+    , m_mapX{ t_mapX }
     , m_mapZ{ t_mapZ }
     , m_type{ t_type }
 {
@@ -49,54 +50,55 @@ float sg::city::map::Tile::GetMapZ() const
 // Setter
 //-------------------------------------------------
 
-void sg::city::map::Tile::SetParentMap(Map* t_map)
-{
-    m_map = t_map;
-}
-
-void sg::city::map::Tile::SetType(const Type t_type)
+void sg::city::map::Tile::ChangeTypeTo(const Map::TileType t_type)
 {
     m_type = t_type;
 
-    m_vertices[6] = TYPE_COLOR[m_type].x;
-    m_vertices[7] = TYPE_COLOR[m_type].y;
-    m_vertices[8] = TYPE_COLOR[m_type].z;
+    m_vertices[6] = Map::TILE_TYPE_COLOR[static_cast<int>(m_type)].x;
+    m_vertices[7] = Map::TILE_TYPE_COLOR[static_cast<int>(m_type)].y;
+    m_vertices[8] = Map::TILE_TYPE_COLOR[static_cast<int>(m_type)].z;
+    m_vertices[9] = static_cast<float>(static_cast<int>(m_type));
 
-    m_vertices[15] = TYPE_COLOR[m_type].x;
-    m_vertices[16] = TYPE_COLOR[m_type].y;
-    m_vertices[17] = TYPE_COLOR[m_type].z;
+    m_vertices[16] = Map::TILE_TYPE_COLOR[static_cast<int>(m_type)].x;
+    m_vertices[17] = Map::TILE_TYPE_COLOR[static_cast<int>(m_type)].y;
+    m_vertices[18] = Map::TILE_TYPE_COLOR[static_cast<int>(m_type)].z;
+    m_vertices[19] = static_cast<float>(static_cast<int>(m_type));
 
-    m_vertices[24] = TYPE_COLOR[m_type].x;
-    m_vertices[25] = TYPE_COLOR[m_type].y;
-    m_vertices[26] = TYPE_COLOR[m_type].z;
+    m_vertices[26] = Map::TILE_TYPE_COLOR[static_cast<int>(m_type)].x;
+    m_vertices[27] = Map::TILE_TYPE_COLOR[static_cast<int>(m_type)].y;
+    m_vertices[28] = Map::TILE_TYPE_COLOR[static_cast<int>(m_type)].z;
+    m_vertices[29] = static_cast<float>(static_cast<int>(m_type));
 
-    m_vertices[33] = TYPE_COLOR[m_type].x;
-    m_vertices[34] = TYPE_COLOR[m_type].y;
-    m_vertices[35] = TYPE_COLOR[m_type].z;
+    m_vertices[36] = Map::TILE_TYPE_COLOR[static_cast<int>(m_type)].x;
+    m_vertices[37] = Map::TILE_TYPE_COLOR[static_cast<int>(m_type)].y;
+    m_vertices[38] = Map::TILE_TYPE_COLOR[static_cast<int>(m_type)].z;
+    m_vertices[39] = static_cast<float>(static_cast<int>(m_type));
 
-    m_vertices[42] = TYPE_COLOR[m_type].x;
-    m_vertices[43] = TYPE_COLOR[m_type].y;
-    m_vertices[44] = TYPE_COLOR[m_type].z;
+    m_vertices[46] = Map::TILE_TYPE_COLOR[static_cast<int>(m_type)].x;
+    m_vertices[47] = Map::TILE_TYPE_COLOR[static_cast<int>(m_type)].y;
+    m_vertices[48] = Map::TILE_TYPE_COLOR[static_cast<int>(m_type)].z;
+    m_vertices[49] = static_cast<float>(static_cast<int>(m_type));
 
-    m_vertices[51] = TYPE_COLOR[m_type].x;
-    m_vertices[52] = TYPE_COLOR[m_type].y;
-    m_vertices[53] = TYPE_COLOR[m_type].z;
+    m_vertices[56] = Map::TILE_TYPE_COLOR[static_cast<int>(m_type)].x;
+    m_vertices[57] = Map::TILE_TYPE_COLOR[static_cast<int>(m_type)].y;
+    m_vertices[58] = Map::TILE_TYPE_COLOR[static_cast<int>(m_type)].z;
+    m_vertices[59] = static_cast<float>(static_cast<int>(m_type));
 }
 
 //-------------------------------------------------
 // To string
 //-------------------------------------------------
 
-std::string sg::city::map::Tile::TileTypeToString(const Type t_type)
+std::string sg::city::map::Tile::TileTypeToString(const Map::TileType t_type)
 {
     switch (t_type)
     {
         default:
-        case NONE: return "None";
-        case RESIDENTIAL: return "Residential Zone";
-        case COMMERCIAL: return "Commercial Zone";
-        case INDUSTRIAL: return "Industrial Zone";
-        case TRAFFIC_NETWORK: return "Road";
+        case Map::TileType::NONE: return "None";
+        case Map::TileType::RESIDENTIAL: return "Residential Zone";
+        case Map::TileType::COMMERCIAL: return "Commercial Zone";
+        case Map::TileType::INDUSTRIAL: return "Industrial Zone";
+        case Map::TileType::TRAFFIC_NETWORK: return "Roads or rails";
     }
 }
 
@@ -122,23 +124,28 @@ void sg::city::map::Tile::Init()
     const auto tL{ glm::vec3(m_mapX, DEFAULT_HEIGHT, -(m_mapZ + 1.0f)) };
     const auto tR{ glm::vec3(m_mapX + 1.0f, DEFAULT_HEIGHT, -(m_mapZ + 1.0f)) };
 
-    // the color of the type
-    auto color{ TYPE_COLOR[m_type] };
+    // the color of the Tile by type
+    const auto color{ Map::TILE_TYPE_COLOR[static_cast<int>(m_type)] };
+
+    // the texture index value in the array of tile textures (m_map->GetTileTypeTextures()) is the sames as m_type
+    auto textureIndex{ static_cast<float>(static_cast<int>(m_type)) };
 
     // red color for the first Tile
+    /*
     if (m_mapX == 0.0f && m_mapZ == 0.0f)
     {
         color = glm::vec3(0.7f, 0.1f, 0.1f);
     }
+    */
 
     m_vertices = {
-        // position        // normal                                              // color
-        bL.x, bL.y, bL.z , DEFAULT_NORMAL.x, DEFAULT_NORMAL.y, DEFAULT_NORMAL.z , color.x, color.y, color.z, // first triangle
-        bR.x, bR.y, bR.z , DEFAULT_NORMAL.x, DEFAULT_NORMAL.y, DEFAULT_NORMAL.z , color.x, color.y, color.z,
-        tL.x, tL.y, tL.z , DEFAULT_NORMAL.x, DEFAULT_NORMAL.y, DEFAULT_NORMAL.z , color.x, color.y, color.z,
+        // position        // normal                                              // color                   // texture
+        bL.x, bL.y, bL.z , DEFAULT_NORMAL.x, DEFAULT_NORMAL.y, DEFAULT_NORMAL.z , color.x, color.y, color.z, textureIndex, // first triangle
+        bR.x, bR.y, bR.z , DEFAULT_NORMAL.x, DEFAULT_NORMAL.y, DEFAULT_NORMAL.z , color.x, color.y, color.z, textureIndex,
+        tL.x, tL.y, tL.z , DEFAULT_NORMAL.x, DEFAULT_NORMAL.y, DEFAULT_NORMAL.z , color.x, color.y, color.z, textureIndex,
 
-        tL.x, tL.y, tL.z , DEFAULT_NORMAL.x, DEFAULT_NORMAL.y, DEFAULT_NORMAL.z , color.x, color.y, color.z, // second triangle
-        bR.x, bR.y, bR.z , DEFAULT_NORMAL.x, DEFAULT_NORMAL.y, DEFAULT_NORMAL.z , color.x, color.y, color.z,
-        tR.x, tR.y, tR.z , DEFAULT_NORMAL.x, DEFAULT_NORMAL.y, DEFAULT_NORMAL.z , color.x, color.y, color.z,
+        tL.x, tL.y, tL.z , DEFAULT_NORMAL.x, DEFAULT_NORMAL.y, DEFAULT_NORMAL.z , color.x, color.y, color.z, textureIndex, // second triangle
+        bR.x, bR.y, bR.z , DEFAULT_NORMAL.x, DEFAULT_NORMAL.y, DEFAULT_NORMAL.z , color.x, color.y, color.z, textureIndex,
+        tR.x, tR.y, tR.z , DEFAULT_NORMAL.x, DEFAULT_NORMAL.y, DEFAULT_NORMAL.z , color.x, color.y, color.z, textureIndex,
     };
 }

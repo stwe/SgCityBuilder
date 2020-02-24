@@ -1,42 +1,21 @@
 #pragma once
 
-#include <vector>
-#include <array>
 #include <glm/vec3.hpp>
+#include "Map.h"
 
 namespace sg::city::map
 {
-    class Map;
-
     class Tile
     {
     public:
         static constexpr auto DEFAULT_HEIGHT{ 0.0f };
         static constexpr auto DEFAULT_NORMAL{ glm::vec3(0.0f, 1.0f, 0.0f) };
-        static constexpr auto FLOATS_PER_VERTEX{ 9u }; // 3x position + 3x normal + 3x color
+        static constexpr auto FLOATS_PER_VERTEX{ 10u }; // 3x position + 3x normal + 3x color + 1x texture
         static constexpr auto VERTICES_PER_TILE{ 6u }; // 2 triangles with 3 vertices
-        static constexpr auto FLOATS_PER_TILE{ FLOATS_PER_VERTEX * VERTICES_PER_TILE }; // = 54 floats
-        static constexpr auto SIZE_IN_BYTES_PER_TILE{ FLOATS_PER_TILE * sizeof(float) }; // = 216 bytes
+        static constexpr auto FLOATS_PER_TILE{ FLOATS_PER_VERTEX * VERTICES_PER_TILE }; // = 60 floats
+        static constexpr auto SIZE_IN_BYTES_PER_TILE{ FLOATS_PER_TILE * sizeof(float) }; // = 240 bytes
 
         using VertexContainer = std::vector<float>;
-
-        enum Type
-        {
-            NONE,
-            RESIDENTIAL,
-            COMMERCIAL,
-            INDUSTRIAL,
-            TRAFFIC_NETWORK,
-            SIZE
-        };
-
-        static constexpr std::array<glm::vec3, SIZE> TYPE_COLOR{
-            glm::vec3(0.0f, 0.5f, 0.0f), // green:  None
-            glm::vec3(0.0f, 0.8f, 0.0f), // lime:   Residential
-            glm::vec3(0.0f, 0.0f, 0.8f), // blue:   Commercial
-            glm::vec3(0.8f, 0.8f, 0.0f), // yellow: Industrial
-            glm::vec3(0.8f, 0.8f, 0.8f), // white:  Traffic Network
-        };
 
         //-------------------------------------------------
         // Ctors. / Dtor.
@@ -45,9 +24,10 @@ namespace sg::city::map
         Tile() = delete;
 
         Tile(
+            Map* t_map,
             float t_mapX,
             float t_mapZ,
-            Type t_type
+            Map::TileType t_type
         );
 
         Tile(const Tile& t_other) = delete;
@@ -71,14 +51,13 @@ namespace sg::city::map
         // Setter
         //-------------------------------------------------
 
-        void SetParentMap(Map* t_map);
-        void SetType(Type t_type);
+        void ChangeTypeTo(Map::TileType t_type);
 
         //-------------------------------------------------
         // To string
         //-------------------------------------------------
 
-        static std::string TileTypeToString(Type t_type);
+        static std::string TileTypeToString(Map::TileType t_type);
 
     protected:
 
@@ -101,7 +80,7 @@ namespace sg::city::map
         /**
          * @brief The Type of the Tile.
          */
-        Type m_type{ NONE };
+        Map::TileType m_type{ Map::TileType::NONE };
 
         /**
          * @brief Vertices of the Tile.

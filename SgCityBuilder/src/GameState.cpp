@@ -49,8 +49,8 @@ bool GameState::Input()
             m_tileIndex = static_cast<int>(mapPoint.z) * m_map->GetMapSize() + static_cast<int>(mapPoint.x);
 
             auto& tile{ m_map->GetTiles()[m_tileIndex] };
-            tile->SetType(m_currentTileType);
-            m_map->UpdateMap(m_tileIndex);
+            tile->ChangeTypeTo(m_currentTileType);
+            m_map->UpdateMapTile(m_tileIndex);
         }
     }
 
@@ -94,20 +94,16 @@ void GameState::Init()
     m_scene = std::make_unique<sg::ogl::scene::Scene>(GetApplicationContext());
     m_scene->SetCurrentCamera(m_firstPersonCamera);
 
-    m_map = std::make_shared<sg::city::map::Map>();
-    m_map->CreateMap(8);
+    m_map = std::make_shared<sg::city::map::Map>(m_scene.get());
+    m_map->CreateMap(128);
     m_map->position = glm::vec3(0.0f);
     m_map->rotation = glm::vec3(0.0f);
     m_map->scale = glm::vec3(1.0f);
-
-    m_astar = std::make_unique<sg::city::map::Astar>(m_map.get(), false);
 
     CreateMapEntity();
 
     m_mousePicker = std::make_unique<sg::city::input::MousePicker>(m_scene.get(), m_map);
     m_mapRenderer = std::make_unique<sg::city::renderer::MapRenderer>(m_scene.get());
-
-    m_astar->FindPath(0, 63);
 }
 
 void GameState::CreateMapEntity()
@@ -152,22 +148,22 @@ void GameState::RenderImGui()
 
     ImGui::Begin("Map Edit");
 
-    if (m_currentTileType == sg::city::map::Tile::RESIDENTIAL)
+    if (m_currentTileType == sg::city::map::Map::TileType::RESIDENTIAL)
     {
         ImGui::Text("Current Tile type: Residential");
     }
 
-    if (m_currentTileType == sg::city::map::Tile::COMMERCIAL)
+    if (m_currentTileType == sg::city::map::Map::TileType::COMMERCIAL)
     {
         ImGui::Text("Current Tile type: Commercial");
     }
 
-    if (m_currentTileType == sg::city::map::Tile::INDUSTRIAL)
+    if (m_currentTileType == sg::city::map::Map::TileType::INDUSTRIAL)
     {
         ImGui::Text("Current Tile type: Industrial");
     }
 
-    if (m_currentTileType == sg::city::map::Tile::TRAFFIC_NETWORK)
+    if (m_currentTileType == sg::city::map::Map::TileType::TRAFFIC_NETWORK)
     {
         ImGui::Text("Current Tile type: Road");
     }
@@ -178,22 +174,22 @@ void GameState::RenderImGui()
 
     if (ImGui::Button("Residential"))
     {
-        m_currentTileType = sg::city::map::Tile::RESIDENTIAL;
+        m_currentTileType = sg::city::map::Map::TileType::RESIDENTIAL;
     }
 
     if (ImGui::Button("Commercial"))
     {
-        m_currentTileType = sg::city::map::Tile::COMMERCIAL;
+        m_currentTileType = sg::city::map::Map::TileType::COMMERCIAL;
     }
 
     if (ImGui::Button("Industrial"))
     {
-        m_currentTileType = sg::city::map::Tile::INDUSTRIAL;
+        m_currentTileType = sg::city::map::Map::TileType::INDUSTRIAL;
     }
 
     if (ImGui::Button("Road"))
     {
-        m_currentTileType = sg::city::map::Tile::TRAFFIC_NETWORK;
+        m_currentTileType = sg::city::map::Map::TileType::TRAFFIC_NETWORK;
     }
 
     ImGui::Spacing();

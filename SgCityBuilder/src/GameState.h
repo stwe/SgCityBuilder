@@ -1,7 +1,7 @@
 #pragma once
 
 #include "SgOgl.h"
-#include "map/Tile.h"
+#include "map/Map.h"
 
 namespace sg::city::map
 {
@@ -61,10 +61,8 @@ private:
     MapRendererUniquePtr m_mapRenderer;
     MousePickerUniquePtr m_mousePicker;
 
-    std::unique_ptr<sg::city::map::Astar> m_astar;
-
     int m_tileIndex{ -1 };
-    sg::city::map::Tile::Type m_currentTileType{ sg::city::map::Tile::RESIDENTIAL };
+    sg::city::map::Map::TileType m_currentTileType{ sg::city::map::Map::TileType::RESIDENTIAL };
 
     //-------------------------------------------------
     // Helper
