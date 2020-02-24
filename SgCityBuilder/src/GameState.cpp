@@ -96,7 +96,7 @@ void GameState::Init()
     m_scene->SetCurrentCamera(m_firstPersonCamera);
 
     m_map = std::make_shared<sg::city::map::Map>(m_scene.get());
-    m_map->CreateMap(4);
+    m_map->CreateMap(128);
     m_map->position = glm::vec3(0.0f);
     m_map->rotation = glm::vec3(0.0f);
     m_map->scale = glm::vec3(1.0f);
