@@ -10,10 +10,10 @@ namespace sg::city::map
     public:
         static constexpr auto DEFAULT_HEIGHT{ 0.0f };
         static constexpr auto DEFAULT_NORMAL{ glm::vec3(0.0f, 1.0f, 0.0f) };
-        static constexpr auto FLOATS_PER_VERTEX{ 10u }; // 3x position + 3x normal + 3x color + 1x texture
+        static constexpr auto FLOATS_PER_VERTEX{ 12u }; // 3x position + 3x normal + 3x color + 1x texture + 2x uv
         static constexpr auto VERTICES_PER_TILE{ 6u }; // 2 triangles with 3 vertices
-        static constexpr auto FLOATS_PER_TILE{ FLOATS_PER_VERTEX * VERTICES_PER_TILE }; // = 60 floats
-        static constexpr auto SIZE_IN_BYTES_PER_TILE{ FLOATS_PER_TILE * sizeof(float) }; // = 240 bytes
+        static constexpr auto FLOATS_PER_TILE{ FLOATS_PER_VERTEX * VERTICES_PER_TILE }; // = 72 floats
+        static constexpr auto SIZE_IN_BYTES_PER_TILE{ FLOATS_PER_TILE * sizeof(float) }; // = 288 bytes
 
         using VertexContainer = std::vector<float>;
 
@@ -65,7 +65,7 @@ namespace sg::city::map
         /**
          * @brief A pointer to the parent Map.
          */
-        Map* m_map{ nullptr };
+        Map* m_map{ nullptr }; // todo not used
 
         /**
          * @brief The bottom left x-position of the Tile.

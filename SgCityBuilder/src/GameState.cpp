@@ -50,6 +50,7 @@ bool GameState::Input()
 
             auto& tile{ m_map->GetTiles()[m_tileIndex] };
             tile->ChangeTypeTo(m_currentTileType);
+
             m_map->UpdateMapTile(m_tileIndex);
         }
     }
@@ -95,7 +96,7 @@ void GameState::Init()
     m_scene->SetCurrentCamera(m_firstPersonCamera);
 
     m_map = std::make_shared<sg::city::map::Map>(m_scene.get());
-    m_map->CreateMap(128);
+    m_map->CreateMap(4);
     m_map->position = glm::vec3(0.0f);
     m_map->rotation = glm::vec3(0.0f);
     m_map->scale = glm::vec3(1.0f);
@@ -148,46 +149,56 @@ void GameState::RenderImGui()
 
     ImGui::Begin("Map Edit");
 
+    if (m_currentTileType == sg::city::map::Map::TileType::NONE)
+    {
+        ImGui::Text(sg::city::map::Tile::TileTypeToString(sg::city::map::Map::TileType::NONE).c_str());
+    }
+
     if (m_currentTileType == sg::city::map::Map::TileType::RESIDENTIAL)
     {
-        ImGui::Text("Current Tile type: Residential");
+        ImGui::Text(sg::city::map::Tile::TileTypeToString(sg::city::map::Map::TileType::RESIDENTIAL).c_str());
     }
 
     if (m_currentTileType == sg::city::map::Map::TileType::COMMERCIAL)
     {
-        ImGui::Text("Current Tile type: Commercial");
+        ImGui::Text(sg::city::map::Tile::TileTypeToString(sg::city::map::Map::TileType::COMMERCIAL).c_str());
     }
 
     if (m_currentTileType == sg::city::map::Map::TileType::INDUSTRIAL)
     {
-        ImGui::Text("Current Tile type: Industrial");
+        ImGui::Text(sg::city::map::Tile::TileTypeToString(sg::city::map::Map::TileType::INDUSTRIAL).c_str());
     }
 
     if (m_currentTileType == sg::city::map::Map::TileType::TRAFFIC_NETWORK)
     {
-        ImGui::Text("Current Tile type: Road");
+        ImGui::Text(sg::city::map::Tile::TileTypeToString(sg::city::map::Map::TileType::TRAFFIC_NETWORK).c_str());
     }
 
     ImGui::Spacing();
     ImGui::Separator();
     ImGui::Spacing();
 
-    if (ImGui::Button("Residential"))
+    if (ImGui::Button(sg::city::map::Tile::TileTypeToString(sg::city::map::Map::TileType::NONE).c_str()))
+    {
+        m_currentTileType = sg::city::map::Map::TileType::NONE;
+    }
+
+    if (ImGui::Button(sg::city::map::Tile::TileTypeToString(sg::city::map::Map::TileType::RESIDENTIAL).c_str()))
     {
         m_currentTileType = sg::city::map::Map::TileType::RESIDENTIAL;
     }
 
-    if (ImGui::Button("Commercial"))
+    if (ImGui::Button(sg::city::map::Tile::TileTypeToString(sg::city::map::Map::TileType::COMMERCIAL).c_str()))
     {
         m_currentTileType = sg::city::map::Map::TileType::COMMERCIAL;
     }
 
-    if (ImGui::Button("Industrial"))
+    if (ImGui::Button(sg::city::map::Tile::TileTypeToString(sg::city::map::Map::TileType::INDUSTRIAL).c_str()))
     {
         m_currentTileType = sg::city::map::Map::TileType::INDUSTRIAL;
     }
 
-    if (ImGui::Button("Road"))
+    if (ImGui::Button(sg::city::map::Tile::TileTypeToString(sg::city::map::Map::TileType::TRAFFIC_NETWORK).c_str()))
     {
         m_currentTileType = sg::city::map::Map::TileType::TRAFFIC_NETWORK;
     }

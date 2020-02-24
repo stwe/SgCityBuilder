@@ -54,35 +54,35 @@ void sg::city::map::Tile::ChangeTypeTo(const Map::TileType t_type)
 {
     m_type = t_type;
 
-    m_vertices[6] = Map::TILE_TYPE_COLOR[static_cast<int>(m_type)].x;
-    m_vertices[7] = Map::TILE_TYPE_COLOR[static_cast<int>(m_type)].y;
-    m_vertices[8] = Map::TILE_TYPE_COLOR[static_cast<int>(m_type)].z;
+    //m_vertices[6] = Map::TILE_TYPE_COLOR[static_cast<int>(m_type)].x;
+    //m_vertices[7] = Map::TILE_TYPE_COLOR[static_cast<int>(m_type)].y;
+    //m_vertices[8] = Map::TILE_TYPE_COLOR[static_cast<int>(m_type)].z;
     m_vertices[9] = static_cast<float>(static_cast<int>(m_type));
 
-    m_vertices[16] = Map::TILE_TYPE_COLOR[static_cast<int>(m_type)].x;
-    m_vertices[17] = Map::TILE_TYPE_COLOR[static_cast<int>(m_type)].y;
-    m_vertices[18] = Map::TILE_TYPE_COLOR[static_cast<int>(m_type)].z;
-    m_vertices[19] = static_cast<float>(static_cast<int>(m_type));
+    //m_vertices[18] = Map::TILE_TYPE_COLOR[static_cast<int>(m_type)].x;
+    //m_vertices[19] = Map::TILE_TYPE_COLOR[static_cast<int>(m_type)].y;
+    //m_vertices[20] = Map::TILE_TYPE_COLOR[static_cast<int>(m_type)].z;
+    m_vertices[21] = static_cast<float>(static_cast<int>(m_type));
 
-    m_vertices[26] = Map::TILE_TYPE_COLOR[static_cast<int>(m_type)].x;
-    m_vertices[27] = Map::TILE_TYPE_COLOR[static_cast<int>(m_type)].y;
-    m_vertices[28] = Map::TILE_TYPE_COLOR[static_cast<int>(m_type)].z;
-    m_vertices[29] = static_cast<float>(static_cast<int>(m_type));
+    //m_vertices[30] = Map::TILE_TYPE_COLOR[static_cast<int>(m_type)].x;
+    //m_vertices[31] = Map::TILE_TYPE_COLOR[static_cast<int>(m_type)].y;
+    //m_vertices[32] = Map::TILE_TYPE_COLOR[static_cast<int>(m_type)].z;
+    m_vertices[33] = static_cast<float>(static_cast<int>(m_type));
 
-    m_vertices[36] = Map::TILE_TYPE_COLOR[static_cast<int>(m_type)].x;
-    m_vertices[37] = Map::TILE_TYPE_COLOR[static_cast<int>(m_type)].y;
-    m_vertices[38] = Map::TILE_TYPE_COLOR[static_cast<int>(m_type)].z;
-    m_vertices[39] = static_cast<float>(static_cast<int>(m_type));
+    //m_vertices[42] = Map::TILE_TYPE_COLOR[static_cast<int>(m_type)].x;
+    //m_vertices[43] = Map::TILE_TYPE_COLOR[static_cast<int>(m_type)].y;
+    //m_vertices[44] = Map::TILE_TYPE_COLOR[static_cast<int>(m_type)].z;
+    m_vertices[45] = static_cast<float>(static_cast<int>(m_type));
 
-    m_vertices[46] = Map::TILE_TYPE_COLOR[static_cast<int>(m_type)].x;
-    m_vertices[47] = Map::TILE_TYPE_COLOR[static_cast<int>(m_type)].y;
-    m_vertices[48] = Map::TILE_TYPE_COLOR[static_cast<int>(m_type)].z;
-    m_vertices[49] = static_cast<float>(static_cast<int>(m_type));
+    //m_vertices[54] = Map::TILE_TYPE_COLOR[static_cast<int>(m_type)].x;
+    //m_vertices[55] = Map::TILE_TYPE_COLOR[static_cast<int>(m_type)].y;
+    //m_vertices[56] = Map::TILE_TYPE_COLOR[static_cast<int>(m_type)].z;
+    m_vertices[57] = static_cast<float>(static_cast<int>(m_type));
 
-    m_vertices[56] = Map::TILE_TYPE_COLOR[static_cast<int>(m_type)].x;
-    m_vertices[57] = Map::TILE_TYPE_COLOR[static_cast<int>(m_type)].y;
-    m_vertices[58] = Map::TILE_TYPE_COLOR[static_cast<int>(m_type)].z;
-    m_vertices[59] = static_cast<float>(static_cast<int>(m_type));
+    //m_vertices[66] = Map::TILE_TYPE_COLOR[static_cast<int>(m_type)].x;
+    //m_vertices[67] = Map::TILE_TYPE_COLOR[static_cast<int>(m_type)].y;
+    //m_vertices[68] = Map::TILE_TYPE_COLOR[static_cast<int>(m_type)].z;
+    m_vertices[69] = static_cast<float>(static_cast<int>(m_type));
 }
 
 //-------------------------------------------------
@@ -118,6 +118,8 @@ void sg::city::map::Tile::Init()
         bL       bR
     */
 
+    // todo: stbi_set_flip_vertically_on_load(true);
+
     // positions
     const auto bL{ glm::vec3(m_mapX, DEFAULT_HEIGHT, -m_mapZ) };
     const auto bR{ glm::vec3(m_mapX + 1.0f, DEFAULT_HEIGHT, -m_mapZ) };
@@ -128,24 +130,16 @@ void sg::city::map::Tile::Init()
     const auto color{ Map::TILE_TYPE_COLOR[static_cast<int>(m_type)] };
 
     // the texture index value in the array of tile textures (m_map->GetTileTypeTextures()) is the sames as m_type
-    auto textureIndex{ static_cast<float>(static_cast<int>(m_type)) };
-
-    // red color for the first Tile
-    /*
-    if (m_mapX == 0.0f && m_mapZ == 0.0f)
-    {
-        color = glm::vec3(0.7f, 0.1f, 0.1f);
-    }
-    */
+    const auto textureIndex{ static_cast<float>(static_cast<int>(m_type)) };
 
     m_vertices = {
-        // position        // normal                                              // color                   // texture
-        bL.x, bL.y, bL.z , DEFAULT_NORMAL.x, DEFAULT_NORMAL.y, DEFAULT_NORMAL.z , color.x, color.y, color.z, textureIndex, // first triangle
-        bR.x, bR.y, bR.z , DEFAULT_NORMAL.x, DEFAULT_NORMAL.y, DEFAULT_NORMAL.z , color.x, color.y, color.z, textureIndex,
-        tL.x, tL.y, tL.z , DEFAULT_NORMAL.x, DEFAULT_NORMAL.y, DEFAULT_NORMAL.z , color.x, color.y, color.z, textureIndex,
+        // position        // normal                                              // color                   // texture    // uv
+        bL.x, bL.y, bL.z , DEFAULT_NORMAL.x, DEFAULT_NORMAL.y, DEFAULT_NORMAL.z , color.x, color.y, color.z, textureIndex, 0.0f, 0.0f, // first triangle
+        bR.x, bR.y, bR.z , DEFAULT_NORMAL.x, DEFAULT_NORMAL.y, DEFAULT_NORMAL.z , color.x, color.y, color.z, textureIndex, 1.0f, 0.0f,
+        tL.x, tL.y, tL.z , DEFAULT_NORMAL.x, DEFAULT_NORMAL.y, DEFAULT_NORMAL.z , color.x, color.y, color.z, textureIndex, 0.0f, 1.0f,
 
-        tL.x, tL.y, tL.z , DEFAULT_NORMAL.x, DEFAULT_NORMAL.y, DEFAULT_NORMAL.z , color.x, color.y, color.z, textureIndex, // second triangle
-        bR.x, bR.y, bR.z , DEFAULT_NORMAL.x, DEFAULT_NORMAL.y, DEFAULT_NORMAL.z , color.x, color.y, color.z, textureIndex,
-        tR.x, tR.y, tR.z , DEFAULT_NORMAL.x, DEFAULT_NORMAL.y, DEFAULT_NORMAL.z , color.x, color.y, color.z, textureIndex,
+        tL.x, tL.y, tL.z , DEFAULT_NORMAL.x, DEFAULT_NORMAL.y, DEFAULT_NORMAL.z , color.x, color.y, color.z, textureIndex, 0.0f, 1.0f, // second triangle
+        bR.x, bR.y, bR.z , DEFAULT_NORMAL.x, DEFAULT_NORMAL.y, DEFAULT_NORMAL.z , color.x, color.y, color.z, textureIndex, 1.0f, 0.0f,
+        tR.x, tR.y, tR.z , DEFAULT_NORMAL.x, DEFAULT_NORMAL.y, DEFAULT_NORMAL.z , color.x, color.y, color.z, textureIndex, 1.0f, 1.0f
     };
 }

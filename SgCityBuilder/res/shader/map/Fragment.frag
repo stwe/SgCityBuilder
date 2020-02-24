@@ -5,6 +5,7 @@
 in vec3 vPosition;
 in vec3 vColor;
 in float vTexture;
+in vec2 vUv;
 
 // Out
 
@@ -18,8 +19,7 @@ uniform sampler2D tileTexture[5];
 
 void main()
 {
-    int textureIndex = int(vTexture);
-    fragColor = texture(tileTexture[textureIndex], vec2(vPosition.x, vPosition.z));
+    fragColor = texture(tileTexture[int(vTexture)], vec2(vUv.x, 1.0 - vUv.y)); // todo
 
     //fragColor = vec4(vColor, 1.0);
 }
