@@ -47,6 +47,8 @@ namespace sg::city::map
         [[nodiscard]] float GetMapX() const;
         [[nodiscard]] float GetMapZ() const;
 
+        [[nodiscard]] Map::TileType GetType() const;
+
         //-------------------------------------------------
         // Setter
         //-------------------------------------------------

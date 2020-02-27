@@ -46,6 +46,11 @@ float sg::city::map::Tile::GetMapZ() const
     return m_mapZ;
 }
 
+sg::city::map::Map::TileType sg::city::map::Tile::GetType() const
+{
+    return m_type;
+}
+
 //-------------------------------------------------
 // Setter
 //-------------------------------------------------

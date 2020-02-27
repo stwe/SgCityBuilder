@@ -47,11 +47,46 @@ bool GameState::Input()
         if (mapPoint.x >= 0.0) // todo - if (hasResult) {}
         {
             m_tileIndex = static_cast<int>(mapPoint.z) * m_map->GetMapSize() + static_cast<int>(mapPoint.x);
-
             auto& tile{ m_map->GetTiles()[m_tileIndex] };
-            tile->ChangeTypeTo(m_currentTileType);
 
-            m_map->UpdateMapTile(m_tileIndex);
+            if (tile->GetType() != m_currentTileType)
+            {
+                // update vertices
+                tile->ChangeTypeTo(m_currentTileType);
+                m_map->UpdateMapTile(m_tileIndex);
+
+                // create house model entity
+                if (m_currentTileType == sg::city::map::Map::TileType::RESIDENTIAL)
+                {
+                    const auto& tileVertices{ tile->GetVerticesContainer() };
+
+                    GetApplicationContext()->GetEntityFactory().CreateModelEntity(
+                        "res/model/Box/box.obj",
+                        glm::vec3(tileVertices[0] + 0.5f, 1.0f, tileVertices[2] - 0.5f),
+                        glm::vec3(0.0f),
+                        glm::vec3(0.5f, 1.0f, 0.5f),
+                        false
+                    );
+
+                    SG_OGL_LOG_INFO("Create House");
+                }
+
+                // create road model entity
+                if (m_currentTileType == sg::city::map::Map::TileType::TRAFFIC_NETWORK)
+                {
+                    const auto& tileVertices{ tile->GetVerticesContainer() };
+
+                    GetApplicationContext()->GetEntityFactory().CreateModelEntity(
+                        "res/model/Plane1/plane1.obj",
+                        glm::vec3(tileVertices[0] + 0.5f, 0.001f, tileVertices[2] - 0.5f),
+                        glm::vec3(0.0f),
+                        glm::vec3(0.5f, 0.001f, 0.5f),
+                        false
+                    );
+
+                    SG_OGL_LOG_INFO("Create Road");
+                }
+            }
         }
     }
 
@@ -69,6 +104,7 @@ bool GameState::Update(const double t_dt)
 void GameState::Render()
 {
     m_mapRenderer->Render();
+    m_forwardRenderSystem->Render();
 
     RenderImGui();
 }
@@ -105,6 +141,7 @@ void GameState::Init()
 
     m_mousePicker = std::make_unique<sg::city::input::MousePicker>(m_scene.get(), m_map);
     m_mapRenderer = std::make_unique<sg::city::renderer::MapRenderer>(m_scene.get());
+    m_forwardRenderSystem = std::make_unique<sg::ogl::ecs::system::ForwardRenderSystem>(m_scene.get());
 }
 
 void GameState::CreateMapEntity()

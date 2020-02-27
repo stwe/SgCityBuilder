@@ -26,6 +26,7 @@ public:
     using FirstPersonCameraSharedPtr = std::shared_ptr<sg::ogl::camera::FirstPersonCamera>;
     using MapSharedPtr = std::shared_ptr<sg::city::map::Map>;
     using MapRendererUniquePtr = std::unique_ptr<sg::city::renderer::MapRenderer>;
+    using ForwardRenderSystemUniquePtr = std::unique_ptr<sg::ogl::ecs::system::ForwardRenderSystem>;
     using MousePickerUniquePtr = std::unique_ptr<sg::city::input::MousePicker>;
 
     //-------------------------------------------------
@@ -59,6 +60,7 @@ private:
     FirstPersonCameraSharedPtr m_firstPersonCamera;
     MapSharedPtr m_map;
     MapRendererUniquePtr m_mapRenderer;
+    ForwardRenderSystemUniquePtr m_forwardRenderSystem;
     MousePickerUniquePtr m_mousePicker;
 
     int m_tileIndex{ -1 };
