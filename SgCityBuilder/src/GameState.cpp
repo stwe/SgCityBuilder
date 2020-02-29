@@ -74,12 +74,31 @@ bool GameState::Input()
                 // create road model entity
                 if (m_currentTileType == sg::city::map::Map::TileType::TRAFFIC_NETWORK)
                 {
+                    const auto& neighbours{ tile->GetNeighbours() };
                     const auto& tileVertices{ tile->GetVerticesContainer() };
+
+                    auto rotation{ 0.0f };
+
+                    if (neighbours[static_cast<int>(sg::city::map::Tile::Directions::NORTH)])
+                    {
+                        if (neighbours[static_cast<int>(sg::city::map::Tile::Directions::NORTH)]->GetType() == sg::city::map::Map::TileType::TRAFFIC_NETWORK)
+                        {
+                            rotation = 90.0f;
+                        }
+                    }
+
+                    if (neighbours[static_cast<int>(sg::city::map::Tile::Directions::SOUTH)])
+                    {
+                        if (neighbours[static_cast<int>(sg::city::map::Tile::Directions::SOUTH)]->GetType() == sg::city::map::Map::TileType::TRAFFIC_NETWORK)
+                        {
+                            rotation = 90.0f;
+                        }
+                    }
 
                     GetApplicationContext()->GetEntityFactory().CreateModelEntity(
                         "res/model/Plane1/plane1.obj",
                         glm::vec3(tileVertices[0] + 0.5f, 0.001f, tileVertices[2] - 0.5f),
-                        glm::vec3(0.0f),
+                        glm::vec3(0.0f, rotation, 0.0f),
                         glm::vec3(0.5f, 0.001f, 0.5f),
                         false
                     );

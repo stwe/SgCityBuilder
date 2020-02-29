@@ -51,6 +51,16 @@ sg::city::map::Map::TileType sg::city::map::Tile::GetType() const
     return m_type;
 }
 
+const sg::city::map::Tile::NeighbourContainer& sg::city::map::Tile::GetNeighbours() const noexcept
+{
+    return m_neighbours;
+}
+
+sg::city::map::Tile::NeighbourContainer& sg::city::map::Tile::GetNeighbours() noexcept
+{
+    return m_neighbours;
+}
+
 //-------------------------------------------------
 // Setter
 //-------------------------------------------------

@@ -1,6 +1,5 @@
 #pragma once
 
-#include <glm/vec3.hpp>
 #include "Map.h"
 
 namespace sg::city::map
@@ -8,6 +7,15 @@ namespace sg::city::map
     class Tile
     {
     public:
+        enum class Directions
+        {
+            NORTH,
+            SOUTH,
+            EAST,
+            WEST,
+            SIZE
+        };
+
         static constexpr auto DEFAULT_HEIGHT{ 0.0f };
         static constexpr auto DEFAULT_NORMAL{ glm::vec3(0.0f, 1.0f, 0.0f) };
         static constexpr auto FLOATS_PER_VERTEX{ 12u }; // 3x position + 3x normal + 3x color + 1x texture + 2x uv
@@ -16,6 +24,7 @@ namespace sg::city::map
         static constexpr auto SIZE_IN_BYTES_PER_TILE{ FLOATS_PER_TILE * sizeof(float) }; // = 288 bytes
 
         using VertexContainer = std::vector<float>;
+        using NeighbourContainer = std::array<Tile*, static_cast<int>(Directions::SIZE)>;
 
         //-------------------------------------------------
         // Ctors. / Dtor.
@@ -48,6 +57,9 @@ namespace sg::city::map
         [[nodiscard]] float GetMapZ() const;
 
         [[nodiscard]] Map::TileType GetType() const;
+
+        [[nodiscard]] const NeighbourContainer& GetNeighbours()const noexcept;
+        [[nodiscard]] NeighbourContainer& GetNeighbours() noexcept;
 
         //-------------------------------------------------
         // Setter
@@ -88,6 +100,8 @@ namespace sg::city::map
          * @brief Vertices of the Tile.
          */
         VertexContainer m_vertices;
+
+        NeighbourContainer m_neighbours{ nullptr, nullptr, nullptr, nullptr };
 
         //-------------------------------------------------
         // Init

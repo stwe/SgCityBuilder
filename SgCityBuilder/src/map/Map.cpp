@@ -101,6 +101,9 @@ void sg::city::map::Map::CreateMap(const int t_mapSize)
         }
     }
 
+    // store neighbours
+    StoreNeighbours();
+
     // create an bind a Vao
     m_mapMesh = std::make_unique<ogl::resource::Mesh>();
     m_mapMesh->GetVao().BindVao();
@@ -154,6 +157,35 @@ void sg::city::map::Map::LoadAndStoreTileTypeTextures()
     m_tileTypeTextures[static_cast<int>(TileType::COMMERCIAL)] = c;
     m_tileTypeTextures[static_cast<int>(TileType::INDUSTRIAL)] = i;
     m_tileTypeTextures[static_cast<int>(TileType::TRAFFIC_NETWORK)] = t;
+}
+
+void sg::city::map::Map::StoreNeighbours()
+{
+    for (auto z{ 0 }; z < m_mapSize; ++z)
+    {
+        for (auto x{ 0 }; x < m_mapSize; ++x)
+        {
+            if (z > 0)
+            {
+                m_tiles[z * m_mapSize + x]->GetNeighbours()[static_cast<int>(Tile::Directions::NORTH)] = m_tiles[(z - 1) * m_mapSize + (x + 0)].get();
+            }
+
+            if (z < m_mapSize - 1)
+            {
+                m_tiles[z * m_mapSize + x]->GetNeighbours()[static_cast<int>(Tile::Directions::SOUTH)] = m_tiles[(z + 1) * m_mapSize + (x + 0)].get();
+            }
+
+            if (x > 0)
+            {
+                m_tiles[z * m_mapSize + x]->GetNeighbours()[static_cast<int>(Tile::Directions::EAST)] = m_tiles[(z + 0) * m_mapSize + (x - 1)].get();
+            }
+
+            if (x < m_mapSize - 1)
+            {
+                m_tiles[z * m_mapSize + x]->GetNeighbours()[static_cast<int>(Tile::Directions::WEST)] = m_tiles[(z + 0) * m_mapSize + (x + 1)].get();
+            }
+        }
+    }
 }
 
 void sg::city::map::Map::CreateVbo()

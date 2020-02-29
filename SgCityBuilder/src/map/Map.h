@@ -136,6 +136,7 @@ namespace sg::city::map
         [[nodiscard]] int32_t GetVerticesCountOfMap() const;
 
         void LoadAndStoreTileTypeTextures();
+        void StoreNeighbours();
         void CreateVbo();
         void StoreTilesInVbo();
     };
