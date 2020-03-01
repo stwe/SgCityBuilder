@@ -22,6 +22,11 @@ sg::city::map::Map::~Map() noexcept
 // Getter
 //-------------------------------------------------
 
+sg::ogl::scene::Scene* sg::city::map::Map::GetScene() const
+{
+    return m_scene;
+}
+
 const sg::city::map::Map::TileTypeTextureContainer& sg::city::map::Map::GetTileTypeTextures() const noexcept
 {
     return m_tileTypeTextures;
@@ -121,13 +126,9 @@ void sg::city::map::Map::CreateMap(const int t_mapSize)
 
 void sg::city::map::Map::UpdateMapTile(const int t_tileIndex) const
 {
-    m_mapMesh->GetVao().BindVao();
-
     ogl::buffer::Vbo::BindVbo(m_vboId);
     glBufferSubData(GL_ARRAY_BUFFER, t_tileIndex * Tile::SIZE_IN_BYTES_PER_TILE, Tile::SIZE_IN_BYTES_PER_TILE, m_tiles[t_tileIndex]->GetVerticesContainer().data());
     ogl::buffer::Vbo::UnbindVbo();
-
-    ogl::buffer::Vao::UnbindVao();
 }
 
 //-------------------------------------------------

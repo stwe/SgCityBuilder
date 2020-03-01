@@ -1,6 +1,7 @@
 #include "GameState.h"
 #include "renderer/MapRenderer.h"
-#include "map/Map.h"
+#include "renderer/RoadNetworkRenderer.h"
+#include "map/RoadNetwork.h"
 #include "map/Tile.h"
 #include "map/Astar.h"
 #include "ecs/Components.h"
@@ -55,7 +56,7 @@ bool GameState::Input()
                 tile->ChangeTypeTo(m_currentTileType);
                 m_map->UpdateMapTile(m_tileIndex);
 
-                // create house model entity
+                // create house entity
                 if (m_currentTileType == sg::city::map::Map::TileType::RESIDENTIAL)
                 {
                     const auto& tileVertices{ tile->GetVerticesContainer() };
@@ -68,42 +69,15 @@ bool GameState::Input()
                         false
                     );
 
-                    SG_OGL_LOG_INFO("Create House");
+                    SG_OGL_LOG_INFO("Create a House Entity");
                 }
 
-                // create road model entity
+                // add road
                 if (m_currentTileType == sg::city::map::Map::TileType::TRAFFIC_NETWORK)
                 {
-                    const auto& neighbours{ tile->GetNeighbours() };
-                    const auto& tileVertices{ tile->GetVerticesContainer() };
+                    m_roadNetwork->StoreRoad(m_tileIndex);
 
-                    auto rotation{ 0.0f };
-
-                    if (neighbours[static_cast<int>(sg::city::map::Tile::Directions::NORTH)])
-                    {
-                        if (neighbours[static_cast<int>(sg::city::map::Tile::Directions::NORTH)]->GetType() == sg::city::map::Map::TileType::TRAFFIC_NETWORK)
-                        {
-                            rotation = 90.0f;
-                        }
-                    }
-
-                    if (neighbours[static_cast<int>(sg::city::map::Tile::Directions::SOUTH)])
-                    {
-                        if (neighbours[static_cast<int>(sg::city::map::Tile::Directions::SOUTH)]->GetType() == sg::city::map::Map::TileType::TRAFFIC_NETWORK)
-                        {
-                            rotation = 90.0f;
-                        }
-                    }
-
-                    GetApplicationContext()->GetEntityFactory().CreateModelEntity(
-                        "res/model/Plane1/plane1.obj",
-                        glm::vec3(tileVertices[0] + 0.5f, 0.001f, tileVertices[2] - 0.5f),
-                        glm::vec3(0.0f, rotation, 0.0f),
-                        glm::vec3(0.5f, 0.001f, 0.5f),
-                        false
-                    );
-
-                    SG_OGL_LOG_INFO("Create Road");
+                    SG_OGL_LOG_INFO("Add a Road to the RoadNetwork");
                 }
             }
         }
@@ -115,7 +89,6 @@ bool GameState::Input()
 bool GameState::Update(const double t_dt)
 {
     m_scene->GetCurrentCamera().Update(t_dt);
-    m_mapRenderer->Update(t_dt);
 
     return true;
 }
@@ -123,7 +96,8 @@ bool GameState::Update(const double t_dt)
 void GameState::Render()
 {
     m_mapRenderer->Render();
-    m_forwardRenderSystem->Render();
+    m_roadNetworkRenderer->Render();
+    m_forwardRenderer->Render();
 
     RenderImGui();
 }
@@ -156,11 +130,16 @@ void GameState::Init()
     m_map->rotation = glm::vec3(0.0f);
     m_map->scale = glm::vec3(1.0f);
 
+    m_roadNetwork = std::make_shared<sg::city::map::RoadNetwork>(m_map.get());
+
     CreateMapEntity();
+    CreateRoadNetworkEntity();
 
     m_mousePicker = std::make_unique<sg::city::input::MousePicker>(m_scene.get(), m_map);
+
     m_mapRenderer = std::make_unique<sg::city::renderer::MapRenderer>(m_scene.get());
-    m_forwardRenderSystem = std::make_unique<sg::ogl::ecs::system::ForwardRenderSystem>(m_scene.get());
+    m_roadNetworkRenderer = std::make_unique<sg::city::renderer::RoadNetworkRenderer>(m_scene.get());
+    m_forwardRenderer = std::make_unique<sg::ogl::ecs::system::ForwardRenderSystem>(m_scene.get());
 }
 
 void GameState::CreateMapEntity()
@@ -170,6 +149,23 @@ void GameState::CreateMapEntity()
     GetApplicationContext()->registry.assign<sg::city::ecs::MapComponent>(
         entity,
         m_map
+    );
+
+    GetApplicationContext()->registry.assign<sg::ogl::ecs::component::TransformComponent>(
+        entity,
+        m_map->position,
+        m_map->rotation,
+        m_map->scale
+    );
+}
+
+void GameState::CreateRoadNetworkEntity()
+{
+    const auto entity{ GetApplicationContext()->registry.create() };
+
+    GetApplicationContext()->registry.assign<sg::city::ecs::RoadNetworkComponent>(
+        entity,
+        m_roadNetwork
     );
 
     GetApplicationContext()->registry.assign<sg::ogl::ecs::component::TransformComponent>(

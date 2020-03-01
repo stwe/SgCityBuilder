@@ -72,6 +72,8 @@ namespace sg::city::map
         // Getter
         //-------------------------------------------------
 
+        ogl::scene::Scene* GetScene() const;
+
         [[nodiscard]] const TileTypeTextureContainer& GetTileTypeTextures() const noexcept;
         [[nodiscard]] TileTypeTextureContainer& GetTileTypeTextures() noexcept;
 
@@ -94,6 +96,12 @@ namespace sg::city::map
          * @param t_tileIndex The Tile index to determine the Vbo buffer-offset.
          */
         void UpdateMapTile(int t_tileIndex) const;
+
+        //-------------------------------------------------
+        // Helper
+        //-------------------------------------------------
+
+        [[nodiscard]] uint32_t GetFloatCountOfMap() const;
 
     protected:
 
@@ -132,7 +140,6 @@ namespace sg::city::map
         // Helper
         //-------------------------------------------------
 
-        [[nodiscard]] uint32_t GetFloatCountOfMap() const;
         [[nodiscard]] int32_t GetVerticesCountOfMap() const;
 
         void LoadAndStoreTileTypeTextures();

@@ -5,13 +5,14 @@
 
 namespace sg::city::map
 {
-    class Map;
+    class RoadNetwork;
     class Astar;
 }
 
 namespace sg::city::renderer
 {
     class MapRenderer;
+    class RoadNetworkRenderer;
 }
 
 namespace sg::city::input
@@ -23,11 +24,17 @@ class GameState : public sg::ogl::state::State
 {
 public:
     using SceneUniquePtr = std::unique_ptr<sg::ogl::scene::Scene>;
+
     using FirstPersonCameraSharedPtr = std::shared_ptr<sg::ogl::camera::FirstPersonCamera>;
     using MapSharedPtr = std::shared_ptr<sg::city::map::Map>;
+
     using MapRendererUniquePtr = std::unique_ptr<sg::city::renderer::MapRenderer>;
-    using ForwardRenderSystemUniquePtr = std::unique_ptr<sg::ogl::ecs::system::ForwardRenderSystem>;
+    using RoadNetworkRendererUniquePtr = std::unique_ptr<sg::city::renderer::RoadNetworkRenderer>;
+    using ForwardRendererUniquePtr = std::unique_ptr<sg::ogl::ecs::system::ForwardRenderSystem>;
+
     using MousePickerUniquePtr = std::unique_ptr<sg::city::input::MousePicker>;
+
+    using RoadNetworkSharedPtr = std::shared_ptr<sg::city::map::RoadNetwork>;
 
     //-------------------------------------------------
     // Ctors. / Dtor.
@@ -59,12 +66,17 @@ private:
 
     FirstPersonCameraSharedPtr m_firstPersonCamera;
     MapSharedPtr m_map;
+
     MapRendererUniquePtr m_mapRenderer;
-    ForwardRenderSystemUniquePtr m_forwardRenderSystem;
+    RoadNetworkRendererUniquePtr m_roadNetworkRenderer;
+    ForwardRendererUniquePtr m_forwardRenderer;
+
     MousePickerUniquePtr m_mousePicker;
 
+    RoadNetworkSharedPtr m_roadNetwork;
+
     int m_tileIndex{ -1 };
-    sg::city::map::Map::TileType m_currentTileType{ sg::city::map::Map::TileType::RESIDENTIAL };
+    sg::city::map::Map::TileType m_currentTileType{ sg::city::map::Map::TileType::TRAFFIC_NETWORK };
 
     //-------------------------------------------------
     // Helper
@@ -72,6 +84,7 @@ private:
 
     void Init();
     void CreateMapEntity();
+    void CreateRoadNetworkEntity();
 
     //-------------------------------------------------
     // ImGui
