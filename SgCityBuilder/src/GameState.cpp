@@ -52,9 +52,9 @@ bool GameState::Input()
 
             if (tile->GetType() != m_currentTileType)
             {
-                // update vertices
-                tile->ChangeTypeTo(m_currentTileType);
-                m_map->UpdateMapTile(m_tileIndex);
+                // update data on CPU/GPU
+                tile->SetType(m_currentTileType);
+                m_map->UpdateMapVbo(m_tileIndex);
 
                 // create house entity
                 if (m_currentTileType == sg::city::map::Map::TileType::RESIDENTIAL)

@@ -86,7 +86,6 @@ void sg::city::map::Map::CreateMap(const int t_mapSize)
 {
     m_mapSize = t_mapSize;
 
-    // load default texture for each Tile type
     LoadAndStoreTileTypeTextures();
 
     // create Tiles
@@ -95,7 +94,6 @@ void sg::city::map::Map::CreateMap(const int t_mapSize)
         for (auto x{ 0 }; x < m_mapSize; ++x)
         {
             auto tile{ std::make_unique<Tile>(
-                this,
                 static_cast<float>(x),
                 static_cast<float>(z),
                 TileType::NONE
@@ -106,7 +104,7 @@ void sg::city::map::Map::CreateMap(const int t_mapSize)
         }
     }
 
-    // store neighbours
+    // store the neighbours of each Tile
     StoreNeighbours();
 
     // create an bind a Vao
@@ -124,7 +122,7 @@ void sg::city::map::Map::CreateMap(const int t_mapSize)
     m_mapMesh->GetVao().SetDrawCount(GetVerticesCountOfMap());
 }
 
-void sg::city::map::Map::UpdateMapTile(const int t_tileIndex) const
+void sg::city::map::Map::UpdateMapVbo(const int t_tileIndex) const
 {
     ogl::buffer::Vbo::BindVbo(m_vboId);
     glBufferSubData(GL_ARRAY_BUFFER, t_tileIndex * Tile::SIZE_IN_BYTES_PER_TILE, Tile::SIZE_IN_BYTES_PER_TILE, m_tiles[t_tileIndex]->GetVerticesContainer().data());

@@ -1,5 +1,6 @@
 #pragma once
 
+#include <glm/vec2.hpp>
 #include "Map.h"
 
 namespace sg::city::map
@@ -32,12 +33,7 @@ namespace sg::city::map
 
         Tile() = delete;
 
-        Tile(
-            Map* t_map,
-            float t_mapX,
-            float t_mapZ,
-            Map::TileType t_type
-        );
+        Tile(float t_mapX, float t_mapZ, Map::TileType t_type);
 
         Tile(const Tile& t_other) = delete;
         Tile(Tile&& t_other) noexcept = delete;
@@ -65,7 +61,18 @@ namespace sg::city::map
         // Setter
         //-------------------------------------------------
 
-        void ChangeTypeTo(Map::TileType t_type);
+        void SetVertexPositions(const glm::vec3& t_bL, const glm::vec3& t_bR, const glm::vec3& t_tL, const glm::vec3& t_tR);
+        void SetNormal(const glm::vec3& t_normal);
+        void SetColor(const glm::vec3& t_color);
+        void SetTexture(float t_texture);
+        void SetUv(
+            const glm::vec2& t_bL = glm::vec2(0.0f, 0.0f),
+            const glm::vec2& t_bR = glm::vec2(1.0f, 0.0f),
+            const glm::vec2& t_tL = glm::vec2(0.0f, 1.0f),
+            const glm::vec2& t_tR = glm::vec2(1.0f, 1.0f)
+        );
+
+        void SetType(Map::TileType t_type);
 
         //-------------------------------------------------
         // To string
@@ -76,11 +83,6 @@ namespace sg::city::map
     protected:
 
     private:
-        /**
-         * @brief A pointer to the parent Map.
-         */
-        Map* m_map{ nullptr }; // todo not used
-
         /**
          * @brief The bottom left x-position of the Tile.
          */
@@ -101,12 +103,15 @@ namespace sg::city::map
          */
         VertexContainer m_vertices;
 
+        /**
+         * @brief The neighbors of this Tile.
+         */
         NeighbourContainer m_neighbours{ nullptr, nullptr, nullptr, nullptr };
 
         //-------------------------------------------------
         // Init
         //-------------------------------------------------
 
-        void Init();
+        void Create();
     };
 }

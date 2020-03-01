@@ -72,7 +72,7 @@ namespace sg::city::map
         // Getter
         //-------------------------------------------------
 
-        ogl::scene::Scene* GetScene() const;
+        [[nodiscard]] ogl::scene::Scene* GetScene() const;
 
         [[nodiscard]] const TileTypeTextureContainer& GetTileTypeTextures() const noexcept;
         [[nodiscard]] TileTypeTextureContainer& GetTileTypeTextures() noexcept;
@@ -95,7 +95,7 @@ namespace sg::city::map
          * @brief Updates the vertex data in the Vbo of a given Tile.
          * @param t_tileIndex The Tile index to determine the Vbo buffer-offset.
          */
-        void UpdateMapTile(int t_tileIndex) const;
+        void UpdateMapVbo(int t_tileIndex) const;
 
         //-------------------------------------------------
         // Helper
@@ -112,7 +112,7 @@ namespace sg::city::map
         ogl::scene::Scene* m_scene{ nullptr };
 
         /**
-         * @brief An array that contains a texture id for each Tile type.
+         * @brief An array that contains a texture Id for each TileType.
          */
         TileTypeTextureContainer m_tileTypeTextures{ 0,0,0,0,0 };
 
