@@ -57,6 +57,16 @@ sg::city::map::Map::TileContainer& sg::city::map::Map::GetTiles() noexcept
     return m_tiles;
 }
 
+const sg::city::map::Tile& sg::city::map::Map::GetTileByPosition(const glm::vec3& t_mapPoint) const noexcept
+{
+    return *m_tiles[GetTileIndexByPosition(t_mapPoint)];
+}
+
+sg::city::map::Tile& sg::city::map::Map::GetTileByPosition(const glm::vec3& t_mapPoint) noexcept
+{
+    return *m_tiles[GetTileIndexByPosition(t_mapPoint)];
+}
+
 int sg::city::map::Map::GetMapSize() const
 {
     return m_mapSize;
@@ -107,11 +117,11 @@ void sg::city::map::Map::CreateMap(const int t_mapSize)
     // store the neighbours of each Tile
     StoreNeighbours();
 
-    // create an bind a Vao
+    // create an bind a new Vao
     m_mapMesh = std::make_unique<ogl::resource::Mesh>();
     m_mapMesh->GetVao().BindVao();
 
-    // create Vbo and store Tiles
+    // create a new Vbo and store Tiles
     CreateVbo();
     StoreTilesInVbo();
 
@@ -122,11 +132,18 @@ void sg::city::map::Map::CreateMap(const int t_mapSize)
     m_mapMesh->GetVao().SetDrawCount(GetVerticesCountOfMap());
 }
 
-void sg::city::map::Map::UpdateMapVbo(const int t_tileIndex) const
+//-------------------------------------------------
+// Update
+//-------------------------------------------------
+
+void sg::city::map::Map::ChangeTileTypeOnPosition(const glm::vec3& t_mapPoint, const TileType t_tileType)
 {
-    ogl::buffer::Vbo::BindVbo(m_vboId);
-    glBufferSubData(GL_ARRAY_BUFFER, t_tileIndex * Tile::SIZE_IN_BYTES_PER_TILE, Tile::SIZE_IN_BYTES_PER_TILE, m_tiles[t_tileIndex]->GetVerticesContainer().data());
-    ogl::buffer::Vbo::UnbindVbo();
+    auto& tile{ GetTileByPosition(t_mapPoint) };
+    if (tile.GetType() != t_tileType)
+    {
+        tile.SetType(t_tileType);
+        UpdateMapVboByByPosition(t_mapPoint);
+    }
 }
 
 //-------------------------------------------------
@@ -136,6 +153,16 @@ void sg::city::map::Map::UpdateMapVbo(const int t_tileIndex) const
 uint32_t sg::city::map::Map::GetFloatCountOfMap() const
 {
     return static_cast<uint32_t>(m_tiles.size()) * Tile::FLOATS_PER_TILE;
+}
+
+int sg::city::map::Map::GetTileIndexByPosition(const glm::vec3& t_mapPoint) const
+{
+    return static_cast<int>(t_mapPoint.z) * m_mapSize + static_cast<int>(t_mapPoint.x);
+}
+
+int sg::city::map::Map::GetTileIndexByPosition(const int t_x, int const t_z) const
+{
+    return t_z * m_mapSize + t_x;
 }
 
 int32_t sg::city::map::Map::GetVerticesCountOfMap() const
@@ -164,28 +191,34 @@ void sg::city::map::Map::StoreNeighbours()
     {
         for (auto x{ 0 }; x < m_mapSize; ++x)
         {
+            const auto tileIndex{ GetTileIndexByPosition(x, z) };
+
             if (z > 0)
             {
-                m_tiles[z * m_mapSize + x]->GetNeighbours()[static_cast<int>(Tile::Directions::NORTH)] = m_tiles[(z - 1) * m_mapSize + (x + 0)].get();
+                m_tiles[tileIndex]->GetNeighbours()[static_cast<int>(Tile::Directions::NORTH)] = m_tiles[GetTileIndexByPosition(x, z - 1)].get();
             }
 
             if (z < m_mapSize - 1)
             {
-                m_tiles[z * m_mapSize + x]->GetNeighbours()[static_cast<int>(Tile::Directions::SOUTH)] = m_tiles[(z + 1) * m_mapSize + (x + 0)].get();
+                m_tiles[tileIndex]->GetNeighbours()[static_cast<int>(Tile::Directions::SOUTH)] = m_tiles[GetTileIndexByPosition(x, z + 1)].get();
             }
 
             if (x > 0)
             {
-                m_tiles[z * m_mapSize + x]->GetNeighbours()[static_cast<int>(Tile::Directions::EAST)] = m_tiles[(z + 0) * m_mapSize + (x - 1)].get();
+                m_tiles[tileIndex]->GetNeighbours()[static_cast<int>(Tile::Directions::EAST)] = m_tiles[GetTileIndexByPosition(x - 1, z)].get();
             }
 
             if (x < m_mapSize - 1)
             {
-                m_tiles[z * m_mapSize + x]->GetNeighbours()[static_cast<int>(Tile::Directions::WEST)] = m_tiles[(z + 0) * m_mapSize + (x + 1)].get();
+                m_tiles[tileIndex]->GetNeighbours()[static_cast<int>(Tile::Directions::WEST)] = m_tiles[GetTileIndexByPosition(x + 1, z)].get();
             }
         }
     }
 }
+
+//-------------------------------------------------
+// Vbo
+//-------------------------------------------------
 
 void sg::city::map::Map::CreateVbo()
 {
@@ -212,4 +245,16 @@ void sg::city::map::Map::StoreTilesInVbo()
     }
 
     ogl::buffer::Vbo::UnbindVbo();
+}
+
+void sg::city::map::Map::UpdateMapVboByTileIndex(const int t_tileIndex) const
+{
+    ogl::buffer::Vbo::BindVbo(m_vboId);
+    glBufferSubData(GL_ARRAY_BUFFER, t_tileIndex * Tile::SIZE_IN_BYTES_PER_TILE, Tile::SIZE_IN_BYTES_PER_TILE, m_tiles[t_tileIndex]->GetVerticesContainer().data());
+    ogl::buffer::Vbo::UnbindVbo();
+}
+
+void sg::city::map::Map::UpdateMapVboByByPosition(const glm::vec3& t_mapPoint) const
+{
+    UpdateMapVboByTileIndex(GetTileIndexByPosition(t_mapPoint));
 }

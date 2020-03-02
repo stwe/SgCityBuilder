@@ -45,41 +45,19 @@ bool GameState::Input()
 
         const auto mapPoint{ m_mousePicker->GetCurrentMapPoint() };
 
-        if (mapPoint.x >= 0.0) // todo - if (hasResult) {}
+        if (mapPoint.x >= 0.0)
         {
-            m_tileIndex = static_cast<int>(mapPoint.z) * m_map->GetMapSize() + static_cast<int>(mapPoint.x);
-            auto& tile{ m_map->GetTiles()[m_tileIndex] };
+            m_map->ChangeTileTypeOnPosition(mapPoint, m_currentTileType);
 
-            if (tile->GetType() != m_currentTileType)
+            // add road
+            /*
+            if (m_currentTileType == sg::city::map::Map::TileType::TRAFFIC_NETWORK)
             {
-                // update data on CPU/GPU
-                tile->SetType(m_currentTileType);
-                m_map->UpdateMapVbo(m_tileIndex);
+                m_roadNetwork->StoreRoad(m_tileIndex);
 
-                // create house entity
-                if (m_currentTileType == sg::city::map::Map::TileType::RESIDENTIAL)
-                {
-                    const auto& tileVertices{ tile->GetVerticesContainer() };
-
-                    GetApplicationContext()->GetEntityFactory().CreateModelEntity(
-                        "res/model/Box/box.obj",
-                        glm::vec3(tileVertices[0] + 0.5f, 1.0f, tileVertices[2] - 0.5f),
-                        glm::vec3(0.0f),
-                        glm::vec3(0.5f, 1.0f, 0.5f),
-                        false
-                    );
-
-                    SG_OGL_LOG_INFO("Create a House Entity");
-                }
-
-                // add road
-                if (m_currentTileType == sg::city::map::Map::TileType::TRAFFIC_NETWORK)
-                {
-                    m_roadNetwork->StoreRoad(m_tileIndex);
-
-                    SG_OGL_LOG_INFO("Add a Road to the RoadNetwork");
-                }
+                SG_OGL_LOG_INFO("Add a Road to the RoadNetwork");
             }
+            */
         }
     }
 

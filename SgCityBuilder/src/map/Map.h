@@ -83,6 +83,9 @@ namespace sg::city::map
         [[nodiscard]] const TileContainer& GetTiles() const noexcept;
         [[nodiscard]] TileContainer& GetTiles() noexcept;
 
+        [[nodiscard]] const Tile& GetTileByPosition(const glm::vec3& t_mapPoint) const noexcept;
+        [[nodiscard]] Tile& GetTileByPosition(const glm::vec3& t_mapPoint) noexcept;
+
         [[nodiscard]] int GetMapSize() const;
 
         //-------------------------------------------------
@@ -91,17 +94,19 @@ namespace sg::city::map
 
         void CreateMap(int t_mapSize);
 
-        /**
-         * @brief Updates the vertex data in the Vbo of a given Tile.
-         * @param t_tileIndex The Tile index to determine the Vbo buffer-offset.
-         */
-        void UpdateMapVbo(int t_tileIndex) const;
+        //-------------------------------------------------
+        // Update
+        //-------------------------------------------------
+
+        void ChangeTileTypeOnPosition(const glm::vec3& t_mapPoint, TileType t_tileType);
 
         //-------------------------------------------------
         // Helper
         //-------------------------------------------------
 
         [[nodiscard]] uint32_t GetFloatCountOfMap() const;
+        [[nodiscard]] int GetTileIndexByPosition(const glm::vec3& t_mapPoint) const;
+        [[nodiscard]] int GetTileIndexByPosition(int t_x, int t_z) const;
 
     protected:
 
@@ -144,7 +149,14 @@ namespace sg::city::map
 
         void LoadAndStoreTileTypeTextures();
         void StoreNeighbours();
+
+        //-------------------------------------------------
+        // Vbo
+        //-------------------------------------------------
+
         void CreateVbo();
         void StoreTilesInVbo();
+        void UpdateMapVboByTileIndex(int t_tileIndex) const;
+        void UpdateMapVboByByPosition(const glm::vec3& t_mapPoint) const;
     };
 }
