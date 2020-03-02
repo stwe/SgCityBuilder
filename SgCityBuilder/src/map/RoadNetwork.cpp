@@ -49,13 +49,27 @@ uint32_t sg::city::map::RoadNetwork::GetAllTextureId() const
 // Create
 //-------------------------------------------------
 
-void sg::city::map::RoadNetwork::StoreRoad(const int t_tileIndex)
+void sg::city::map::RoadNetwork::StoreRoadOnPosition(const glm::vec3& t_mapPoint)
 {
-    // get vertices of the Road
-    auto& vertices{ m_map->GetTiles()[t_tileIndex]->GetVerticesContainer() };
+    // get Tile index
+    const auto tileIndex{ m_map->GetTileIndexByPosition(t_mapPoint) };
 
-    // get neighbours of the Road
-    const auto& neighbours{ m_map->GetTiles()[t_tileIndex]->GetNeighbours() };
+    // check if a Road already exists
+    if (m_lookupTable[tileIndex] > 0)
+    {
+        return;
+    }
+
+    SG_OGL_LOG_INFO("Add a Road to the RoadNetwork");
+
+    // get Tile
+    auto& tile{ m_map->GetTileByIndex(tileIndex) };
+
+    // get vertices of the Tile
+    auto& vertices{ tile.GetVerticesContainer() };
+
+    // get neighbours of the Tile
+    const auto& neighbours{ tile.GetNeighbours() };
 
     // todo: y-position
     vertices[1] = 0.001f;
@@ -170,7 +184,7 @@ void sg::city::map::RoadNetwork::StoreRoad(const int t_tileIndex)
     const auto nrTiles{ static_cast<int>(m_vertices.size()) / Tile::FLOATS_PER_TILE };
 
     // stores where the road is in the street network container
-    m_lookupTable[t_tileIndex] = nrTiles;
+    m_lookupTable[tileIndex] = nrTiles;
 
     ogl::buffer::Vbo::BindVbo(m_vboId);
     glBufferSubData(GL_ARRAY_BUFFER, 0, nrTiles * Tile::SIZE_IN_BYTES_PER_TILE, m_vertices.data());

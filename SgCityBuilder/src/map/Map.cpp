@@ -57,6 +57,16 @@ sg::city::map::Map::TileContainer& sg::city::map::Map::GetTiles() noexcept
     return m_tiles;
 }
 
+const sg::city::map::Tile& sg::city::map::Map::GetTileByIndex(const int t_tileIndex) const noexcept
+{
+    return *m_tiles[t_tileIndex];
+}
+
+sg::city::map::Tile& sg::city::map::Map::GetTileByIndex(const int t_tileIndex) noexcept
+{
+    return *m_tiles[t_tileIndex];
+}
+
 const sg::city::map::Tile& sg::city::map::Map::GetTileByPosition(const glm::vec3& t_mapPoint) const noexcept
 {
     return *m_tiles[GetTileIndexByPosition(t_mapPoint)];

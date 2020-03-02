@@ -83,6 +83,9 @@ namespace sg::city::map
         [[nodiscard]] const TileContainer& GetTiles() const noexcept;
         [[nodiscard]] TileContainer& GetTiles() noexcept;
 
+        [[nodiscard]] const Tile& GetTileByIndex(int t_tileIndex) const noexcept;
+        [[nodiscard]] Tile& GetTileByIndex(int t_tileIndex) noexcept;
+
         [[nodiscard]] const Tile& GetTileByPosition(const glm::vec3& t_mapPoint) const noexcept;
         [[nodiscard]] Tile& GetTileByPosition(const glm::vec3& t_mapPoint) noexcept;
 

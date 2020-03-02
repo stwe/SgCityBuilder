@@ -47,7 +47,7 @@ namespace sg::city::map
         // Create
         //-------------------------------------------------
 
-        void StoreRoad(int t_tileIndex);
+        void StoreRoadOnPosition(const glm::vec3& t_mapPoint);
         void RemoveRoadFromVbo(int t_tileIndex);
 
         void Init();

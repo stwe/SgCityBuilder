@@ -49,15 +49,10 @@ bool GameState::Input()
         {
             m_map->ChangeTileTypeOnPosition(mapPoint, m_currentTileType);
 
-            // add road
-            /*
             if (m_currentTileType == sg::city::map::Map::TileType::TRAFFIC_NETWORK)
             {
-                m_roadNetwork->StoreRoad(m_tileIndex);
-
-                SG_OGL_LOG_INFO("Add a Road to the RoadNetwork");
+                m_roadNetwork->StoreRoadOnPosition(mapPoint);
             }
-            */
         }
     }
 
@@ -237,12 +232,14 @@ void GameState::RenderImGui()
     ImGui::Separator();
     ImGui::Spacing();
 
+    /*
     if (m_tileIndex >= 0)
     {
         const auto& tile{ *m_map->GetTiles()[m_tileIndex] };
         ImGui::Text("Current Tile x: %g", tile.GetMapX());
         ImGui::Text("Current Tile z: %g", tile.GetMapZ());
     }
+    */
 
     ImGui::End();
 

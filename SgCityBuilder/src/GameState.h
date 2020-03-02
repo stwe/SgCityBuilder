@@ -75,7 +75,6 @@ private:
 
     RoadNetworkSharedPtr m_roadNetwork;
 
-    int m_tileIndex{ -1 };
     sg::city::map::Map::TileType m_currentTileType{ sg::city::map::Map::TileType::TRAFFIC_NETWORK };
 
     //-------------------------------------------------
