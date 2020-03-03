@@ -40,6 +40,16 @@ uint32_t sg::city::map::RoadNetwork::GetNsTextureId() const
     return m_nsTextureId;
 }
 
+uint32_t sg::city::map::RoadNetwork::GetNsoTextureId() const
+{
+    return m_nsoTextureId;
+}
+
+uint32_t sg::city::map::RoadNetwork::GetNswTextureId() const
+{
+    return m_nswTextureId;
+}
+
 uint32_t sg::city::map::RoadNetwork::GetAllTextureId() const
 {
     return m_allTextureId;
@@ -65,13 +75,13 @@ void sg::city::map::RoadNetwork::StoreRoadOnPosition(const glm::vec3& t_mapPoint
     // get Tile
     auto& tile{ m_map->GetTileByIndex(tileIndex) };
 
-    // get vertices of the Tile
-    auto& vertices{ tile.GetVerticesContainer() };
+    // get vertices of the Tile (make a copy)
+    auto vertices{ tile.GetVerticesContainer() };
 
     // get neighbours of the Tile
     const auto& neighbours{ tile.GetNeighbours() };
 
-    // todo: y-position
+    // we use the same vertices of the tiles, but just a little bit higher
     vertices[1] = 0.001f;
     vertices[13] = 0.001f;
     vertices[25] = 0.001f;
@@ -80,18 +90,87 @@ void sg::city::map::RoadNetwork::StoreRoadOnPosition(const glm::vec3& t_mapPoint
     vertices[49] = 0.001f;
     vertices[61] = 0.001f;
 
+    // set the default texture
+    auto texture{ Texture::WO };
+
+    uint8_t roadNeighbours{ 0 };
+
+    if (neighbours[static_cast<int>(Tile::Directions::NORTH)])
+    {
+        if (neighbours[static_cast<int>(Tile::Directions::NORTH)]->GetType() == Map::TileType::TRAFFIC_NETWORK)
+        {
+            roadNeighbours = NORTH;
+            SG_OGL_LOG_DEBUG("Nachbar im Norden +1 = {}", roadNeighbours);
+        }
+    }
+
+    if (neighbours[static_cast<int>(Tile::Directions::EAST)])
+    {
+        if (neighbours[static_cast<int>(Tile::Directions::EAST)]->GetType() == Map::TileType::TRAFFIC_NETWORK)
+        {
+            roadNeighbours |= EAST;
+            SG_OGL_LOG_DEBUG("Nachbar im Osten +2 = {}", roadNeighbours);
+        }
+    }
+
+    if (neighbours[static_cast<int>(Tile::Directions::SOUTH)])
+    {
+        if (neighbours[static_cast<int>(Tile::Directions::SOUTH)]->GetType() == Map::TileType::TRAFFIC_NETWORK)
+        {
+            roadNeighbours |= SOUTH;
+            SG_OGL_LOG_DEBUG("Nachbar im Sueden +4 = {}", roadNeighbours);
+        }
+    }
+
+    if (neighbours[static_cast<int>(Tile::Directions::WEST)])
+    {
+        if (neighbours[static_cast<int>(Tile::Directions::WEST)]->GetType() == Map::TileType::TRAFFIC_NETWORK)
+        {
+            roadNeighbours |= WEST;
+            SG_OGL_LOG_DEBUG("Nachbar im Westen +8 = {}", roadNeighbours);
+        }
+    }
+
+    SG_OGL_LOG_DEBUG("Nachbarn gesamt {}", roadNeighbours);
+
+    switch (roadNeighbours)
+    {
+    case 0: texture = Texture::WO;
+            break;
+    case 1: texture = Texture::NS;
+            break;
+    case 2: texture = Texture::WO;
+            break;
+    case 3: texture = Texture::NSO;
+            break;
+    case 4: texture = Texture::NS;
+            break;
+    case 5: texture = Texture::NS;
+            break;
+    case 6: texture = Texture::NSO;
+            break;
+    case 7: texture = Texture::NSO;
+            break;
+    case 8: texture = Texture::WO;
+            break;
+    case 9: texture = Texture::NSW;
+            break;
+    case 10: texture = Texture::WO;
+            break;
+    case 11: texture = Texture::ALL;
+             break;
+    case 12: texture = Texture::NSW;
+             break;
+    case 13: texture = Texture::NSW;
+             break;
+    case 14: texture = Texture::ALL;
+             break;
+    case 15: texture = Texture::ALL;
+             break;
+    default: texture = Texture::WO;
+    }
+
     /*
-
-    __
-    
-    |
-    __
-
-    */
-
-
-    // todo: orientation
-    auto textureId{ 0 };
     if (neighbours[static_cast<int>(Tile::Directions::NORTH)])
     {
         if (neighbours[static_cast<int>(Tile::Directions::NORTH)]->GetType() == Map::TileType::TRAFFIC_NETWORK)
@@ -101,8 +180,11 @@ void sg::city::map::RoadNetwork::StoreRoadOnPosition(const glm::vec3& t_mapPoint
 
             if (!w && !e)
             {
-                // get tile index from North
-                const auto tileIndex{ static_cast<int>(neighbours[static_cast<int>(Tile::Directions::NORTH)]->GetMapZ())* m_map->GetMapSize() + static_cast<int>(neighbours[static_cast<int>(Tile::Directions::NORTH)]->GetMapX()) };
+                const auto northTileIndex{ m_map->GetTileIndexByPosition(
+                    static_cast<int>(neighbours[static_cast<int>(Tile::Directions::NORTH)]->GetMapX()),
+                    static_cast<int>(neighbours[static_cast<int>(Tile::Directions::NORTH)]->GetMapZ()))
+                };
+
                 auto index{ m_lookupTable[tileIndex] - 1 };
 
                 auto offset{ index * Tile::FLOATS_PER_TILE };
@@ -118,7 +200,7 @@ void sg::city::map::RoadNetwork::StoreRoadOnPosition(const glm::vec3& t_mapPoint
                 SG_OGL_LOG_DEBUG("North keine Nachbarn");
             }
 
-            textureId = 1;
+            texture = Texture::NS;
         }
     }
 
@@ -149,9 +231,10 @@ void sg::city::map::RoadNetwork::StoreRoadOnPosition(const glm::vec3& t_mapPoint
             }
 
 
-            textureId = 1;
+            texture = Texture::NS;
         }
     }
+    */
 
     /*
     if (neighbours[static_cast<int>(Tile::Directions::NORTH)] &&
@@ -171,12 +254,12 @@ void sg::city::map::RoadNetwork::StoreRoadOnPosition(const glm::vec3& t_mapPoint
     }
     */
 
-    vertices[9] = static_cast<float>(textureId);
-    vertices[21] = static_cast<float>(textureId);;
-    vertices[33] = static_cast<float>(textureId);;
-    vertices[45] = static_cast<float>(textureId);;
-    vertices[57] = static_cast<float>(textureId);;
-    vertices[69] = static_cast<float>(textureId);;
+    vertices[9] = static_cast<float>(texture);
+    vertices[21] = static_cast<float>(texture);;
+    vertices[33] = static_cast<float>(texture);;
+    vertices[45] = static_cast<float>(texture);;
+    vertices[57] = static_cast<float>(texture);;
+    vertices[69] = static_cast<float>(texture);;
 
     // insert vertices at the end
     m_vertices.insert(m_vertices.end(), vertices.begin(), vertices.end());
@@ -198,6 +281,19 @@ void sg::city::map::RoadNetwork::RemoveRoadFromVbo(int t_tileIndex)
     // update vertex count
 }
 
+void sg::city::map::RoadNetwork::CreateVbo()
+{
+    m_vboId = ogl::buffer::Vbo::GenerateVbo();
+
+    ogl::buffer::Vbo::InitEmpty(m_vboId, m_map->GetFloatCountOfMap(), GL_DYNAMIC_DRAW);
+
+    ogl::buffer::Vbo::AddAttribute(m_vboId, 0, 3, Tile::FLOATS_PER_VERTEX, 0);  // 3x position
+    ogl::buffer::Vbo::AddAttribute(m_vboId, 1, 3, Tile::FLOATS_PER_VERTEX, 3);  // 3x normal
+    ogl::buffer::Vbo::AddAttribute(m_vboId, 2, 3, Tile::FLOATS_PER_VERTEX, 6);  // 3x color
+    ogl::buffer::Vbo::AddAttribute(m_vboId, 3, 1, Tile::FLOATS_PER_VERTEX, 9);  // 1x texture
+    ogl::buffer::Vbo::AddAttribute(m_vboId, 4, 2, Tile::FLOATS_PER_VERTEX, 10); // 2x uv
+}
+
 void sg::city::map::RoadNetwork::Init()
 {
     // create an bind a Vao
@@ -213,21 +309,10 @@ void sg::city::map::RoadNetwork::Init()
     // load textures
     m_woTextureId = m_map->GetScene()->GetApplicationContext()->GetTextureManager().GetTextureIdFromPath("res/texture/road/wo.png");
     m_nsTextureId = m_map->GetScene()->GetApplicationContext()->GetTextureManager().GetTextureIdFromPath("res/texture/road/ns.png");
+    m_nsoTextureId = m_map->GetScene()->GetApplicationContext()->GetTextureManager().GetTextureIdFromPath("res/texture/road/nso.png");
+    m_nswTextureId = m_map->GetScene()->GetApplicationContext()->GetTextureManager().GetTextureIdFromPath("res/texture/road/nsw.png");
     m_allTextureId = m_map->GetScene()->GetApplicationContext()->GetTextureManager().GetTextureIdFromPath("res/texture/road/all.png");
 
     // setup lookup table
     m_lookupTable.resize(m_map->GetMapSize() * m_map->GetMapSize(), -1);
-}
-
-void sg::city::map::RoadNetwork::CreateVbo()
-{
-    m_vboId = ogl::buffer::Vbo::GenerateVbo();
-
-    ogl::buffer::Vbo::InitEmpty(m_vboId, m_map->GetFloatCountOfMap(), GL_DYNAMIC_DRAW);
-
-    ogl::buffer::Vbo::AddAttribute(m_vboId, 0, 3, Tile::FLOATS_PER_VERTEX, 0);  // 3x position
-    ogl::buffer::Vbo::AddAttribute(m_vboId, 1, 3, Tile::FLOATS_PER_VERTEX, 3);  // 3x normal
-    ogl::buffer::Vbo::AddAttribute(m_vboId, 2, 3, Tile::FLOATS_PER_VERTEX, 6);  // 3x color
-    ogl::buffer::Vbo::AddAttribute(m_vboId, 3, 1, Tile::FLOATS_PER_VERTEX, 9);  // 1x texture
-    ogl::buffer::Vbo::AddAttribute(m_vboId, 4, 2, Tile::FLOATS_PER_VERTEX, 10); // 2x uv
 }

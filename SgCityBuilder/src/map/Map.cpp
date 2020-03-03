@@ -203,24 +203,24 @@ void sg::city::map::Map::StoreNeighbours()
         {
             const auto tileIndex{ GetTileIndexByPosition(x, z) };
 
-            if (z > 0)
-            {
-                m_tiles[tileIndex]->GetNeighbours()[static_cast<int>(Tile::Directions::NORTH)] = m_tiles[GetTileIndexByPosition(x, z - 1)].get();
-            }
-
             if (z < m_mapSize - 1)
             {
-                m_tiles[tileIndex]->GetNeighbours()[static_cast<int>(Tile::Directions::SOUTH)] = m_tiles[GetTileIndexByPosition(x, z + 1)].get();
-            }
-
-            if (x > 0)
-            {
-                m_tiles[tileIndex]->GetNeighbours()[static_cast<int>(Tile::Directions::EAST)] = m_tiles[GetTileIndexByPosition(x - 1, z)].get();
+                m_tiles[tileIndex]->GetNeighbours()[static_cast<int>(Tile::Directions::NORTH)] = m_tiles[GetTileIndexByPosition(x, z + 1)].get();
             }
 
             if (x < m_mapSize - 1)
             {
-                m_tiles[tileIndex]->GetNeighbours()[static_cast<int>(Tile::Directions::WEST)] = m_tiles[GetTileIndexByPosition(x + 1, z)].get();
+                m_tiles[tileIndex]->GetNeighbours()[static_cast<int>(Tile::Directions::EAST)] = m_tiles[GetTileIndexByPosition(x + 1, z)].get();
+            }
+
+            if (z > 0)
+            {
+                m_tiles[tileIndex]->GetNeighbours()[static_cast<int>(Tile::Directions::SOUTH)] = m_tiles[GetTileIndexByPosition(x, z - 1)].get();
+            }
+
+            if (x > 0)
+            {
+                m_tiles[tileIndex]->GetNeighbours()[static_cast<int>(Tile::Directions::WEST)] = m_tiles[GetTileIndexByPosition(x - 1, z)].get();
             }
         }
     }

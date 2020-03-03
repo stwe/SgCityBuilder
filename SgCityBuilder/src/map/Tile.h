@@ -11,8 +11,8 @@ namespace sg::city::map
         enum class Directions
         {
             NORTH,
-            SOUTH,
             EAST,
+            SOUTH,
             WEST,
             SIZE
         };

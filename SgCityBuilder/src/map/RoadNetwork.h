@@ -14,6 +14,23 @@ namespace sg::city::map
     class RoadNetwork
     {
     public:
+        enum RoadNeighbours : uint8_t
+        {
+            NORTH = 1,
+            EAST  = 2,
+            SOUTH = 4,
+            WEST  = 8
+        };
+
+        enum class Texture
+        {
+            WO,
+            NS,
+            NSO,
+            NSW,
+            ALL
+        };
+
         using VertexContainer = std::vector<float>;
         using MeshUniquePtr = std::unique_ptr<ogl::resource::Mesh>;
 
@@ -41,6 +58,8 @@ namespace sg::city::map
 
         [[nodiscard]] uint32_t GetWoTextureId() const;
         [[nodiscard]] uint32_t GetNsTextureId() const;
+        [[nodiscard]] uint32_t GetNsoTextureId() const;
+        [[nodiscard]] uint32_t GetNswTextureId() const;
         [[nodiscard]] uint32_t GetAllTextureId() const;
 
         //-------------------------------------------------
@@ -49,8 +68,6 @@ namespace sg::city::map
 
         void StoreRoadOnPosition(const glm::vec3& t_mapPoint);
         void RemoveRoadFromVbo(int t_tileIndex);
-
-        void Init();
 
     protected:
 
@@ -77,10 +94,14 @@ namespace sg::city::map
 
         uint32_t m_woTextureId{ 0 };
         uint32_t m_nsTextureId{ 0 };
+        uint32_t m_nsoTextureId{ 0 };
+        uint32_t m_nswTextureId{ 0 };
         uint32_t m_allTextureId{ 0 };
 
         std::vector<int> m_lookupTable;
 
         void CreateVbo();
+
+        void Init();
     };
 }
