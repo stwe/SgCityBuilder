@@ -10,6 +10,7 @@ namespace sg::ogl::resource
 namespace sg::city::map
 {
     class Map;
+    class Tile;
 
     class RoadNetwork
     {
@@ -103,5 +104,9 @@ namespace sg::city::map
         void CreateVbo();
 
         void Init();
+
+        Texture GetTexture(const Tile& t_tile);
+        void UpdateNeighbours(const Tile& t_tile);
+        void UpdateExistingTexture(const Tile& t_tile);
     };
 }
