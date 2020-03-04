@@ -23,11 +23,11 @@ namespace sg::city::shader
             SetUniform("roadTexture[3]", 3);
             SetUniform("roadTexture[4]", 4);
 
-            ogl::resource::TextureManager::BindForReading(roadNetworkComponent.roadNetwork->GetWoTextureId(), GL_TEXTURE0);
-            ogl::resource::TextureManager::BindForReading(roadNetworkComponent.roadNetwork->GetNsTextureId(), GL_TEXTURE1);
-            ogl::resource::TextureManager::BindForReading(roadNetworkComponent.roadNetwork->GetNsoTextureId(), GL_TEXTURE2);
-            ogl::resource::TextureManager::BindForReading(roadNetworkComponent.roadNetwork->GetNswTextureId(), GL_TEXTURE3);
-            ogl::resource::TextureManager::BindForReading(roadNetworkComponent.roadNetwork->GetAllTextureId(), GL_TEXTURE4);
+            ogl::resource::TextureManager::BindForReading(roadNetworkComponent.roadNetwork->GetTextureId(map::RoadNetwork::Texture::WO), GL_TEXTURE0);
+            ogl::resource::TextureManager::BindForReading(roadNetworkComponent.roadNetwork->GetTextureId(map::RoadNetwork::Texture::NS), GL_TEXTURE1);
+            ogl::resource::TextureManager::BindForReading(roadNetworkComponent.roadNetwork->GetTextureId(map::RoadNetwork::Texture::NSO), GL_TEXTURE2);
+            ogl::resource::TextureManager::BindForReading(roadNetworkComponent.roadNetwork->GetTextureId(map::RoadNetwork::Texture::NSW), GL_TEXTURE3);
+            ogl::resource::TextureManager::BindForReading(roadNetworkComponent.roadNetwork->GetTextureId(map::RoadNetwork::Texture::ALL), GL_TEXTURE4);
         }
 
         [[nodiscard]] std::string GetFolderName() const override

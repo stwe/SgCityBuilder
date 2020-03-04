@@ -33,6 +33,8 @@ namespace sg::city::map
         };
 
         using VertexContainer = std::vector<float>;
+        using TextureContainer = std::map<Texture, uint32_t>;
+        using TileIndexContainer = std::vector<int>;
         using MeshUniquePtr = std::unique_ptr<ogl::resource::Mesh>;
 
         //-------------------------------------------------
@@ -57,18 +59,13 @@ namespace sg::city::map
         [[nodiscard]] const ogl::resource::Mesh& GetMesh() const noexcept;
         [[nodiscard]] ogl::resource::Mesh& GetMesh() noexcept;
 
-        [[nodiscard]] uint32_t GetWoTextureId() const;
-        [[nodiscard]] uint32_t GetNsTextureId() const;
-        [[nodiscard]] uint32_t GetNsoTextureId() const;
-        [[nodiscard]] uint32_t GetNswTextureId() const;
-        [[nodiscard]] uint32_t GetAllTextureId() const;
+        [[nodiscard]] uint32_t GetTextureId(Texture t_texture) const;
 
         //-------------------------------------------------
-        // Create
+        // Add Road
         //-------------------------------------------------
 
         void StoreRoadOnPosition(const glm::vec3& t_mapPoint);
-        void RemoveRoadFromVbo(int t_tileIndex);
 
     protected:
 
@@ -93,20 +90,44 @@ namespace sg::city::map
          */
         VertexContainer m_vertices;
 
-        uint32_t m_woTextureId{ 0 };
-        uint32_t m_nsTextureId{ 0 };
-        uint32_t m_nsoTextureId{ 0 };
-        uint32_t m_nswTextureId{ 0 };
-        uint32_t m_allTextureId{ 0 };
+        /**
+         * @brief Container with the textures for each direction.
+         */
+        TextureContainer m_textures;
 
-        std::vector<int> m_lookupTable;
+        /**
+         * @brief Stores the position of the Road Tile in the Vbo.
+         */
+        TileIndexContainer m_lookupTable;
+
+        //-------------------------------------------------
+        // Init
+        //-------------------------------------------------
 
         void CreateVbo();
-
         void Init();
 
-        Texture GetTexture(const Tile& t_tile);
+        //-------------------------------------------------
+        // Update
+        //-------------------------------------------------
+
+        /**
+         * @brief Determines the correct texture for the Tile depending on the neighbors.
+         * @param t_tile The tile for which the texture is to be determined.
+         * @return Texture::WO | Texture::NS | Texture::NSO | Texture::NSW | Texture::ALL
+         */
+        static Texture GetTexture(const Tile& t_tile);
+
+        /**
+         * @brief Calls UpdateExistingTexture() for Tile's neighbors to set the correct texture.
+         * @param t_tile The tile for which the neighbors are to be determined.
+         */
         void UpdateNeighbours(const Tile& t_tile);
+
+        /**
+         * @brief Changes the texture for a Tile that is already in the Vbo.
+         * @param t_tile Tile, which is already in the Vbo.
+         */
         void UpdateExistingTexture(const Tile& t_tile);
     };
 }

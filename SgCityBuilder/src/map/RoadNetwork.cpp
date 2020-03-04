@@ -30,33 +30,13 @@ sg::ogl::resource::Mesh& sg::city::map::RoadNetwork::GetMesh() noexcept
     return *m_roadNetworkMesh;
 }
 
-uint32_t sg::city::map::RoadNetwork::GetWoTextureId() const
+uint32_t sg::city::map::RoadNetwork::GetTextureId(const Texture t_texture) const
 {
-    return m_woTextureId;
-}
-
-uint32_t sg::city::map::RoadNetwork::GetNsTextureId() const
-{
-    return m_nsTextureId;
-}
-
-uint32_t sg::city::map::RoadNetwork::GetNsoTextureId() const
-{
-    return m_nsoTextureId;
-}
-
-uint32_t sg::city::map::RoadNetwork::GetNswTextureId() const
-{
-    return m_nswTextureId;
-}
-
-uint32_t sg::city::map::RoadNetwork::GetAllTextureId() const
-{
-    return m_allTextureId;
+    return m_textures.at(t_texture);
 }
 
 //-------------------------------------------------
-// Create
+// Add Road
 //-------------------------------------------------
 
 void sg::city::map::RoadNetwork::StoreRoadOnPosition(const glm::vec3& t_mapPoint)
@@ -64,13 +44,11 @@ void sg::city::map::RoadNetwork::StoreRoadOnPosition(const glm::vec3& t_mapPoint
     // get Tile index
     const auto tileIndex{ m_map->GetTileIndexByPosition(t_mapPoint) };
 
-    // check if a Road already exists
+    // checks whether the Tile is already a Road and in the Vbo
     if (m_lookupTable[tileIndex] > 0)
     {
         return;
     }
-
-    SG_OGL_LOG_INFO("Add a Road to the RoadNetwork");
 
     // get Tile
     auto& tile{ m_map->GetTileByIndex(tileIndex) };
@@ -86,7 +64,7 @@ void sg::city::map::RoadNetwork::StoreRoadOnPosition(const glm::vec3& t_mapPoint
     vertices[49] = 0.001f;
     vertices[61] = 0.001f;
 
-    // use the right texture
+    // get the right texture
     const auto texture{ static_cast<float>(GetTexture(tile)) };
     vertices[9] = texture;
     vertices[21] = texture;
@@ -98,10 +76,10 @@ void sg::city::map::RoadNetwork::StoreRoadOnPosition(const glm::vec3& t_mapPoint
     // insert vertices at the end
     m_vertices.insert(m_vertices.end(), vertices.begin(), vertices.end());
 
-    // calculate the tile number
+    // calculate the Tile number in m_vertices
     const auto nrTiles{ static_cast<int>(m_vertices.size()) / Tile::FLOATS_PER_TILE };
 
-    // stores where the road is in the street network container
+    // use Tile number to store where the road is in the Vbo
     m_lookupTable[tileIndex] = nrTiles;
 
     // update Vbo
@@ -116,10 +94,9 @@ void sg::city::map::RoadNetwork::StoreRoadOnPosition(const glm::vec3& t_mapPoint
     UpdateNeighbours(tile);
 }
 
-void sg::city::map::RoadNetwork::RemoveRoadFromVbo(int t_tileIndex)
-{
-    // update vertex count
-}
+//-------------------------------------------------
+// Init
+//-------------------------------------------------
 
 void sg::city::map::RoadNetwork::CreateVbo()
 {
@@ -147,14 +124,16 @@ void sg::city::map::RoadNetwork::Init()
     ogl::buffer::Vao::UnbindVao();
 
     // load textures
-    m_woTextureId = m_map->GetScene()->GetApplicationContext()->GetTextureManager().GetTextureIdFromPath("res/texture/road/wo.png");
-    m_nsTextureId = m_map->GetScene()->GetApplicationContext()->GetTextureManager().GetTextureIdFromPath("res/texture/road/ns.png");
-    m_nsoTextureId = m_map->GetScene()->GetApplicationContext()->GetTextureManager().GetTextureIdFromPath("res/texture/road/nso.png");
-    m_nswTextureId = m_map->GetScene()->GetApplicationContext()->GetTextureManager().GetTextureIdFromPath("res/texture/road/nsw.png");
-    m_allTextureId = m_map->GetScene()->GetApplicationContext()->GetTextureManager().GetTextureIdFromPath("res/texture/road/all.png");
+    m_textures.emplace(Texture::WO, m_map->GetScene()->GetApplicationContext()->GetTextureManager().GetTextureIdFromPath("res/texture/road/wo.png"));
+    m_textures.emplace(Texture::NS, m_map->GetScene()->GetApplicationContext()->GetTextureManager().GetTextureIdFromPath("res/texture/road/ns.png"));
+    m_textures.emplace(Texture::NSO, m_map->GetScene()->GetApplicationContext()->GetTextureManager().GetTextureIdFromPath("res/texture/road/nso.png"));
+    m_textures.emplace(Texture::NSW, m_map->GetScene()->GetApplicationContext()->GetTextureManager().GetTextureIdFromPath("res/texture/road/nsw.png"));
+    m_textures.emplace(Texture::ALL, m_map->GetScene()->GetApplicationContext()->GetTextureManager().GetTextureIdFromPath("res/texture/road/all.png"));
 
-    // setup lookup table
-    m_lookupTable.resize(m_map->GetMapSize() * m_map->GetMapSize(), -1);
+    // Every Tile can be a Road. The lookup table stores the position of the Tile in the RoadNetwork Vbo.
+    // The default value -1 means that the Tile is not a Road and is not in the Vbo.
+    const auto lookupTableSize(m_map->GetMapSize() * m_map->GetMapSize());
+    m_lookupTable.resize(lookupTableSize, -1);
 }
 
 sg::city::map::RoadNetwork::Texture sg::city::map::RoadNetwork::GetTexture(const Tile& t_tile)
@@ -212,12 +191,10 @@ sg::city::map::RoadNetwork::Texture sg::city::map::RoadNetwork::GetTexture(const
         break;
     case 3: texture = Texture::NSO;
         break;
-    case 4: texture = Texture::NS;
-        break;
+    case 4:
     case 5: texture = Texture::NS;
         break;
-    case 6: texture = Texture::NSO;
-        break;
+    case 6:
     case 7: texture = Texture::NSO;
         break;
     case 8: texture = Texture::WO;
@@ -228,12 +205,10 @@ sg::city::map::RoadNetwork::Texture sg::city::map::RoadNetwork::GetTexture(const
         break;
     case 11: texture = Texture::ALL;
         break;
-    case 12: texture = Texture::NSW;
-        break;
+    case 12:
     case 13: texture = Texture::NSW;
         break;
-    case 14: texture = Texture::ALL;
-        break;
+    case 14:
     case 15: texture = Texture::ALL;
         break;
     default: texture = Texture::WO;
@@ -287,7 +262,7 @@ void sg::city::map::RoadNetwork::UpdateExistingTexture(const Tile& t_tile)
     // get Tile index
     const auto tileIndex{ m_map->GetTileIndexByPosition(static_cast<int>(t_tile.GetMapX()), static_cast<int>(t_tile.GetMapZ())) };
 
-    // get lookup index
+    // get the position in the Vbo
     const auto lookupIndex{ m_lookupTable[tileIndex] - 1 };
 
     // update texture
