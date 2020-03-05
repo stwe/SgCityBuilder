@@ -175,6 +175,46 @@ int sg::city::map::Map::GetTileIndexByPosition(const int t_x, int const t_z) con
     return t_z * m_mapSize + t_x;
 }
 
+//-------------------------------------------------
+// Regions
+//-------------------------------------------------
+
+void sg::city::map::Map::FindConnectedRegions()
+{
+    auto regions{ 1 };
+
+    for (auto& tile : m_tiles)
+    {
+        tile->SetRegion(0);
+    }
+
+    for (auto z{ 0 }; z < m_mapSize; ++z)
+    {
+        for (auto x{ 0 }; x < m_mapSize; ++x)
+        {
+            auto found{ false };
+
+            for (auto tileType : m_tileTypes)
+            {
+                if (tileType == m_tiles[GetTileIndexByPosition(x, z)]->GetType())
+                {
+                    found = true;
+                    break;
+                }
+            }
+
+            if (m_tiles[GetTileIndexByPosition(x, z)]->GetRegion() == 0 && found)
+            {
+                DepthFirstSearch(x, z, regions++);
+            }
+        }
+    }
+
+    m_numRegions = regions;
+
+    SG_OGL_LOG_DEBUG("Regions: {}", regions);
+}
+
 int32_t sg::city::map::Map::GetVerticesCountOfMap() const
 {
     return static_cast<int32_t>(m_tiles.size())* Tile::VERTICES_PER_TILE;
@@ -267,4 +307,49 @@ void sg::city::map::Map::UpdateMapVboByTileIndex(const int t_tileIndex) const
 void sg::city::map::Map::UpdateMapVboByByPosition(const glm::vec3& t_mapPoint) const
 {
     UpdateMapVboByTileIndex(GetTileIndexByPosition(t_mapPoint));
+}
+
+//-------------------------------------------------
+// Regions
+//-------------------------------------------------
+
+void sg::city::map::Map::DepthFirstSearch(const int t_xPos, const int t_zPos, const int t_label)
+{
+    if (t_xPos < 0 || t_xPos >= m_mapSize)
+    {
+        return;
+    }
+
+    if (t_zPos < 0 || t_zPos >= m_mapSize)
+    {
+        return;
+    }
+
+    if (m_tiles[GetTileIndexByPosition(t_xPos, t_zPos)]->GetRegion() != 0)
+    {
+        return;
+    }
+
+    auto found{ false };
+
+    for (auto tileType : m_tileTypes)
+    {
+        if (tileType == m_tiles[GetTileIndexByPosition(t_xPos, t_zPos)]->GetType())
+        {
+            found = true;
+            break;
+        }
+    }
+
+    if (!found)
+    {
+        return;
+    }
+
+    m_tiles[GetTileIndexByPosition(t_xPos, t_zPos)]->SetRegion(t_label);
+
+    DepthFirstSearch(t_xPos - 1, t_zPos, t_label);
+    DepthFirstSearch(t_xPos + 1, t_zPos, t_label);
+    DepthFirstSearch(t_xPos, t_zPos + 1, t_label);
+    DepthFirstSearch(t_xPos, t_zPos - 1, t_label);
 }

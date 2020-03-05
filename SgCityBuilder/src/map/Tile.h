@@ -54,8 +54,10 @@ namespace sg::city::map
 
         [[nodiscard]] Map::TileType GetType() const;
 
-        [[nodiscard]] const NeighbourContainer& GetNeighbours()const noexcept;
+        [[nodiscard]] const NeighbourContainer& GetNeighbours() const noexcept;
         [[nodiscard]] NeighbourContainer& GetNeighbours() noexcept;
+
+        [[nodiscard]] int GetRegion() const;
 
         //-------------------------------------------------
         // Setter
@@ -73,6 +75,8 @@ namespace sg::city::map
         );
 
         void SetType(Map::TileType t_type);
+
+        void SetRegion(int t_region);
 
         //-------------------------------------------------
         // To string
@@ -107,6 +111,11 @@ namespace sg::city::map
          * @brief The neighbors of this Tile.
          */
         NeighbourContainer m_neighbours{ nullptr, nullptr, nullptr, nullptr };
+
+        /**
+         * @brief The region Id of the Tile. Tiles in the same region are connected.
+         */
+        int m_region{ 0 };
 
         //-------------------------------------------------
         // Init

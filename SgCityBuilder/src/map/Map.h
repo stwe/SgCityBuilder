@@ -44,6 +44,7 @@ namespace sg::city::map
         using MeshUniquePtr = std::unique_ptr<ogl::resource::Mesh>;
         using TileUniquePtr = std::unique_ptr<Tile>;
         using TileContainer = std::vector<TileUniquePtr>;
+        using TileTypeContainer = std::vector<TileType>;
 
         //-------------------------------------------------
         // Public member
@@ -111,6 +112,12 @@ namespace sg::city::map
         [[nodiscard]] int GetTileIndexByPosition(const glm::vec3& t_mapPoint) const;
         [[nodiscard]] int GetTileIndexByPosition(int t_x, int t_z) const;
 
+        //-------------------------------------------------
+        // Regions
+        //-------------------------------------------------
+
+        void FindConnectedRegions();
+
     protected:
 
     private:
@@ -144,6 +151,16 @@ namespace sg::city::map
          */
         uint32_t m_vboId{ 0 };
 
+        /**
+         * @brief The current number of regions.
+         */
+        int m_numRegions{ 0 };
+
+        /**
+         * @brief Tiles of these types can build regions.
+         */
+        TileTypeContainer m_tileTypes{ TileType::RESIDENTIAL, TileType::COMMERCIAL, TileType::INDUSTRIAL, TileType::TRAFFIC_NETWORK };
+
         //-------------------------------------------------
         // Helper
         //-------------------------------------------------
@@ -161,5 +178,11 @@ namespace sg::city::map
         void StoreTilesInVbo();
         void UpdateMapVboByTileIndex(int t_tileIndex) const;
         void UpdateMapVboByByPosition(const glm::vec3& t_mapPoint) const;
+
+        //-------------------------------------------------
+        // Regions
+        //-------------------------------------------------
+
+        void DepthFirstSearch(int t_xPos, int t_zPos, int t_label);
     };
 }

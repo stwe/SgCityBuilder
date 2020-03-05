@@ -55,6 +55,11 @@ sg::city::map::Tile::NeighbourContainer& sg::city::map::Tile::GetNeighbours() no
     return m_neighbours;
 }
 
+int sg::city::map::Tile::GetRegion() const
+{
+    return m_region;
+}
+
 //-------------------------------------------------
 // Setter
 //-------------------------------------------------
@@ -180,6 +185,11 @@ void sg::city::map::Tile::SetType(const Map::TileType t_type)
 
     // we use the TileType color as Tile color
     SetColor(Map::TILE_TYPE_COLOR[static_cast<int>(m_type)]);
+}
+
+void sg::city::map::Tile::SetRegion(const int t_region)
+{
+    m_region = t_region;
 }
 
 //-------------------------------------------------

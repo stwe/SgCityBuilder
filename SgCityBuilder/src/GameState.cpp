@@ -53,6 +53,8 @@ bool GameState::Input()
             {
                 m_roadNetwork->StoreRoadOnPosition(mapPoint);
             }
+
+            m_map->FindConnectedRegions();
         }
     }
 
