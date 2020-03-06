@@ -40,11 +40,21 @@ namespace sg::city::renderer
             {
                 auto& mapComponent{ view.get<ecs::MapComponent>(entity) };
 
+                if (mapComponent.map->wireframeMode)
+                {
+                    ogl::OpenGl::EnableWireframeMode();
+                }
+
                 shader.UpdateUniforms(*m_scene, entity, mapComponent.map->GetMapMesh());
 
                 mapComponent.map->GetMapMesh().InitDraw();
                 mapComponent.map->GetMapMesh().DrawPrimitives();
                 mapComponent.map->GetMapMesh().EndDraw();
+
+                if (mapComponent.map->wireframeMode)
+                {
+                    ogl::OpenGl::DisableWireframeMode();
+                }
             }
 
             ogl::resource::ShaderProgram::Unbind();
@@ -55,24 +65,12 @@ namespace sg::city::renderer
     protected:
         void PrepareRendering() override
         {
-            //ogl::OpenGl::EnableAlphaBlending();
             ogl::OpenGl::EnableFaceCulling();
-
-            //if (modelComponent.showTriangles)
-            {
-                //ogl::OpenGl::EnableWireframeMode();
-            }
         }
 
         void FinishRendering() override
         {
-            //if (modelComponent.showTriangles)
-            {
-                //ogl::OpenGl::DisableWireframeMode();
-            }
-
             ogl::OpenGl::DisableFaceCulling();
-            //ogl::OpenGl::DisableBlending();
         }
 
     private:

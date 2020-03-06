@@ -62,6 +62,8 @@ public:
 protected:
 
 private:
+    glm::vec3 m_mapPoint{ glm::vec3(0.0f) };
+
     SceneUniquePtr m_scene;
 
     FirstPersonCameraSharedPtr m_firstPersonCamera;

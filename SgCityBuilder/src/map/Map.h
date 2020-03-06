@@ -2,8 +2,14 @@
 
 #include <vector>
 #include <array>
+#include <map>
 #include <memory>
 #include <glm/vec3.hpp>
+
+namespace sg::ogl
+{
+    struct Color;
+}
 
 namespace sg::ogl::scene
 {
@@ -45,6 +51,12 @@ namespace sg::city::map
         using TileUniquePtr = std::unique_ptr<Tile>;
         using TileContainer = std::vector<TileUniquePtr>;
         using TileTypeContainer = std::vector<TileType>;
+        using RandomColorContainer = std::map<int, ogl::Color>;
+
+        /**
+         * @brief 200 predefined colors are generated to show contiguous regions.
+         */
+        static constexpr auto MAX_REGION_COLORS{ 200 };
 
         //-------------------------------------------------
         // Public member
@@ -53,6 +65,9 @@ namespace sg::city::map
         glm::vec3 position{ glm::vec3(0.0f) };
         glm::vec3 rotation{ glm::vec3(0.0f) };
         glm::vec3 scale{ glm::vec3(1.0f) };
+
+        bool showRegions{ false };
+        bool wireframeMode{ false };
 
         //-------------------------------------------------
         // Ctors. / Dtor.
@@ -161,6 +176,11 @@ namespace sg::city::map
          */
         TileTypeContainer m_tileTypes{ TileType::RESIDENTIAL, TileType::COMMERCIAL, TileType::INDUSTRIAL, TileType::TRAFFIC_NETWORK };
 
+        /**
+         * @brief A container with randomly generated colors that e.g. can be used to display tile regions.
+         */
+        RandomColorContainer m_randomColors;
+
         //-------------------------------------------------
         // Helper
         //-------------------------------------------------
@@ -169,6 +189,7 @@ namespace sg::city::map
 
         void LoadAndStoreTileTypeTextures();
         void StoreNeighbours();
+        void CreateRandomColors();
 
         //-------------------------------------------------
         // Vbo

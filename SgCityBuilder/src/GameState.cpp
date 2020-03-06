@@ -3,7 +3,6 @@
 #include "renderer/RoadNetworkRenderer.h"
 #include "map/RoadNetwork.h"
 #include "map/Tile.h"
-#include "map/Astar.h"
 #include "ecs/Components.h"
 #include "input/MousePicker.h"
 
@@ -43,15 +42,15 @@ bool GameState::Input()
             static_cast<float>(GetApplicationContext()->GetMouseInput().GetCurrentPos().y)
         );
 
-        const auto mapPoint{ m_mousePicker->GetCurrentMapPoint() };
+        m_mapPoint = m_mousePicker->GetCurrentMapPoint();
 
-        if (mapPoint.x >= 0.0)
+        if (m_mapPoint.x >= 0.0)
         {
-            m_map->ChangeTileTypeOnPosition(mapPoint, m_currentTileType);
+            m_map->ChangeTileTypeOnPosition(m_mapPoint, m_currentTileType);
 
             if (m_currentTileType == sg::city::map::Map::TileType::TRAFFIC_NETWORK)
             {
-                m_roadNetwork->StoreRoadOnPosition(mapPoint);
+                m_roadNetwork->StoreRoadOnPosition(m_mapPoint);
             }
 
             m_map->FindConnectedRegions();
@@ -234,14 +233,26 @@ void GameState::RenderImGui()
     ImGui::Separator();
     ImGui::Spacing();
 
-    /*
-    if (m_tileIndex >= 0)
+    if (m_mapPoint.x >= 0.0)
     {
-        const auto& tile{ *m_map->GetTiles()[m_tileIndex] };
+        const auto& tile{ m_map->GetTileByPosition(m_mapPoint) };
         ImGui::Text("Current Tile x: %g", tile.GetMapX());
         ImGui::Text("Current Tile z: %g", tile.GetMapZ());
     }
-    */
+
+    ImGui::Spacing();
+    ImGui::Separator();
+    ImGui::Spacing();
+
+    if (ImGui::Button("Show contiguous regions"))
+    {
+        m_map->showRegions = !m_map->showRegions;
+    }
+
+    if (ImGui::Button("Wireframe mode"))
+    {
+        m_map->wireframeMode = !m_map->wireframeMode;
+    }
 
     ImGui::End();
 

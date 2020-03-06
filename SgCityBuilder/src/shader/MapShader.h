@@ -17,6 +17,8 @@ namespace sg::city::shader
 
             SetUniform("mvpMatrix", mvp);
 
+            SetUniform("showRegionColor", mapComponent.map->showRegions);
+
             SetUniform("tileTexture[0]", 0);
             SetUniform("tileTexture[1]", 1);
             SetUniform("tileTexture[2]", 2);

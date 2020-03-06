@@ -1,7 +1,9 @@
 #include <Application.h>
+#include <Color.h>
 #include <scene/Scene.h>
 #include <resource/Mesh.h>
 #include <resource/TextureManager.h>
+#include <random>
 #include "Map.h"
 #include "Tile.h"
 
@@ -140,6 +142,9 @@ void sg::city::map::Map::CreateMap(const int t_mapSize)
 
     // set draw count
     m_mapMesh->GetVao().SetDrawCount(GetVerticesCountOfMap());
+
+    // create random colors
+    CreateRandomColors();
 }
 
 //-------------------------------------------------
@@ -193,17 +198,18 @@ void sg::city::map::Map::FindConnectedRegions()
         for (auto x{ 0 }; x < m_mapSize; ++x)
         {
             auto found{ false };
+            const auto tileIndex{ GetTileIndexByPosition(x, z) };
 
             for (auto tileType : m_tileTypes)
             {
-                if (tileType == m_tiles[GetTileIndexByPosition(x, z)]->GetType())
+                if (tileType == m_tiles[tileIndex]->GetType())
                 {
                     found = true;
                     break;
                 }
             }
 
-            if (m_tiles[GetTileIndexByPosition(x, z)]->GetRegion() == 0 && found)
+            if (m_tiles[tileIndex]->GetRegion() == 0 && found)
             {
                 DepthFirstSearch(x, z, regions++);
             }
@@ -211,8 +217,6 @@ void sg::city::map::Map::FindConnectedRegions()
     }
 
     m_numRegions = regions;
-
-    SG_OGL_LOG_DEBUG("Regions: {}", regions);
 }
 
 int32_t sg::city::map::Map::GetVerticesCountOfMap() const
@@ -263,6 +267,21 @@ void sg::city::map::Map::StoreNeighbours()
                 m_tiles[tileIndex]->GetNeighbours()[static_cast<int>(Tile::Directions::WEST)] = m_tiles[GetTileIndexByPosition(x - 1, z)].get();
             }
         }
+    }
+}
+
+void sg::city::map::Map::CreateRandomColors()
+{
+    std::random_device seeder;
+    std::mt19937 engine(seeder());
+
+    const std::uniform_int_distribution<unsigned int> r(7, 164);
+    const std::uniform_int_distribution<unsigned int> g(1, 160);
+    const std::uniform_int_distribution<unsigned int> b(124, 254);
+
+    for (auto i{ 0 }; i < MAX_REGION_COLORS; ++i)
+    {
+        m_randomColors.emplace(i, ogl::Color(r(engine), g(engine), b(engine)));
     }
 }
 
@@ -325,7 +344,9 @@ void sg::city::map::Map::DepthFirstSearch(const int t_xPos, const int t_zPos, co
         return;
     }
 
-    if (m_tiles[GetTileIndexByPosition(t_xPos, t_zPos)]->GetRegion() != 0)
+    const auto tileIndex{ GetTileIndexByPosition(t_xPos, t_zPos) };
+
+    if (m_tiles[tileIndex]->GetRegion() != 0)
     {
         return;
     }
@@ -334,7 +355,7 @@ void sg::city::map::Map::DepthFirstSearch(const int t_xPos, const int t_zPos, co
 
     for (auto tileType : m_tileTypes)
     {
-        if (tileType == m_tiles[GetTileIndexByPosition(t_xPos, t_zPos)]->GetType())
+        if (tileType == m_tiles[tileIndex]->GetType())
         {
             found = true;
             break;
@@ -346,7 +367,9 @@ void sg::city::map::Map::DepthFirstSearch(const int t_xPos, const int t_zPos, co
         return;
     }
 
-    m_tiles[GetTileIndexByPosition(t_xPos, t_zPos)]->SetRegion(t_label);
+    m_tiles[tileIndex]->SetRegion(t_label);
+    m_tiles[tileIndex]->SetColor(static_cast<glm::vec3>(m_randomColors[t_label]));
+    UpdateMapVboByTileIndex(tileIndex);
 
     DepthFirstSearch(t_xPos - 1, t_zPos, t_label);
     DepthFirstSearch(t_xPos + 1, t_zPos, t_label);
