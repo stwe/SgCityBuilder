@@ -157,7 +157,7 @@ void sg::city::map::Map::ChangeTileTypeOnPosition(const glm::vec3& t_mapPoint, c
     if (tile.GetType() != t_tileType)
     {
         tile.SetType(t_tileType);
-        UpdateMapVboByByPosition(t_mapPoint);
+        UpdateMapVboByPosition(t_mapPoint);
     }
 }
 
@@ -323,7 +323,7 @@ void sg::city::map::Map::UpdateMapVboByTileIndex(const int t_tileIndex) const
     ogl::buffer::Vbo::UnbindVbo();
 }
 
-void sg::city::map::Map::UpdateMapVboByByPosition(const glm::vec3& t_mapPoint) const
+void sg::city::map::Map::UpdateMapVboByPosition(const glm::vec3& t_mapPoint) const
 {
     UpdateMapVboByTileIndex(GetTileIndexByPosition(t_mapPoint));
 }
@@ -368,7 +368,9 @@ void sg::city::map::Map::DepthFirstSearch(const int t_xPos, const int t_zPos, co
     }
 
     m_tiles[tileIndex]->SetRegion(t_label);
-    m_tiles[tileIndex]->SetColor(static_cast<glm::vec3>(m_randomColors[t_label]));
+
+    // changing the color needs also a Vbo update
+    m_tiles[tileIndex]->SetColor(static_cast<glm::vec3>(m_randomColors[t_label - 1]));
     UpdateMapVboByTileIndex(tileIndex);
 
     DepthFirstSearch(t_xPos - 1, t_zPos, t_label);

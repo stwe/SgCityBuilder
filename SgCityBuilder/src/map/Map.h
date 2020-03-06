@@ -198,7 +198,7 @@ namespace sg::city::map
         void CreateVbo();
         void StoreTilesInVbo();
         void UpdateMapVboByTileIndex(int t_tileIndex) const;
-        void UpdateMapVboByByPosition(const glm::vec3& t_mapPoint) const;
+        void UpdateMapVboByPosition(const glm::vec3& t_mapPoint) const;
 
         //-------------------------------------------------
         // Regions
