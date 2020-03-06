@@ -240,6 +240,8 @@ void GameState::RenderImGui()
         ImGui::Text("Current Tile z: %g", tile.GetMapZ());
     }
 
+    ImGui::Text("Current number of regions: %i", m_map->GetNumRegions());
+
     ImGui::Spacing();
     ImGui::Separator();
     ImGui::Spacing();

@@ -84,6 +84,11 @@ int sg::city::map::Map::GetMapSize() const
     return m_mapSize;
 }
 
+int sg::city::map::Map::GetNumRegions() const
+{
+    return m_numRegions;
+}
+
 //-------------------------------------------------
 // Create
 //-------------------------------------------------
@@ -186,11 +191,12 @@ int sg::city::map::Map::GetTileIndexByPosition(const int t_x, int const t_z) con
 
 void sg::city::map::Map::FindConnectedRegions()
 {
-    auto regions{ 1 };
+    auto regions{ 0 };
 
+    // delete the regions Id from all Tiles
     for (auto& tile : m_tiles)
     {
-        tile->SetRegion(0);
+        tile->SetRegion(NO_REGION);
     }
 
     for (auto z{ 0 }; z < m_mapSize; ++z)
@@ -211,7 +217,8 @@ void sg::city::map::Map::FindConnectedRegions()
 
             if (m_tiles[tileIndex]->GetRegion() == 0 && found)
             {
-                DepthFirstSearch(x, z, regions++);
+                regions++;
+                DepthFirstSearch(x, z, regions);
             }
         }
     }
@@ -332,7 +339,7 @@ void sg::city::map::Map::UpdateMapVboByPosition(const glm::vec3& t_mapPoint) con
 // Regions
 //-------------------------------------------------
 
-void sg::city::map::Map::DepthFirstSearch(const int t_xPos, const int t_zPos, const int t_label)
+void sg::city::map::Map::DepthFirstSearch(const int t_xPos, const int t_zPos, const int t_region)
 {
     if (t_xPos < 0 || t_xPos >= m_mapSize)
     {
@@ -367,14 +374,14 @@ void sg::city::map::Map::DepthFirstSearch(const int t_xPos, const int t_zPos, co
         return;
     }
 
-    m_tiles[tileIndex]->SetRegion(t_label);
+    m_tiles[tileIndex]->SetRegion(t_region);
 
     // changing the color needs also a Vbo update
-    m_tiles[tileIndex]->SetColor(static_cast<glm::vec3>(m_randomColors[t_label - 1]));
+    m_tiles[tileIndex]->SetColor(static_cast<glm::vec3>(m_randomColors[t_region - 1]));
     UpdateMapVboByTileIndex(tileIndex);
 
-    DepthFirstSearch(t_xPos - 1, t_zPos, t_label);
-    DepthFirstSearch(t_xPos + 1, t_zPos, t_label);
-    DepthFirstSearch(t_xPos, t_zPos + 1, t_label);
-    DepthFirstSearch(t_xPos, t_zPos - 1, t_label);
+    DepthFirstSearch(t_xPos - 1, t_zPos, t_region);
+    DepthFirstSearch(t_xPos + 1, t_zPos, t_region);
+    DepthFirstSearch(t_xPos, t_zPos + 1, t_region);
+    DepthFirstSearch(t_xPos, t_zPos - 1, t_region);
 }

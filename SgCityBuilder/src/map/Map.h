@@ -58,6 +58,8 @@ namespace sg::city::map
          */
         static constexpr auto MAX_REGION_COLORS{ 200 };
 
+        static constexpr auto NO_REGION{ 0 };
+
         //-------------------------------------------------
         // Public member
         //-------------------------------------------------
@@ -106,6 +108,8 @@ namespace sg::city::map
         [[nodiscard]] Tile& GetTileByPosition(const glm::vec3& t_mapPoint) noexcept;
 
         [[nodiscard]] int GetMapSize() const;
+
+        [[nodiscard]] int GetNumRegions() const;
 
         //-------------------------------------------------
         // Create
@@ -204,6 +208,6 @@ namespace sg::city::map
         // Regions
         //-------------------------------------------------
 
-        void DepthFirstSearch(int t_xPos, int t_zPos, int t_label);
+        void DepthFirstSearch(int t_xPos, int t_zPos, int t_region);
     };
 }
