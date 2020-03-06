@@ -208,6 +208,6 @@ namespace sg::city::map
         // Regions
         //-------------------------------------------------
 
-        void DepthFirstSearch(int t_xPos, int t_zPos, int t_region);
+        void DepthSearch(Tile& t_startTile, int t_region);
     };
 }

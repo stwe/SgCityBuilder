@@ -215,10 +215,10 @@ void sg::city::map::Map::FindConnectedRegions()
                 }
             }
 
-            if (m_tiles[tileIndex]->GetRegion() == 0 && found)
+            if (m_tiles[tileIndex]->GetRegion() == NO_REGION && found)
             {
                 regions++;
-                DepthFirstSearch(x, z, regions);
+                DepthSearch(*m_tiles[tileIndex], regions);
             }
         }
     }
@@ -339,21 +339,9 @@ void sg::city::map::Map::UpdateMapVboByPosition(const glm::vec3& t_mapPoint) con
 // Regions
 //-------------------------------------------------
 
-void sg::city::map::Map::DepthFirstSearch(const int t_xPos, const int t_zPos, const int t_region)
+void sg::city::map::Map::DepthSearch(Tile& t_startTile, const int t_region)
 {
-    if (t_xPos < 0 || t_xPos >= m_mapSize)
-    {
-        return;
-    }
-
-    if (t_zPos < 0 || t_zPos >= m_mapSize)
-    {
-        return;
-    }
-
-    const auto tileIndex{ GetTileIndexByPosition(t_xPos, t_zPos) };
-
-    if (m_tiles[tileIndex]->GetRegion() != 0)
+    if (t_startTile.GetRegion() != NO_REGION)
     {
         return;
     }
@@ -362,7 +350,7 @@ void sg::city::map::Map::DepthFirstSearch(const int t_xPos, const int t_zPos, co
 
     for (auto tileType : m_tileTypes)
     {
-        if (tileType == m_tiles[tileIndex]->GetType())
+        if (tileType == t_startTile.GetType())
         {
             found = true;
             break;
@@ -374,14 +362,17 @@ void sg::city::map::Map::DepthFirstSearch(const int t_xPos, const int t_zPos, co
         return;
     }
 
-    m_tiles[tileIndex]->SetRegion(t_region);
+    t_startTile.SetRegion(t_region);
 
     // changing the color needs also a Vbo update
-    m_tiles[tileIndex]->SetColor(static_cast<glm::vec3>(m_randomColors[t_region - 1]));
-    UpdateMapVboByTileIndex(tileIndex);
+    t_startTile.SetColor(static_cast<glm::vec3>(m_randomColors[t_region - 1]));
+    UpdateMapVboByTileIndex(GetTileIndexByPosition(static_cast<int>(t_startTile.GetMapX()), static_cast<int>(t_startTile.GetMapZ())));
 
-    DepthFirstSearch(t_xPos - 1, t_zPos, t_region);
-    DepthFirstSearch(t_xPos + 1, t_zPos, t_region);
-    DepthFirstSearch(t_xPos, t_zPos + 1, t_region);
-    DepthFirstSearch(t_xPos, t_zPos - 1, t_region);
+    for (auto* neighbour : t_startTile.GetNeighbours())
+    {
+        if (neighbour)
+        {
+            DepthSearch(*neighbour, t_region);
+        }
+    }
 }
