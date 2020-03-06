@@ -36,6 +36,8 @@ public:
 
     using RoadNetworkSharedPtr = std::shared_ptr<sg::city::map::RoadNetwork>;
 
+    using AstarUniquePtr = std::unique_ptr<sg::city::map::Astar>;
+
     //-------------------------------------------------
     // Ctors. / Dtor.
     //-------------------------------------------------
@@ -78,6 +80,8 @@ private:
     RoadNetworkSharedPtr m_roadNetwork;
 
     sg::city::map::Map::TileType m_currentTileType{ sg::city::map::Map::TileType::TRAFFIC_NETWORK };
+
+    AstarUniquePtr m_astar;
 
     //-------------------------------------------------
     // Helper

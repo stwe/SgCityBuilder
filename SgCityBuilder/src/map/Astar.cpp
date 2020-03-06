@@ -126,7 +126,7 @@ void sg::city::map::Astar::CreateNodes()
             auto* node{ new Node };
             node->mapX = static_cast<float>(x);
             node->mapZ = static_cast<float>(z);
-            node->obstacle = false;
+            node->obstacle = false; // todo
             node->parent = nullptr;
             node->visited = false;
             m_nodes.push_back(node);

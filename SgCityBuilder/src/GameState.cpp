@@ -3,6 +3,7 @@
 #include "renderer/RoadNetworkRenderer.h"
 #include "map/RoadNetwork.h"
 #include "map/Tile.h"
+#include "map/Astar.h"
 #include "ecs/Components.h"
 #include "input/MousePicker.h"
 
@@ -46,12 +47,40 @@ bool GameState::Input()
 
         if (m_mapPoint.x >= 0.0)
         {
+            //SG_OGL_LOG_DEBUG("Map Point x: {}, z: {}", m_mapPoint.x, m_mapPoint.z);
+
             m_map->ChangeTileTypeOnPosition(m_mapPoint, m_currentTileType);
 
             if (m_currentTileType == sg::city::map::Map::TileType::TRAFFIC_NETWORK)
             {
                 m_roadNetwork->StoreRoadOnPosition(m_mapPoint);
             }
+
+            /*
+            const auto& tile{ m_map->GetTileByPosition(m_mapPoint) };
+
+            if (m_currentTileType == sg::city::map::Map::TileType::RESIDENTIAL)
+            {
+                GetApplicationContext()->GetEntityFactory().CreateModelEntity(
+                    "res/model/H1/h1.obj",
+                    glm::vec3(tile.GetMapX() + 0.5f, 2.4f, -tile.GetMapZ() + -0.45f),
+                    glm::vec3(0.0f),
+                    glm::vec3(1.0f / 152.0f),
+                    false
+                );
+            }
+
+            if (m_currentTileType == sg::city::map::Map::TileType::COMMERCIAL)
+            {
+                GetApplicationContext()->GetEntityFactory().CreateModelEntity(
+                    "res/model/Tree_02/tree02.obj",
+                    glm::vec3(tile.GetMapX() + 0.5f, 0.0f, -tile.GetMapZ() + -0.5f),
+                    glm::vec3(0.0f, 0.0f, 0.0f),
+                    glm::vec3(1.0f / 2.0f),
+                    false
+                );
+            }
+            */
 
             m_map->FindConnectedRegions();
         }
@@ -106,14 +135,63 @@ void GameState::Init()
 
     m_roadNetwork = std::make_shared<sg::city::map::RoadNetwork>(m_map.get());
 
+    m_astar = std::make_unique<sg::city::map::Astar>(m_map.get());
+
     CreateMapEntity();
     CreateRoadNetworkEntity();
+
+    GetApplicationContext()->GetEntityFactory().CreateModelEntity(
+        "res/model/Plane1/plane1.obj",
+        glm::vec3(0.65f, 0.1f, -0.35f),
+        glm::vec3(0.0f),
+        glm::vec3(1.0f / 16.0f),
+        false
+    );
 
     m_mousePicker = std::make_unique<sg::city::input::MousePicker>(m_scene.get(), m_map);
 
     m_mapRenderer = std::make_unique<sg::city::renderer::MapRenderer>(m_scene.get());
     m_roadNetworkRenderer = std::make_unique<sg::city::renderer::RoadNetworkRenderer>(m_scene.get());
     m_forwardRenderer = std::make_unique<sg::ogl::ecs::system::ForwardRenderSystem>(m_scene.get());
+
+    m_map->ChangeTileTypeOnPosition(glm::vec3(0.0f, 0.0f, 0.0f), sg::city::map::Map::TileType::TRAFFIC_NETWORK);
+    m_roadNetwork->StoreRoadOnPosition(glm::vec3(0.0f, 0.0f, 0.0f));
+
+    m_map->ChangeTileTypeOnPosition(glm::vec3(0.0f, 0.0f, 1.0f), sg::city::map::Map::TileType::TRAFFIC_NETWORK);
+    m_roadNetwork->StoreRoadOnPosition(glm::vec3(0.0f, 0.0f, 1.0f));
+
+    m_map->ChangeTileTypeOnPosition(glm::vec3(0.0f, 0.0f, 2.0f), sg::city::map::Map::TileType::TRAFFIC_NETWORK);
+    m_roadNetwork->StoreRoadOnPosition(glm::vec3(0.0f, 0.0f, 2.0f));
+
+    m_map->ChangeTileTypeOnPosition(glm::vec3(0.0f, 0.0f, 3.0f), sg::city::map::Map::TileType::TRAFFIC_NETWORK);
+    m_roadNetwork->StoreRoadOnPosition(glm::vec3(0.0f, 0.0f, 3.0f));
+
+    m_map->ChangeTileTypeOnPosition(glm::vec3(1.0f, 0.0f, 3.0f), sg::city::map::Map::TileType::TRAFFIC_NETWORK);
+    m_roadNetwork->StoreRoadOnPosition(glm::vec3(1.0f, 0.0f, 3.0f));
+
+    m_map->ChangeTileTypeOnPosition(glm::vec3(2.0f, 0.0f, 3.0f), sg::city::map::Map::TileType::TRAFFIC_NETWORK);
+    m_roadNetwork->StoreRoadOnPosition(glm::vec3(2.0f, 0.0f, 3.0f));
+
+    m_map->ChangeTileTypeOnPosition(glm::vec3(3.0f, 0.0f, 3.0f), sg::city::map::Map::TileType::TRAFFIC_NETWORK);
+    m_roadNetwork->StoreRoadOnPosition(glm::vec3(3.0f, 0.0f, 3.0f));
+
+    m_map->ChangeTileTypeOnPosition(glm::vec3(3.0f, 0.0f, 2.0f), sg::city::map::Map::TileType::TRAFFIC_NETWORK);
+    m_roadNetwork->StoreRoadOnPosition(glm::vec3(3.0f, 0.0f, 2.0f));
+
+    m_map->ChangeTileTypeOnPosition(glm::vec3(3.0f, 0.0f, 1.0f), sg::city::map::Map::TileType::TRAFFIC_NETWORK);
+    m_roadNetwork->StoreRoadOnPosition(glm::vec3(3.0f, 0.0f, 1.0f));
+
+    m_map->ChangeTileTypeOnPosition(glm::vec3(3.0f, 0.0f, 0.0f), sg::city::map::Map::TileType::TRAFFIC_NETWORK);
+    m_roadNetwork->StoreRoadOnPosition(glm::vec3(3.0f, 0.0f, 0.0f));
+
+    m_map->ChangeTileTypeOnPosition(glm::vec3(1.0f, 0.0f, 0.0f), sg::city::map::Map::TileType::TRAFFIC_NETWORK);
+    m_roadNetwork->StoreRoadOnPosition(glm::vec3(1.0f, 0.0f, 0.0f));
+
+    m_map->ChangeTileTypeOnPosition(glm::vec3(2.0f, 0.0f, 0.0f), sg::city::map::Map::TileType::TRAFFIC_NETWORK);
+    m_roadNetwork->StoreRoadOnPosition(glm::vec3(2.0f, 0.0f, 0.0f));
+
+    // Find path 0,0 --> 3,3
+    m_astar->FindPath(0, m_map->GetTileIndexByPosition(3, 3));
 }
 
 void GameState::CreateMapEntity()
