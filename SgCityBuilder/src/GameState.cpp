@@ -92,6 +92,7 @@ bool GameState::Input()
 bool GameState::Update(const double t_dt)
 {
     m_scene->GetCurrentCamera().Update(t_dt);
+    m_roadNetwork->UpdateDirections(); // todo: do this only when necessary
 
     return true;
 }
@@ -154,6 +155,7 @@ void GameState::Init()
     m_roadNetworkRenderer = std::make_unique<sg::city::renderer::RoadNetworkRenderer>(m_scene.get());
     m_forwardRenderer = std::make_unique<sg::ogl::ecs::system::ForwardRenderSystem>(m_scene.get());
 
+    /*
     m_map->ChangeTileTypeOnPosition(glm::vec3(0.0f, 0.0f, 0.0f), sg::city::map::Map::TileType::TRAFFIC_NETWORK);
     m_roadNetwork->StoreRoadOnPosition(glm::vec3(0.0f, 0.0f, 0.0f));
 
@@ -192,6 +194,7 @@ void GameState::Init()
 
     // Find path 0,0 --> 3,3
     m_astar->FindPath(0, m_map->GetTileIndexByPosition(3, 3));
+    */
 }
 
 void GameState::CreateMapEntity()

@@ -41,22 +41,19 @@ uint32_t sg::city::map::RoadNetwork::GetTextureId(const Texture t_texture) const
 
 void sg::city::map::RoadNetwork::StoreRoadOnPosition(const glm::vec3& t_mapPoint)
 {
-    // get Tile index
+    // get Tile index by given map point
     const auto tileIndex{ m_map->GetTileIndexByPosition(t_mapPoint) };
 
-    // checks whether the Tile is already a Road and in the Vbo
+    // checks whether the Tile is already a stored as a Road
     if (m_lookupTable[tileIndex] > 0)
     {
         return;
     }
 
-    // get Tile
-    auto& tile{ m_map->GetTileByIndex(tileIndex) };
+    // get the vertices of the Tile and make a !copy!
+    auto vertices{ m_map->GetTileByIndex(tileIndex).GetVerticesContainer() };
 
-    // get vertices of the Tile and make a copy
-    auto vertices{ tile.GetVerticesContainer() };
-
-    // we use the same vertices of the tile, but just a little bit higher
+    // we use the same vertices of the tile, but just a little bit higher (y = 0.001f)
     vertices[1] = 0.001f;
     vertices[13] = 0.001f;
     vertices[25] = 0.001f;
@@ -64,8 +61,8 @@ void sg::city::map::RoadNetwork::StoreRoadOnPosition(const glm::vec3& t_mapPoint
     vertices[49] = 0.001f;
     vertices[61] = 0.001f;
 
-    // get the right texture
-    const auto texture{ static_cast<float>(GetTexture(tile)) };
+    // set a default texture
+    const auto texture{ static_cast<float>(Texture::WO) };
     vertices[9] = texture;
     vertices[21] = texture;
     vertices[33] = texture;
@@ -73,25 +70,53 @@ void sg::city::map::RoadNetwork::StoreRoadOnPosition(const glm::vec3& t_mapPoint
     vertices[57] = texture;
     vertices[69] = texture;
 
-    // insert vertices at the end
+    // insert the Tile vertices at the end of the container with all vertices
     m_vertices.insert(m_vertices.end(), vertices.begin(), vertices.end());
 
-    // calculate the Tile number in m_vertices
+    // calculate the number of Tiles in m_vertices
     const auto nrTiles{ static_cast<int>(m_vertices.size()) / Tile::FLOATS_PER_TILE };
 
-    // use Tile number to store where the road is in the Vbo
+    // use the number of Tiles as offset
     m_lookupTable[tileIndex] = nrTiles;
-
-    // update Vbo
-    ogl::buffer::Vbo::BindVbo(m_vboId);
-    glBufferSubData(GL_ARRAY_BUFFER, 0, nrTiles * Tile::SIZE_IN_BYTES_PER_TILE, m_vertices.data());
-    ogl::buffer::Vbo::UnbindVbo();
 
     // update draw count
     m_roadNetworkMesh->GetVao().SetDrawCount(nrTiles * Tile::VERTICES_PER_TILE);
+}
 
-    // update neighbours
-    UpdateNeighbours(tile);
+//-------------------------------------------------
+// Update
+//-------------------------------------------------
+
+void sg::city::map::RoadNetwork::UpdateDirections()
+{
+    auto tileIndex{ 0 };
+    for (auto positionInVbo : m_lookupTable)
+    {
+        if (positionInVbo == NO_ROAD)
+        {
+            tileIndex++;
+            continue; // skip entry
+        }
+
+        // get the Tile
+        auto& tile{ m_map->GetTileByIndex(tileIndex) };
+
+        // determine the texture depending on the road direction and the neighbors
+        const auto texture{ static_cast<float>(GetTexture(tile)) };
+
+        // update texture information
+        const auto offset{ (positionInVbo - 1) * Tile::FLOATS_PER_TILE };
+        m_vertices[static_cast<size_t>(offset) + 9] = texture;
+        m_vertices[static_cast<size_t>(offset) + 21] = texture;
+        m_vertices[static_cast<size_t>(offset) + 33] = texture;
+        m_vertices[static_cast<size_t>(offset) + 45] = texture;
+        m_vertices[static_cast<size_t>(offset) + 57] = texture;
+        m_vertices[static_cast<size_t>(offset) + 69] = texture;
+
+        tileIndex++;
+    }
+
+    UpdateVbo();
 }
 
 //-------------------------------------------------
@@ -131,9 +156,9 @@ void sg::city::map::RoadNetwork::Init()
     m_textures.emplace(Texture::ALL, m_map->GetScene()->GetApplicationContext()->GetTextureManager().GetTextureIdFromPath("res/texture/road/all.png"));
 
     // Every Tile can be a Road. The lookup table stores the position of the Tile in the RoadNetwork Vbo.
-    // The default value -1 means that the Tile is not a Road and is not in the Vbo.
+    // The default value -1 (NO_ROAD) means that the Tile is not a Road and is not in the Vbo.
     const auto lookupTableSize(m_map->GetMapSize() * m_map->GetMapSize());
-    m_lookupTable.resize(lookupTableSize, -1);
+    m_lookupTable.resize(lookupTableSize, NO_ROAD);
 }
 
 sg::city::map::RoadNetwork::Texture sg::city::map::RoadNetwork::GetTexture(const Tile& t_tile)
@@ -147,7 +172,6 @@ sg::city::map::RoadNetwork::Texture sg::city::map::RoadNetwork::GetTexture(const
         if (neighbours[static_cast<int>(Tile::Directions::NORTH)]->GetType() == Map::TileType::TRAFFIC_NETWORK)
         {
             roadNeighbours = NORTH;
-            SG_OGL_LOG_DEBUG("Nachbar im Norden +1 = {}", roadNeighbours);
         }
     }
 
@@ -156,7 +180,6 @@ sg::city::map::RoadNetwork::Texture sg::city::map::RoadNetwork::GetTexture(const
         if (neighbours[static_cast<int>(Tile::Directions::EAST)]->GetType() == Map::TileType::TRAFFIC_NETWORK)
         {
             roadNeighbours |= EAST;
-            SG_OGL_LOG_DEBUG("Nachbar im Osten +2 = {}", roadNeighbours);
         }
     }
 
@@ -165,7 +188,6 @@ sg::city::map::RoadNetwork::Texture sg::city::map::RoadNetwork::GetTexture(const
         if (neighbours[static_cast<int>(Tile::Directions::SOUTH)]->GetType() == Map::TileType::TRAFFIC_NETWORK)
         {
             roadNeighbours |= SOUTH;
-            SG_OGL_LOG_DEBUG("Nachbar im Sueden +4 = {}", roadNeighbours);
         }
     }
 
@@ -174,11 +196,8 @@ sg::city::map::RoadNetwork::Texture sg::city::map::RoadNetwork::GetTexture(const
         if (neighbours[static_cast<int>(Tile::Directions::WEST)]->GetType() == Map::TileType::TRAFFIC_NETWORK)
         {
             roadNeighbours |= WEST;
-            SG_OGL_LOG_DEBUG("Nachbar im Westen +8 = {}", roadNeighbours);
         }
     }
-
-    SG_OGL_LOG_DEBUG("Nachbarn gesamt {}", roadNeighbours);
 
     Texture texture;
     switch (roadNeighbours)
@@ -217,60 +236,16 @@ sg::city::map::RoadNetwork::Texture sg::city::map::RoadNetwork::GetTexture(const
     return texture;
 }
 
-void sg::city::map::RoadNetwork::UpdateNeighbours(const Tile& t_tile)
+void sg::city::map::RoadNetwork::UpdateVbo()
 {
-    auto neighbours{ t_tile.GetNeighbours() };
+    // calculate the number of Tiles in m_vertices
+    const auto nrTiles{ static_cast<int>(m_vertices.size()) / Tile::FLOATS_PER_TILE };
 
-    if (neighbours[static_cast<int>(Tile::Directions::NORTH)])
+    // update Vbo
+    if (nrTiles > 0)
     {
-        if (neighbours[static_cast<int>(Tile::Directions::NORTH)]->GetType() == Map::TileType::TRAFFIC_NETWORK)
-        {
-            UpdateExistingTexture(*neighbours[static_cast<int>(Tile::Directions::NORTH)]);
-        }
+        ogl::buffer::Vbo::BindVbo(m_vboId);
+        glBufferSubData(GL_ARRAY_BUFFER, 0, nrTiles * Tile::SIZE_IN_BYTES_PER_TILE, m_vertices.data());
+        ogl::buffer::Vbo::UnbindVbo();
     }
-
-    if (neighbours[static_cast<int>(Tile::Directions::EAST)])
-    {
-        if (neighbours[static_cast<int>(Tile::Directions::EAST)]->GetType() == Map::TileType::TRAFFIC_NETWORK)
-        {
-            UpdateExistingTexture(*neighbours[static_cast<int>(Tile::Directions::EAST)]);
-        }
-    }
-
-    if (neighbours[static_cast<int>(Tile::Directions::SOUTH)])
-    {
-        if (neighbours[static_cast<int>(Tile::Directions::SOUTH)]->GetType() == Map::TileType::TRAFFIC_NETWORK)
-        {
-            UpdateExistingTexture(*neighbours[static_cast<int>(Tile::Directions::SOUTH)]);
-        }
-    }
-
-    if (neighbours[static_cast<int>(Tile::Directions::WEST)])
-    {
-        if (neighbours[static_cast<int>(Tile::Directions::WEST)]->GetType() == Map::TileType::TRAFFIC_NETWORK)
-        {
-            UpdateExistingTexture(*neighbours[static_cast<int>(Tile::Directions::WEST)]);
-        }
-    }
-}
-
-void sg::city::map::RoadNetwork::UpdateExistingTexture(const Tile& t_tile)
-{
-    // get the right texture
-    const auto texture{ static_cast<float>(GetTexture(t_tile)) };
-
-    // get Tile index
-    const auto tileIndex{ m_map->GetTileIndexByPosition(static_cast<int>(t_tile.GetMapX()), static_cast<int>(t_tile.GetMapZ())) };
-
-    // get the position in the Vbo
-    const auto lookupIndex{ m_lookupTable[tileIndex] - 1 };
-
-    // update texture
-    const auto offset{ lookupIndex * Tile::FLOATS_PER_TILE };
-    m_vertices[offset + 9] = texture;
-    m_vertices[offset + 21] = texture;
-    m_vertices[offset + 33] = texture;
-    m_vertices[offset + 45] = texture;
-    m_vertices[offset + 57] = texture;
-    m_vertices[offset + 69] = texture;
 }

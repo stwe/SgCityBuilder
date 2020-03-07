@@ -37,6 +37,8 @@ namespace sg::city::map
         using TileIndexContainer = std::vector<int>;
         using MeshUniquePtr = std::unique_ptr<ogl::resource::Mesh>;
 
+        static constexpr auto NO_ROAD{ -1 };
+
         //-------------------------------------------------
         // Ctors. / Dtor.
         //-------------------------------------------------
@@ -66,6 +68,12 @@ namespace sg::city::map
         //-------------------------------------------------
 
         void StoreRoadOnPosition(const glm::vec3& t_mapPoint);
+
+        //-------------------------------------------------
+        // Update
+        //-------------------------------------------------
+
+        void UpdateDirections();
 
     protected:
 
@@ -118,16 +126,6 @@ namespace sg::city::map
          */
         static Texture GetTexture(const Tile& t_tile);
 
-        /**
-         * @brief Calls UpdateExistingTexture() for Tile's neighbors to set the correct texture.
-         * @param t_tile The tile for which the neighbors are to be determined.
-         */
-        void UpdateNeighbours(const Tile& t_tile);
-
-        /**
-         * @brief Changes the texture for a Tile that is already in the Vbo.
-         * @param t_tile Tile, which is already in the Vbo.
-         */
-        void UpdateExistingTexture(const Tile& t_tile);
+        void UpdateVbo();
     };
 }
