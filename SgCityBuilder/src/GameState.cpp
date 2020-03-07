@@ -49,11 +49,13 @@ bool GameState::Input()
         {
             //SG_OGL_LOG_DEBUG("Map Point x: {}, z: {}", m_mapPoint.x, m_mapPoint.z);
 
-            m_map->ChangeTileTypeOnPosition(m_mapPoint, m_currentTileType);
-
             if (m_currentTileType == sg::city::map::Map::TileType::TRAFFIC_NETWORK)
             {
                 m_roadNetwork->StoreRoadOnPosition(m_mapPoint);
+            }
+            else
+            {
+                m_map->ChangeTileTypeOnPosition(m_mapPoint, m_currentTileType);
             }
 
             /*
@@ -155,46 +157,10 @@ void GameState::Init()
     m_roadNetworkRenderer = std::make_unique<sg::city::renderer::RoadNetworkRenderer>(m_scene.get());
     m_forwardRenderer = std::make_unique<sg::ogl::ecs::system::ForwardRenderSystem>(m_scene.get());
 
-    /*
-    m_map->ChangeTileTypeOnPosition(glm::vec3(0.0f, 0.0f, 0.0f), sg::city::map::Map::TileType::TRAFFIC_NETWORK);
-    m_roadNetwork->StoreRoadOnPosition(glm::vec3(0.0f, 0.0f, 0.0f));
-
-    m_map->ChangeTileTypeOnPosition(glm::vec3(0.0f, 0.0f, 1.0f), sg::city::map::Map::TileType::TRAFFIC_NETWORK);
-    m_roadNetwork->StoreRoadOnPosition(glm::vec3(0.0f, 0.0f, 1.0f));
-
-    m_map->ChangeTileTypeOnPosition(glm::vec3(0.0f, 0.0f, 2.0f), sg::city::map::Map::TileType::TRAFFIC_NETWORK);
-    m_roadNetwork->StoreRoadOnPosition(glm::vec3(0.0f, 0.0f, 2.0f));
-
-    m_map->ChangeTileTypeOnPosition(glm::vec3(0.0f, 0.0f, 3.0f), sg::city::map::Map::TileType::TRAFFIC_NETWORK);
-    m_roadNetwork->StoreRoadOnPosition(glm::vec3(0.0f, 0.0f, 3.0f));
-
-    m_map->ChangeTileTypeOnPosition(glm::vec3(1.0f, 0.0f, 3.0f), sg::city::map::Map::TileType::TRAFFIC_NETWORK);
-    m_roadNetwork->StoreRoadOnPosition(glm::vec3(1.0f, 0.0f, 3.0f));
-
-    m_map->ChangeTileTypeOnPosition(glm::vec3(2.0f, 0.0f, 3.0f), sg::city::map::Map::TileType::TRAFFIC_NETWORK);
-    m_roadNetwork->StoreRoadOnPosition(glm::vec3(2.0f, 0.0f, 3.0f));
-
-    m_map->ChangeTileTypeOnPosition(glm::vec3(3.0f, 0.0f, 3.0f), sg::city::map::Map::TileType::TRAFFIC_NETWORK);
-    m_roadNetwork->StoreRoadOnPosition(glm::vec3(3.0f, 0.0f, 3.0f));
-
-    m_map->ChangeTileTypeOnPosition(glm::vec3(3.0f, 0.0f, 2.0f), sg::city::map::Map::TileType::TRAFFIC_NETWORK);
-    m_roadNetwork->StoreRoadOnPosition(glm::vec3(3.0f, 0.0f, 2.0f));
-
-    m_map->ChangeTileTypeOnPosition(glm::vec3(3.0f, 0.0f, 1.0f), sg::city::map::Map::TileType::TRAFFIC_NETWORK);
-    m_roadNetwork->StoreRoadOnPosition(glm::vec3(3.0f, 0.0f, 1.0f));
-
-    m_map->ChangeTileTypeOnPosition(glm::vec3(3.0f, 0.0f, 0.0f), sg::city::map::Map::TileType::TRAFFIC_NETWORK);
-    m_roadNetwork->StoreRoadOnPosition(glm::vec3(3.0f, 0.0f, 0.0f));
-
-    m_map->ChangeTileTypeOnPosition(glm::vec3(1.0f, 0.0f, 0.0f), sg::city::map::Map::TileType::TRAFFIC_NETWORK);
-    m_roadNetwork->StoreRoadOnPosition(glm::vec3(1.0f, 0.0f, 0.0f));
-
-    m_map->ChangeTileTypeOnPosition(glm::vec3(2.0f, 0.0f, 0.0f), sg::city::map::Map::TileType::TRAFFIC_NETWORK);
-    m_roadNetwork->StoreRoadOnPosition(glm::vec3(2.0f, 0.0f, 0.0f));
+    CreateRoads();
 
     // Find path 0,0 --> 3,3
-    m_astar->FindPath(0, m_map->GetTileIndexByPosition(3, 3));
-    */
+    //m_astar->FindPath(0, m_map->GetTileIndexByPosition(3, 3));
 }
 
 void GameState::CreateMapEntity()
@@ -229,6 +195,22 @@ void GameState::CreateRoadNetworkEntity()
         m_map->rotation,
         m_map->scale
     );
+}
+
+void GameState::CreateRoads() const
+{
+    m_roadNetwork->StoreRoadOnPosition(0.0f, 0.0f);
+    m_roadNetwork->StoreRoadOnPosition(0.0f, 1.0f);
+    m_roadNetwork->StoreRoadOnPosition(0.0f, 2.0f);
+    m_roadNetwork->StoreRoadOnPosition(0.0f, 3.0f);
+    m_roadNetwork->StoreRoadOnPosition(1.0f, 3.0f);
+    m_roadNetwork->StoreRoadOnPosition(2.0f, 3.0f);
+    m_roadNetwork->StoreRoadOnPosition(3.0f, 3.0f);
+    m_roadNetwork->StoreRoadOnPosition(3.0f, 2.0f);
+    m_roadNetwork->StoreRoadOnPosition(3.0f, 1.0f);
+    m_roadNetwork->StoreRoadOnPosition(3.0f, 0.0f);
+    m_roadNetwork->StoreRoadOnPosition(1.0f, 0.0f);
+    m_roadNetwork->StoreRoadOnPosition(2.0f, 0.0f);
 }
 
 //-------------------------------------------------

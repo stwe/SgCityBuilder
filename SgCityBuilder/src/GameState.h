@@ -90,6 +90,7 @@ private:
     void Init();
     void CreateMapEntity();
     void CreateRoadNetworkEntity();
+    void CreateRoads() const;
 
     //-------------------------------------------------
     // ImGui

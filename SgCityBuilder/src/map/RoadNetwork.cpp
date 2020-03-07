@@ -50,6 +50,9 @@ void sg::city::map::RoadNetwork::StoreRoadOnPosition(const glm::vec3& t_mapPoint
         return;
     }
 
+    // update TileType
+    m_map->ChangeTileTypeOnPosition(t_mapPoint, Map::TileType::TRAFFIC_NETWORK);
+
     // get the vertices of the Tile and make a !copy!
     auto vertices{ m_map->GetTileByIndex(tileIndex).GetVerticesContainer() };
 
@@ -81,6 +84,11 @@ void sg::city::map::RoadNetwork::StoreRoadOnPosition(const glm::vec3& t_mapPoint
 
     // update draw count
     m_roadNetworkMesh->GetVao().SetDrawCount(nrTiles * Tile::VERTICES_PER_TILE);
+}
+
+void sg::city::map::RoadNetwork::StoreRoadOnPosition(const float t_posX, const float t_posZ)
+{
+    StoreRoadOnPosition(glm::vec3(t_posX, 0.0f, t_posZ));
 }
 
 //-------------------------------------------------
