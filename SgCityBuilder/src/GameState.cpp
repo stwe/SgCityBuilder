@@ -122,9 +122,9 @@ void GameState::Init()
 
     m_firstPersonCamera = std::make_shared<sg::ogl::camera::FirstPersonCamera>(
         GetApplicationContext(),
-        glm::vec3(4.0f, 3.0f, 4.0f),
-        -90.0f, // todo
-        -6.0f   // todo: -90 not allowed (clamp)
+        glm::vec3(-2.5f, 3.0f, -2.5f),
+        -0.1f,
+        -35.0f
     );
     m_firstPersonCamera->SetCameraVelocity(4.0f);
     m_firstPersonCamera->SetMouseSensitivity(0.05f);
@@ -145,13 +145,13 @@ void GameState::Init()
     CreateMapEntity();
     CreateRoadNetworkEntity();
 
-    auto entity = GetApplicationContext()->GetEntityFactory().CreateModelEntity(
+    const auto entity{ GetApplicationContext()->GetEntityFactory().CreateModelEntity(
         "res/model/Plane1/plane1.obj",
-        glm::vec3(0.65f, 0.1f, -0.35f),
+        glm::vec3(0.5f, 0.1f, -0.5f),
         glm::vec3(0.0f),
         glm::vec3(1.0f / 16.0f),
         false
-    );
+    ) };
 
     m_mousePicker = std::make_unique<sg::city::input::MousePicker>(m_scene.get(), m_map);
 
@@ -163,7 +163,8 @@ void GameState::Init()
 
     // Find path 0,0 --> 3,3
     auto path{ m_astar->FindPath(0, m_map->GetTileIndexByPosition(3, 3)) };
-    GetApplicationContext()->registry.assign<sg::city::ecs::PathComponent>(entity, path, 0.65f, -0.35f);
+    GetApplicationContext()->registry.assign<sg::city::ecs::PathComponent>(entity, path, 0.15f, 0.15f);
+    GetApplicationContext()->registry.assign<sg::city::ecs::MapComponent>(entity, m_map);
 
     m_moveSystem = std::make_unique<sg::city::ecs::MoveSystem>(m_scene.get());
 }

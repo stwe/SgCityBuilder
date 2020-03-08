@@ -1,8 +1,6 @@
 #pragma once
 
-#include "map/Map.h"
 #include "shader/MapShader.h"
-#include "ecs/Components.h"
 
 namespace sg::city::renderer
 {
@@ -33,7 +31,7 @@ namespace sg::city::renderer
 
             auto view{ m_scene->GetApplicationContext()->registry.view<
                 ecs::MapComponent,
-                ogl::ecs::component::TransformComponent>()
+                ogl::ecs::component::TransformComponent>(entt::exclude<ecs::PathComponent>)
             };
 
             for (auto entity : view)

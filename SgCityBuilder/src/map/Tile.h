@@ -59,6 +59,12 @@ namespace sg::city::map
 
         [[nodiscard]] int GetRegion() const;
 
+        /**
+         * @brief Returns the center of the Tile as world position.
+         * @return glm::vec3
+         */
+        [[nodiscard]] glm::vec3 GetCenter() const;
+
         //-------------------------------------------------
         // Setter
         //-------------------------------------------------

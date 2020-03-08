@@ -60,6 +60,15 @@ int sg::city::map::Tile::GetRegion() const
     return m_region;
 }
 
+glm::vec3 sg::city::map::Tile::GetCenter() const
+{
+    return glm::vec3(
+        (m_vertices[0] + m_vertices[12]) * 0.5f,
+        0.0f,
+        (m_vertices[2] + m_vertices[26]) * 0.5f
+        );
+}
+
 //-------------------------------------------------
 // Setter
 //-------------------------------------------------

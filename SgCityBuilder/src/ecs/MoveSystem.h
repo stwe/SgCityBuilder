@@ -21,13 +21,15 @@ namespace sg::city::ecs
             auto view{ m_scene->GetApplicationContext()->registry.view<
                 ogl::ecs::component::ModelComponent,
                 ogl::ecs::component::TransformComponent,
-                PathComponent>()
+                PathComponent,
+                MapComponent>()
             };
 
             for (auto entity : view)
             {
                 auto& transformComponent{ view.get<ogl::ecs::component::TransformComponent>(entity) };
                 auto& pathComponent{ view.get<PathComponent>(entity) };
+                auto& mapComponent{ view.get<MapComponent>(entity) };
 
                 // no waypoints
                 if (pathComponent.waypoints.empty())
@@ -38,15 +40,25 @@ namespace sg::city::ecs
                 // get the next waypoint
                 auto& waypoint{ pathComponent.waypoints.top() };
 
-                // calculate the distance from the current position to the waypoint
-                const auto distance{ length(waypoint - glm::vec2(transformComponent.position.x, transformComponent.position.z)) };
+                // get target Tile of the waypoint
+                auto& targetTile{ mapComponent.map->GetTileByPosition(glm::vec3(waypoint.x, 0.0f, waypoint.y)) };
+
+                // get center of the Tile as target position
+                auto targetTilePosition{ targetTile.GetCenter() };
+
+                // add an offset if the object should not be in the middle of the Tile
+                targetTilePosition.x += pathComponent.offsetX;
+                targetTilePosition.z += pathComponent.offsetZ;
+
+                // calculate the distance from the current position to the targe position
+                const auto distance{ length(glm::vec2(targetTilePosition.x, targetTilePosition.z) - glm::vec2(transformComponent.position.x, transformComponent.position.z)) };
 
                 // we are almost there...
                 if (abs(distance) < SMALLDIST)
                 {
-                    // use the waypoint as the current position
-                    transformComponent.position.x = waypoint.x;
-                    transformComponent.position.z = waypoint.y;
+                    // use the target position as the current position
+                    transformComponent.position.x = targetTilePosition.x;
+                    transformComponent.position.z = targetTilePosition.z;
 
                     // remove waypoint
                     if (!pathComponent.waypoints.empty())
@@ -56,9 +68,9 @@ namespace sg::city::ecs
                 }
                 else
                 {
-                    // move towards the waypoint
-                    const auto targetX{ waypoint.x - transformComponent.position.x };
-                    const auto targetZ{ waypoint.y - transformComponent.position.z };
+                    // move towards the target
+                    const auto targetX{ targetTilePosition.x - transformComponent.position.x };
+                    const auto targetZ{ targetTilePosition.z - transformComponent.position.z };
 
                     const auto direction{ normalize(glm::vec2(targetX, targetZ)) };
 
