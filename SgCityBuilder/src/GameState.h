@@ -3,6 +3,11 @@
 #include "SgOgl.h"
 #include "map/Map.h"
 
+namespace sg::city::ecs
+{
+    class MoveSystem;
+}
+
 namespace sg::city::map
 {
     class RoadNetwork;
@@ -82,6 +87,8 @@ private:
     sg::city::map::Map::TileType m_currentTileType{ sg::city::map::Map::TileType::TRAFFIC_NETWORK };
 
     AstarUniquePtr m_astar;
+
+    std::unique_ptr<sg::city::ecs::MoveSystem> m_moveSystem;
 
     //-------------------------------------------------
     // Helper

@@ -5,6 +5,7 @@
 #include "map/Tile.h"
 #include "map/Astar.h"
 #include "ecs/Components.h"
+#include "ecs/MoveSystem.h"
 #include "input/MousePicker.h"
 
 //-------------------------------------------------
@@ -95,6 +96,7 @@ bool GameState::Update(const double t_dt)
 {
     m_scene->GetCurrentCamera().Update(t_dt);
     m_roadNetwork->UpdateDirections(); // todo: do this only when necessary
+    m_moveSystem->Update(t_dt);
 
     return true;
 }
@@ -143,7 +145,7 @@ void GameState::Init()
     CreateMapEntity();
     CreateRoadNetworkEntity();
 
-    GetApplicationContext()->GetEntityFactory().CreateModelEntity(
+    auto entity = GetApplicationContext()->GetEntityFactory().CreateModelEntity(
         "res/model/Plane1/plane1.obj",
         glm::vec3(0.65f, 0.1f, -0.35f),
         glm::vec3(0.0f),
@@ -160,7 +162,10 @@ void GameState::Init()
     CreateRoads();
 
     // Find path 0,0 --> 3,3
-    //m_astar->FindPath(0, m_map->GetTileIndexByPosition(3, 3));
+    auto path{ m_astar->FindPath(0, m_map->GetTileIndexByPosition(3, 3)) };
+    GetApplicationContext()->registry.assign<sg::city::ecs::PathComponent>(entity, path, 0.65f, -0.35f);
+
+    m_moveSystem = std::make_unique<sg::city::ecs::MoveSystem>(m_scene.get());
 }
 
 void GameState::CreateMapEntity()

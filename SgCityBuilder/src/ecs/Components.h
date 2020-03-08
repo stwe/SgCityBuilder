@@ -1,6 +1,7 @@
 #pragma once
 
 #include <memory>
+#include <stack>
 
 namespace sg::city::map
 {
@@ -18,5 +19,12 @@ namespace sg::city::ecs
     struct RoadNetworkComponent
     {
         std::shared_ptr<map::RoadNetwork> roadNetwork;
+    };
+
+    struct PathComponent
+    {
+        std::stack<glm::vec2> waypoints;
+        float offsetX{ 0.0f };
+        float offsetZ{ 0.0f };
     };
 }

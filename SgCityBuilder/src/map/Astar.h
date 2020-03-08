@@ -1,6 +1,8 @@
 #pragma once
 
 #include <vector>
+#include <stack>
+#include <glm/vec2.hpp>
 
 namespace sg::city::map
 {
@@ -43,7 +45,7 @@ namespace sg::city::map
         // Find
         //-------------------------------------------------
 
-        void FindPath(int t_startTileIndex, int t_endTileIndex);
+        std::stack<glm::vec2> FindPath(int t_startTileIndex, int t_endTileIndex);
 
     protected:
 

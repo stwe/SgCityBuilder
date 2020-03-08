@@ -17,7 +17,7 @@ sg::city::map::Astar::Astar(Map* t_map, const bool t_diagonalMovement)
 // Find
 //-------------------------------------------------
 
-void sg::city::map::Astar::FindPath(const int t_startTileIndex, const int t_endTileIndex)
+std::stack<glm::vec2> sg::city::map::Astar::FindPath(const int t_startTileIndex, const int t_endTileIndex)
 {
     CreateMarker(t_startTileIndex, t_endTileIndex);
 
@@ -92,17 +92,27 @@ void sg::city::map::Astar::FindPath(const int t_startTileIndex, const int t_endT
         }
     }
 
+    std::stack<glm::vec2> result;
+
+    // todo: store world coordinates (-z values)
     if (m_nodeEnd != nullptr)
     {
         auto* p = m_nodeEnd;
+
+        result.push(glm::vec2(m_nodeEnd->mapX, -m_nodeEnd->mapZ));
+
         while (p->parent != nullptr)
         {
             SG_OGL_LOG_DEBUG("Node x: {}, z: {}", p->mapX, p->mapZ);
 
             // Set next node to this node's parent.
             p = p->parent;
+
+            result.push(glm::vec2(p->mapX, -p->mapZ));
         }
     }
+
+    return result;
 }
 
 //-------------------------------------------------
