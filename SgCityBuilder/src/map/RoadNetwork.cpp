@@ -3,7 +3,6 @@
 #include <resource/Mesh.h>
 #include <resource/TextureManager.h>
 #include "RoadNetwork.h"
-#include "Map.h"
 #include "Tile.h"
 
 //-------------------------------------------------
@@ -86,9 +85,9 @@ void sg::city::map::RoadNetwork::StoreRoadOnPosition(const glm::vec3& t_mapPoint
     m_roadNetworkMesh->GetVao().SetDrawCount(nrTiles * Tile::VERTICES_PER_TILE);
 }
 
-void sg::city::map::RoadNetwork::StoreRoadOnPosition(const float t_posX, const float t_posZ)
+void sg::city::map::RoadNetwork::StoreRoadOnPosition(const int t_mapX, const int t_mapZ)
 {
-    StoreRoadOnPosition(glm::vec3(t_posX, 0.0f, t_posZ));
+    StoreRoadOnPosition(glm::vec3(static_cast<float>(t_mapX), 0.0f, static_cast<float>(t_mapZ)));
 }
 
 //-------------------------------------------------

@@ -1,8 +1,6 @@
 #pragma once
 
-#include "map/RoadNetwork.h"
 #include "shader/RoadNetworkShader.h"
-#include "ecs/Components.h"
 
 namespace sg::city::renderer
 {
@@ -55,24 +53,12 @@ namespace sg::city::renderer
     protected:
         void PrepareRendering() override
         {
-            //ogl::OpenGl::EnableAlphaBlending();
             ogl::OpenGl::EnableFaceCulling();
-
-            //if (modelComponent.showTriangles)
-            {
-                //ogl::OpenGl::EnableWireframeMode();
-            }
         }
 
         void FinishRendering() override
         {
-            //if (modelComponent.showTriangles)
-            {
-                //ogl::OpenGl::DisableWireframeMode();
-            }
-
             ogl::OpenGl::DisableFaceCulling();
-            //ogl::OpenGl::DisableBlending();
         }
 
     private:

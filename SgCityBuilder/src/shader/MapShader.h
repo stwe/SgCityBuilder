@@ -1,5 +1,9 @@
 #pragma once
 
+#include <resource/TextureManager.h>
+#include <ecs/component/Components.h>
+#include <camera/Camera.h>
+#include <Window.h>
 #include "ecs/Components.h"
 
 namespace sg::city::shader

@@ -1,0 +1,157 @@
+#pragma once
+
+#include <memory>
+#include <string>
+#include <stack>
+#include <glm/vec2.hpp>
+
+namespace sg::ogl::scene
+{
+    class Scene;
+}
+
+namespace sg::city::map
+{
+    class Map;
+    class RoadNetwork;
+    class Astar;
+}
+
+namespace sg::city::renderer
+{
+    class MapRenderer;
+    class RoadNetworkRenderer;
+}
+
+namespace sg::city::city
+{
+    class City
+    {
+    public:
+        using MapSharedPtr = std::shared_ptr<map::Map>;
+        using RoadNetworkSharedPtr = std::shared_ptr<map::RoadNetwork>;
+        using AstarUniquePtr = std::unique_ptr<map::Astar>;
+
+        using MapRendererUniquePtr = std::unique_ptr<renderer::MapRenderer>;
+        using RoadNetworkRendererUniquePtr = std::unique_ptr<renderer::RoadNetworkRenderer>;
+
+        using PathPositionContainer = std::stack<glm::vec2>;
+
+        //-------------------------------------------------
+        // Ctors. / Dtor.
+        //-------------------------------------------------
+
+        City(std::string t_name, ogl::scene::Scene* t_scene, int t_mapSize = 128);
+
+        City(const City& t_other) = delete;
+        City(City&& t_other) noexcept = delete;
+        City& operator=(const City& t_other) = delete;
+        City& operator=(City&& t_other) noexcept = delete;
+
+        ~City() noexcept;
+
+        //-------------------------------------------------
+        // Getter
+        //-------------------------------------------------
+
+        [[nodiscard]] const std::string& GetName() const noexcept;
+
+        [[nodiscard]] const map::Map& GetMap() const noexcept;
+        [[nodiscard]] map::Map& GetMap() noexcept;
+        [[nodiscard]] MapSharedPtr GetMapPtr() const;
+
+        [[nodiscard]] const map::RoadNetwork& GetRoadNetwork() const noexcept;
+        [[nodiscard]] map::RoadNetwork& GetRoadNetwork() noexcept;
+        [[nodiscard]] RoadNetworkSharedPtr GetRoadNetworkPtr() const;
+
+        [[nodiscard]] map::Astar& GetAstar() const noexcept;
+
+        [[nodiscard]] int GetDay() const;
+
+        //-------------------------------------------------
+        // Logic
+        //-------------------------------------------------
+
+        void Update(double t_dt);
+        void RenderMap() const;
+        void RenderRoadNetwork() const;
+
+        //-------------------------------------------------
+        // Path
+        //-------------------------------------------------
+
+        PathPositionContainer Path(int t_fromMapX, int t_fromMapZ, int t_toMapX, int t_toMapZ);
+
+    protected:
+
+    private:
+        /**
+         * @brief The name of the City;
+         */
+        std::string m_name;
+
+        /**
+         * @brief The parent Scene object.
+         */
+        ogl::scene::Scene* m_scene{ nullptr };
+
+        /**
+         * @brief The Map of the City holding all Tiles.
+         */
+        MapSharedPtr m_map;
+
+        /**
+         * @brief The Road Network of the City.
+         */
+        RoadNetworkSharedPtr m_roadNetwork;
+
+        /**
+         * @brief Renders the Map.
+         */
+        MapRendererUniquePtr m_mapRenderer;
+
+        /**
+         * @brief Renders the RoadNetwork.
+         */
+        RoadNetworkRendererUniquePtr m_roadNetworkRenderer;
+
+        /**
+         * @brief An Astar instance.
+         */
+        AstarUniquePtr m_astar;
+
+        /**
+         * @brief The real world time (in seconds) since the day updated.
+         */
+        float m_currentTime{ 0.0f };
+
+        /**
+         * @brief The amount of real world time each day should last.
+         */
+        float m_timePerDay{ 1.0f };
+
+        /**
+         * @brief Number of days.
+         */
+        int m_day{ 0 };
+
+        /**
+         * @brief Stores the number of citizens who do not have a home.
+         */
+        float m_populationPool{ 0.0f };
+
+        /**
+         * @brief The total population of the City.
+         *        The sum of all the Tiles populations and the populationPool.
+         */
+        float m_population{ 0.0f };
+
+        //-------------------------------------------------
+        // Init
+        //-------------------------------------------------
+
+        void Init(ogl::scene::Scene* t_scene, int t_mapSize);
+        void CreateMapEntity();
+        void CreateRoadNetworkEntity();
+    };
+}

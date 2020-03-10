@@ -1,5 +1,8 @@
 #pragma once
 
+#include <ecs/system/RenderSystem.h>
+#include <resource/ShaderManager.h>
+#include <resource/Mesh.h>
 #include "shader/MapShader.h"
 
 namespace sg::city::renderer

@@ -1,7 +1,5 @@
 #pragma once
 
-#include "ecs/Components.h"
-
 namespace sg::city::shader
 {
     class RoadNetworkShader : public ogl::resource::ShaderProgram

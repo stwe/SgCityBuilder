@@ -68,7 +68,7 @@ namespace sg::city::map
         //-------------------------------------------------
 
         void StoreRoadOnPosition(const glm::vec3& t_mapPoint);
-        void StoreRoadOnPosition(float t_posX, float t_posZ);
+        void StoreRoadOnPosition(int t_mapX, int t_mapZ);
 
         //-------------------------------------------------
         // Update
