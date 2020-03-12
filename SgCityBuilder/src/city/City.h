@@ -15,6 +15,7 @@ namespace sg::city::map
     class Map;
     class RoadNetwork;
     class Astar;
+    class Tile;
 }
 
 namespace sg::city::renderer
@@ -36,6 +37,10 @@ namespace sg::city::city
         using RoadNetworkRendererUniquePtr = std::unique_ptr<renderer::RoadNetworkRenderer>;
 
         using PathPositionContainer = std::stack<glm::vec2>;
+
+        static constexpr auto BIRTH_RATE{ 0.00055f };
+        static constexpr auto DEATH_RATE{ 0.00023f };
+        static constexpr auto MOVE_POPULATION_RATE{ 4 };
 
         //-------------------------------------------------
         // Ctors. / Dtor.
@@ -66,7 +71,10 @@ namespace sg::city::city
 
         [[nodiscard]] map::Astar& GetAstar() const noexcept;
 
+        [[nodiscard]] float& GetTimePerDay();
         [[nodiscard]] int GetDay() const;
+        [[nodiscard]] float GetPopulationPool() const;
+        [[nodiscard]] float GetPopulation() const;
 
         //-------------------------------------------------
         // Logic
@@ -138,13 +146,13 @@ namespace sg::city::city
         /**
          * @brief Stores the number of citizens who do not have a home.
          */
-        float m_populationPool{ 0.0f };
+        float m_populationPool{ 50.0f };
 
         /**
          * @brief The total population of the City.
          *        The sum of all the Tiles populations and the populationPool.
          */
-        float m_population{ 0.0f };
+        float m_population{ 50.0f };
 
         //-------------------------------------------------
         // Init
@@ -153,5 +161,11 @@ namespace sg::city::city
         void Init(ogl::scene::Scene* t_scene, int t_mapSize);
         void CreateMapEntity();
         void CreateRoadNetworkEntity();
+
+        //-------------------------------------------------
+        // Distribute
+        //-------------------------------------------------
+
+        static void DistributePool(float& t_pool, map::Tile& t_tile, float t_rate = 0.0f);
     };
 }

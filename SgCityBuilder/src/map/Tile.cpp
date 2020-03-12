@@ -1,3 +1,4 @@
+//#include <Log.h>
 #include "Tile.h"
 
 //-------------------------------------------------
@@ -199,6 +200,25 @@ void sg::city::map::Tile::SetType(const Map::TileType t_type)
 void sg::city::map::Tile::SetRegion(const int t_region)
 {
     m_region = t_region;
+}
+
+//-------------------------------------------------
+// Logic
+//-------------------------------------------------
+
+void sg::city::map::Tile::Update() const
+{
+    /*
+    if (m_type == Map::TileType::RESIDENTIAL)
+    {
+        SG_OGL_LOG_INFO("Population: {}", population);
+    }
+
+    if (m_type == Map::TileType::RESIDENTIAL && population >= MAX_POPULATION)
+    {
+        SG_OGL_LOG_INFO("Max population reached.");
+    }
+    */
 }
 
 //-------------------------------------------------

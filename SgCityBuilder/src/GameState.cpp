@@ -280,6 +280,9 @@ void GameState::RenderImGui()
     ImGui::Spacing();
 
     ImGui::Text("Day: %i", m_city->GetDay());
+    ImGui::SliderFloat("Time per day: ", &m_city->GetTimePerDay(), 0.0f, 1.0f, "ratio = %.2f");
+    ImGui::Text("Citizens who do not have a home (Population Pool): %f", m_city->GetPopulationPool());
+    ImGui::Text("Total population: %f", m_city->GetPopulation());
 
     ImGui::End();
 

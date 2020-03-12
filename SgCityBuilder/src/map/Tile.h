@@ -24,8 +24,16 @@ namespace sg::city::map
         static constexpr auto FLOATS_PER_TILE{ FLOATS_PER_VERTEX * VERTICES_PER_TILE }; // = 72 floats
         static constexpr auto SIZE_IN_BYTES_PER_TILE{ FLOATS_PER_TILE * sizeof(float) }; // = 288 bytes
 
+        static constexpr auto MAX_POPULATION{ 50 };
+
         using VertexContainer = std::vector<float>;
         using NeighbourContainer = std::array<Tile*, static_cast<int>(Directions::SIZE)>;
+
+        //-------------------------------------------------
+        // Public member
+        //-------------------------------------------------
+
+        float population{ 0.0 };
 
         //-------------------------------------------------
         // Ctors. / Dtor.
@@ -83,6 +91,12 @@ namespace sg::city::map
         void SetType(Map::TileType t_type);
 
         void SetRegion(int t_region);
+
+        //-------------------------------------------------
+        // Logic
+        //-------------------------------------------------
+
+        void Update() const;
 
         //-------------------------------------------------
         // To string
