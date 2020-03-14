@@ -137,7 +137,7 @@ void sg::city::map::RoadNetwork::UpdateDirections()
         const auto xOffset{ static_cast<float>(column) / TEXTURE_ATLAS_ROWS };
 
         const auto row{ roadType / static_cast<int>(TEXTURE_ATLAS_ROWS) };
-        const auto yOffset{ static_cast<float>(row) / TEXTURE_ATLAS_ROWS };
+        const auto yOffset{ 1.0f - static_cast<float>(row) / TEXTURE_ATLAS_ROWS };
 
         // bl
         m_vertices[static_cast<size_t>(offset) + 10] = (0.0f / TEXTURE_ATLAS_ROWS) + xOffset;
