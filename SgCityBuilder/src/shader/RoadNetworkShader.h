@@ -15,17 +15,8 @@ namespace sg::city::shader
 
             SetUniform("mvpMatrix", mvp);
 
-            SetUniform("roadTexture[0]", 0);
-            SetUniform("roadTexture[1]", 1);
-            SetUniform("roadTexture[2]", 2);
-            SetUniform("roadTexture[3]", 3);
-            SetUniform("roadTexture[4]", 4);
-
-            ogl::resource::TextureManager::BindForReading(roadNetworkComponent.roadNetwork->GetTextureId(map::RoadNetwork::Texture::WO), GL_TEXTURE0);
-            ogl::resource::TextureManager::BindForReading(roadNetworkComponent.roadNetwork->GetTextureId(map::RoadNetwork::Texture::NS), GL_TEXTURE1);
-            ogl::resource::TextureManager::BindForReading(roadNetworkComponent.roadNetwork->GetTextureId(map::RoadNetwork::Texture::NSO), GL_TEXTURE2);
-            ogl::resource::TextureManager::BindForReading(roadNetworkComponent.roadNetwork->GetTextureId(map::RoadNetwork::Texture::NSW), GL_TEXTURE3);
-            ogl::resource::TextureManager::BindForReading(roadNetworkComponent.roadNetwork->GetTextureId(map::RoadNetwork::Texture::ALL), GL_TEXTURE4);
+            SetUniform("roadTextureAtlas", 0);
+            ogl::resource::TextureManager::BindForReading(roadNetworkComponent.roadNetwork->GetRoadTextureAtlasId(), GL_TEXTURE0);
         }
 
         [[nodiscard]] std::string GetFolderName() const override

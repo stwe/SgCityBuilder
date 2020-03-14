@@ -15,6 +15,8 @@ namespace sg::city::map
     class RoadNetwork
     {
     public:
+        static constexpr auto TEXTURE_ATLAS_ROWS{ 4.0f };
+
         enum RoadNeighbours : uint8_t
         {
             NORTH = 1,
@@ -23,17 +25,25 @@ namespace sg::city::map
             WEST  = 8
         };
 
-        enum class Texture
+        /**
+         * @brief The value corresponds to the index in the texture atlas.
+         */
+        enum class RoadType
         {
-            WO,
-            NS,
-            NSO,
-            NSW,
-            ALL
+            ROAD_V = 0,
+            ROAD_H = 1,
+            ROAD_C1 = 4,
+            ROAD_T1 = 5,
+            ROAD_C2 = 6,
+            ROAD_T2 = 8,
+            ROAD_X = 9,
+            ROAD_T3 = 10,
+            ROAD_C3 = 12,
+            ROAD_T4 = 13,
+            ROAD_C4 = 14,
         };
 
         using VertexContainer = std::vector<float>;
-        using TextureContainer = std::map<Texture, uint32_t>;
         using TileIndexContainer = std::vector<int>;
         using MeshUniquePtr = std::unique_ptr<ogl::resource::Mesh>;
 
@@ -61,7 +71,7 @@ namespace sg::city::map
         [[nodiscard]] const ogl::resource::Mesh& GetMesh() const noexcept;
         [[nodiscard]] ogl::resource::Mesh& GetMesh() noexcept;
 
-        [[nodiscard]] uint32_t GetTextureId(Texture t_texture) const;
+        [[nodiscard]] uint32_t GetRoadTextureAtlasId() const;
 
         //-------------------------------------------------
         // Add Road
@@ -100,9 +110,9 @@ namespace sg::city::map
         VertexContainer m_vertices;
 
         /**
-         * @brief Container with the textures for each direction.
+         * @brief The texture Id of the road texture atlas.
          */
-        TextureContainer m_textures;
+        uint32_t m_roadTextureAtlasId{ 0 };
 
         /**
          * @brief Stores the position of the Road Tile in the Vbo.
@@ -121,11 +131,11 @@ namespace sg::city::map
         //-------------------------------------------------
 
         /**
-         * @brief Determines the correct texture for the Tile depending on the neighbors.
-         * @param t_tile The tile for which the texture is to be determined.
-         * @return Texture::WO | Texture::NS | Texture::NSO | Texture::NSW | Texture::ALL
+         * @brief Determines the correct RoadType for the Tile depending on the neighbors.
+         * @param t_tile The tile for which the type is to be determined.
+         * @return A RoadType.
          */
-        static Texture GetTexture(const Tile& t_tile);
+        static RoadType GetRoadType(const Tile& t_tile);
 
         void UpdateVbo();
     };

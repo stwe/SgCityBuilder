@@ -120,9 +120,9 @@ void GameState::Init()
 
     m_firstPersonCamera = std::make_shared<sg::ogl::camera::FirstPersonCamera>(
         GetApplicationContext(),
-        glm::vec3(-2.5f, 3.0f, -2.5f),
-        -0.1f,
-        -35.0f
+        glm::vec3(3.0f, 3.0f, 1.0f),
+        -87.0f,
+        -32.0f
     );
     m_firstPersonCamera->SetCameraVelocity(4.0f);
     m_firstPersonCamera->SetMouseSensitivity(0.05f);
@@ -145,7 +145,7 @@ void GameState::Init()
     m_forwardRenderer = std::make_unique<sg::ogl::ecs::system::ForwardRenderSystem>(m_scene.get());
     m_textRenderer = std::make_unique<sg::ogl::ecs::system::TextRenderSystem>(m_scene.get(), "res/font/bitter/Bitter-Italic.otf");
 
-    CreateExampleRoads();
+    //CreateExampleRoads();
 
     // Find an example path 0,0 --> 3,3
     auto path{ m_city->Path(0, 0, 3, 3) };

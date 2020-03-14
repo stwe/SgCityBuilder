@@ -29,9 +29,9 @@ sg::ogl::resource::Mesh& sg::city::map::RoadNetwork::GetMesh() noexcept
     return *m_roadNetworkMesh;
 }
 
-uint32_t sg::city::map::RoadNetwork::GetTextureId(const Texture t_texture) const
+uint32_t sg::city::map::RoadNetwork::GetRoadTextureAtlasId() const
 {
-    return m_textures.at(t_texture);
+    return m_roadTextureAtlasId;
 }
 
 //-------------------------------------------------
@@ -63,14 +63,33 @@ void sg::city::map::RoadNetwork::StoreRoadOnPosition(const glm::vec3& t_mapPoint
     vertices[49] = 0.001f;
     vertices[61] = 0.001f;
 
-    // set a default texture
-    const auto texture{ static_cast<float>(Texture::WO) };
-    vertices[9] = texture;
-    vertices[21] = texture;
-    vertices[33] = texture;
-    vertices[45] = texture;
-    vertices[57] = texture;
-    vertices[69] = texture;
+    // set a default texture value
+    const auto unused{ 0.0f };
+    vertices[9] = unused;
+    vertices[21] = unused;
+    vertices[33] = unused;
+    vertices[45] = unused;
+    vertices[57] = unused;
+    vertices[69] = unused;
+
+    // set initial uv values
+    vertices[10] /= TEXTURE_ATLAS_ROWS;
+    vertices[11] /= TEXTURE_ATLAS_ROWS;
+
+    vertices[22] /= TEXTURE_ATLAS_ROWS;
+    vertices[23] /= TEXTURE_ATLAS_ROWS;
+
+    vertices[34] /= TEXTURE_ATLAS_ROWS;
+    vertices[35] /= TEXTURE_ATLAS_ROWS;
+
+    vertices[46] /= TEXTURE_ATLAS_ROWS;
+    vertices[47] /= TEXTURE_ATLAS_ROWS;
+
+    vertices[58] /= TEXTURE_ATLAS_ROWS;
+    vertices[59] /= TEXTURE_ATLAS_ROWS;
+
+    vertices[70] /= TEXTURE_ATLAS_ROWS;
+    vertices[71] /= TEXTURE_ATLAS_ROWS;
 
     // insert the Tile vertices at the end of the container with all vertices
     m_vertices.insert(m_vertices.end(), vertices.begin(), vertices.end());
@@ -108,17 +127,41 @@ void sg::city::map::RoadNetwork::UpdateDirections()
         // get the Tile
         auto& tile{ m_map->GetTileByIndex(tileIndex) };
 
-        // determine the texture depending on the road direction and the neighbors
-        const auto texture{ static_cast<float>(GetTexture(tile)) };
+        // determine the RoadType depending on the road direction and the neighbors
+        const auto roadType{ static_cast<int>(GetRoadType(tile)) };
 
-        // update texture information
+        // update uv values
         const auto offset{ (positionInVbo - 1) * Tile::FLOATS_PER_TILE };
-        m_vertices[static_cast<size_t>(offset) + 9] = texture;
-        m_vertices[static_cast<size_t>(offset) + 21] = texture;
-        m_vertices[static_cast<size_t>(offset) + 33] = texture;
-        m_vertices[static_cast<size_t>(offset) + 45] = texture;
-        m_vertices[static_cast<size_t>(offset) + 57] = texture;
-        m_vertices[static_cast<size_t>(offset) + 69] = texture;
+
+        const auto column{ roadType % static_cast<int>(TEXTURE_ATLAS_ROWS) };
+        const auto xOffset{ static_cast<float>(column) / TEXTURE_ATLAS_ROWS };
+
+        const auto row{ roadType / static_cast<int>(TEXTURE_ATLAS_ROWS) };
+        const auto yOffset{ static_cast<float>(row) / TEXTURE_ATLAS_ROWS };
+
+        // bl
+        m_vertices[static_cast<size_t>(offset) + 10] = (0.0f / TEXTURE_ATLAS_ROWS) + xOffset;
+        m_vertices[static_cast<size_t>(offset) + 11] = (0.0f / TEXTURE_ATLAS_ROWS) + yOffset;
+
+        // br
+        m_vertices[static_cast<size_t>(offset) + 22] = (1.0f / TEXTURE_ATLAS_ROWS) + xOffset;
+        m_vertices[static_cast<size_t>(offset) + 23] = (0.0f / TEXTURE_ATLAS_ROWS) + yOffset;
+
+        // tl
+        m_vertices[static_cast<size_t>(offset) + 34] = (0.0f / TEXTURE_ATLAS_ROWS) + xOffset;
+        m_vertices[static_cast<size_t>(offset) + 35] = (1.0f / TEXTURE_ATLAS_ROWS) + yOffset;
+
+        // tl
+        m_vertices[static_cast<size_t>(offset) + 46] = (0.0f / TEXTURE_ATLAS_ROWS) + xOffset;
+        m_vertices[static_cast<size_t>(offset) + 47] = (1.0f / TEXTURE_ATLAS_ROWS) + yOffset;
+
+        // br
+        m_vertices[static_cast<size_t>(offset) + 58] = (1.0f / TEXTURE_ATLAS_ROWS) + xOffset;
+        m_vertices[static_cast<size_t>(offset) + 59] = (0.0f / TEXTURE_ATLAS_ROWS) + yOffset;
+
+        // tr
+        m_vertices[static_cast<size_t>(offset) + 70] = (1.0f / TEXTURE_ATLAS_ROWS) + xOffset;
+        m_vertices[static_cast<size_t>(offset) + 71] = (1.0f / TEXTURE_ATLAS_ROWS) + yOffset;
 
         tileIndex++;
     }
@@ -155,20 +198,16 @@ void sg::city::map::RoadNetwork::Init()
     // unbind Vao
     ogl::buffer::Vao::UnbindVao();
 
-    // load textures
-    m_textures.emplace(Texture::WO, m_map->GetScene()->GetApplicationContext()->GetTextureManager().GetTextureIdFromPath("res/texture/road/wo.png"));
-    m_textures.emplace(Texture::NS, m_map->GetScene()->GetApplicationContext()->GetTextureManager().GetTextureIdFromPath("res/texture/road/ns.png"));
-    m_textures.emplace(Texture::NSO, m_map->GetScene()->GetApplicationContext()->GetTextureManager().GetTextureIdFromPath("res/texture/road/nso.png"));
-    m_textures.emplace(Texture::NSW, m_map->GetScene()->GetApplicationContext()->GetTextureManager().GetTextureIdFromPath("res/texture/road/nsw.png"));
-    m_textures.emplace(Texture::ALL, m_map->GetScene()->GetApplicationContext()->GetTextureManager().GetTextureIdFromPath("res/texture/road/all.png"));
+    // load texture atlas
+    m_roadTextureAtlasId = m_map->GetScene()->GetApplicationContext()->GetTextureManager().GetTextureIdFromPath("res/texture/road/roads.png");
 
     // Every Tile can be a Road. The lookup table stores the position of the Tile in the RoadNetwork Vbo.
-    // The default value -1 (NO_ROAD) means that the Tile is not a Road and is not in the Vbo.
+    // The default value -1 (NO_ROAD) means that the Tile is currently not a Road and is therefore not in the Vbo.
     const auto lookupTableSize(m_map->GetMapSize() * m_map->GetMapSize());
     m_lookupTable.resize(lookupTableSize, NO_ROAD);
 }
 
-sg::city::map::RoadNetwork::Texture sg::city::map::RoadNetwork::GetTexture(const Tile& t_tile)
+sg::city::map::RoadNetwork::RoadType sg::city::map::RoadNetwork::GetRoadType(const Tile& t_tile)
 {
     const auto& neighbours{ t_tile.GetNeighbours() };
 
@@ -206,41 +245,45 @@ sg::city::map::RoadNetwork::Texture sg::city::map::RoadNetwork::GetTexture(const
         }
     }
 
-    Texture texture;
+    RoadType roadType;
     switch (roadNeighbours)
     {
-    case 0: texture = Texture::WO;
+    case 0: roadType = RoadType::ROAD_V;   // keine Nachbarn
         break;
-    case 1: texture = Texture::NS;
+    case 1: roadType = RoadType::ROAD_V;   // Norden
         break;
-    case 2: texture = Texture::WO;
+    case 2: roadType = RoadType::ROAD_H;   // Osten
         break;
-    case 3: texture = Texture::NSO;
+    case 3: roadType = RoadType::ROAD_C3;  // Norden - Osten
         break;
-    case 4:
-    case 5: texture = Texture::NS;
+    case 4: roadType = RoadType::ROAD_V;   // Sueden
         break;
-    case 6:
-    case 7: texture = Texture::NSO;
+    case 5: roadType = RoadType::ROAD_V;   // Sueden - Norden
         break;
-    case 8: texture = Texture::WO;
+    case 6: roadType = RoadType::ROAD_C1;  // Sueden - Osten
         break;
-    case 9: texture = Texture::NSW;
+    case 7: roadType = RoadType::ROAD_X;   // Norden - Osten - Sueden
         break;
-    case 10: texture = Texture::WO;
+    case 8: roadType = RoadType::ROAD_H;   // Westen
         break;
-    case 11: texture = Texture::ALL;
+    case 9: roadType = RoadType::ROAD_C4;  // Westen - Norden
         break;
-    case 12:
-    case 13: texture = Texture::NSW;
+    case 10: roadType = RoadType::ROAD_H;  // Westen - Osten
         break;
-    case 14:
-    case 15: texture = Texture::ALL;
+    case 11: roadType = RoadType::ROAD_X;  // Westen - Osten - Norden
         break;
-    default: texture = Texture::WO;
+    case 12: roadType = RoadType::ROAD_C2; // Westen - Sueden // test c4
+        break;
+    case 13: roadType = RoadType::ROAD_X;  // Westen - Sueden - Norden
+        break;
+    case 14: roadType = RoadType::ROAD_X;  // Westen - Sueden - Osten
+        break;
+    case 15: roadType = RoadType::ROAD_X;
+        break;
+    default: roadType = RoadType::ROAD_V;
     }
 
-    return texture;
+    return roadType;
 }
 
 void sg::city::map::RoadNetwork::UpdateVbo()

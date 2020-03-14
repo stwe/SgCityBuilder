@@ -11,7 +11,6 @@ layout (location = 4) in vec2 aUv;
 // Out
 
 out vec3 vPosition;
-out float vTexture;
 out vec2 vUv;
 
 // Uniforms
@@ -24,6 +23,5 @@ void main()
 {
     gl_Position = mvpMatrix * vec4(aPosition, 1.0);
     vPosition = aPosition;
-    vTexture = aTexture;
     vUv = aUv;
 }
