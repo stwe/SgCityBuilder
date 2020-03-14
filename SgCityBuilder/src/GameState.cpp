@@ -103,6 +103,8 @@ void GameState::Render()
     m_city->RenderRoadNetwork();
     m_forwardRenderer->Render();
 
+    m_textRenderer->RenderText("SgCityBuilder", 10.0f, 10.0f, 0.25f, glm::vec3(0.4f));
+
     RenderImGui();
 }
 
@@ -141,6 +143,7 @@ void GameState::Init()
 
     m_mousePicker = std::make_unique<sg::city::input::MousePicker>(m_scene.get(), m_city->GetMapPtr());
     m_forwardRenderer = std::make_unique<sg::ogl::ecs::system::ForwardRenderSystem>(m_scene.get());
+    m_textRenderer = std::make_unique<sg::ogl::ecs::system::TextRenderSystem>(m_scene.get(), "res/font/bitter/Bitter-Italic.otf");
 
     CreateExampleRoads();
 
@@ -281,8 +284,8 @@ void GameState::RenderImGui()
 
     ImGui::Text("Day: %i", m_city->GetDay());
     ImGui::SliderFloat("Time per day: ", &m_city->GetTimePerDay(), 0.0f, 1.0f, "ratio = %.2f");
-    ImGui::Text("Citizens who do not have a home (Population Pool): %f", m_city->GetPopulationPool());
-    ImGui::Text("Total population: %f", m_city->GetPopulation());
+    ImGui::Text("Homeless people: %f", m_city->GetPopulationPool());
+    ImGui::Text("Population: %f", m_city->GetPopulation());
 
     ImGui::End();
 

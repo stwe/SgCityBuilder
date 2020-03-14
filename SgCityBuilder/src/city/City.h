@@ -88,7 +88,7 @@ namespace sg::city::city
         // Path
         //-------------------------------------------------
 
-        PathPositionContainer Path(int t_fromMapX, int t_fromMapZ, int t_toMapX, int t_toMapZ);
+        PathPositionContainer Path(int t_fromMapX, int t_fromMapZ, int t_toMapX, int t_toMapZ) const;
 
     protected:
 
@@ -144,7 +144,8 @@ namespace sg::city::city
         int m_day{ 0 };
 
         /**
-         * @brief Stores the number of citizens who do not have a home.
+         * @brief Stores the number of people who do not have a home.
+         *        We start with a small number of 50 people.
          */
         float m_populationPool{ 50.0f };
 
@@ -152,7 +153,7 @@ namespace sg::city::city
          * @brief The total population of the City.
          *        The sum of all the Tiles populations and the populationPool.
          */
-        float m_population{ 50.0f };
+        float m_population{ 0.0f };
 
         //-------------------------------------------------
         // Init

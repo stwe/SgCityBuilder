@@ -41,7 +41,8 @@ project "SgCityBuilder"
         "%{prj.name}/vendor/sgogl/vendor/assimp/include",
         "%{prj.name}/vendor/sgogl/vendor/entt",
         "%{prj.name}/vendor/sgogl/vendor/imgui",
-        "%{prj.name}/vendor/sgogl/vendor/gli"
+        "%{prj.name}/vendor/sgogl/vendor/gli",
+        "%{prj.name}/vendor/sgogl/vendor/freetype/include"
     }
 
     links

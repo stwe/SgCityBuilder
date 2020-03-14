@@ -137,7 +137,7 @@ void sg::city::city::City::RenderRoadNetwork() const
 // Path
 //-------------------------------------------------
 
-sg::city::city::City::PathPositionContainer sg::city::city::City::Path(const int t_fromMapX, const int t_fromMapZ, const int t_toMapX, const int t_toMapZ)
+sg::city::city::City::PathPositionContainer sg::city::city::City::Path(const int t_fromMapX, const int t_fromMapZ, const int t_toMapX, const int t_toMapZ) const
 {
     const auto fromTileIndex{ m_map->GetTileIndexByPosition(t_fromMapX, t_fromMapZ) };
     const auto toTileIndex{ m_map->GetTileIndexByPosition(t_toMapX, t_toMapZ) };
