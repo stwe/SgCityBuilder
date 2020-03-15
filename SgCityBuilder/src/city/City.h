@@ -16,12 +16,14 @@ namespace sg::city::map
     class RoadNetwork;
     class Astar;
     class Tile;
+    class BuildingGenerator;
 }
 
 namespace sg::city::renderer
 {
     class MapRenderer;
     class RoadNetworkRenderer;
+    class BuildingsRenderer;
 }
 
 namespace sg::city::city
@@ -31,10 +33,12 @@ namespace sg::city::city
     public:
         using MapSharedPtr = std::shared_ptr<map::Map>;
         using RoadNetworkSharedPtr = std::shared_ptr<map::RoadNetwork>;
+        using BuildingGeneratorSharedPtr = std::shared_ptr<map::BuildingGenerator>;
         using AstarUniquePtr = std::unique_ptr<map::Astar>;
 
         using MapRendererUniquePtr = std::unique_ptr<renderer::MapRenderer>;
         using RoadNetworkRendererUniquePtr = std::unique_ptr<renderer::RoadNetworkRenderer>;
+        using BuildingsRendererUniquePtr = std::unique_ptr<renderer::BuildingsRenderer>;
 
         using PathPositionContainer = std::stack<glm::vec2>;
 
@@ -83,12 +87,13 @@ namespace sg::city::city
         void Update(double t_dt);
         void RenderMap() const;
         void RenderRoadNetwork() const;
+        void RenderBuildings() const;
 
         //-------------------------------------------------
         // Path
         //-------------------------------------------------
 
-        PathPositionContainer Path(int t_fromMapX, int t_fromMapZ, int t_toMapX, int t_toMapZ) const;
+        [[nodiscard]] PathPositionContainer Path(int t_fromMapX, int t_fromMapZ, int t_toMapX, int t_toMapZ) const;
 
     protected:
 
@@ -114,6 +119,11 @@ namespace sg::city::city
         RoadNetworkSharedPtr m_roadNetwork;
 
         /**
+         * @brief Contains all buildings of the City.
+         */
+        BuildingGeneratorSharedPtr m_buildingGenerator;
+
+        /**
          * @brief Renders the Map.
          */
         MapRendererUniquePtr m_mapRenderer;
@@ -122,6 +132,11 @@ namespace sg::city::city
          * @brief Renders the RoadNetwork.
          */
         RoadNetworkRendererUniquePtr m_roadNetworkRenderer;
+
+        /**
+         * @brief Renders all buildings.
+         */
+        BuildingsRendererUniquePtr m_buildingsRenderer;
 
         /**
          * @brief An Astar instance.
@@ -162,6 +177,7 @@ namespace sg::city::city
         void Init(ogl::scene::Scene* t_scene, int t_mapSize);
         void CreateMapEntity();
         void CreateRoadNetworkEntity();
+        void CreateBuildingsEntity();
 
         //-------------------------------------------------
         // Distribute

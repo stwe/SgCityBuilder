@@ -3,9 +3,11 @@
 #include "map/Map.h"
 #include "map/Tile.h"
 #include "map/RoadNetwork.h"
+#include "map/BuildingGenerator.h"
 #include "map/Astar.h"
 #include "renderer/MapRenderer.h"
 #include "renderer/RoadNetworkRenderer.h"
+#include "renderer/BuildingsRenderer.h"
 
 //-------------------------------------------------
 // Ctors. / Dtor.
@@ -133,6 +135,11 @@ void sg::city::city::City::RenderRoadNetwork() const
     m_roadNetworkRenderer->Render();
 }
 
+void sg::city::city::City::RenderBuildings() const
+{
+    m_buildingsRenderer->Render();
+}
+
 //-------------------------------------------------
 // Path
 //-------------------------------------------------
@@ -151,21 +158,31 @@ sg::city::city::City::PathPositionContainer sg::city::city::City::Path(const int
 
 void sg::city::city::City::Init(ogl::scene::Scene* t_scene, const int t_mapSize)
 {
+    // create Map
     m_map = std::make_shared<map::Map>(t_scene);
     m_map->CreateMap(t_mapSize);
     m_map->position = glm::vec3(0.0f);
     m_map->rotation = glm::vec3(0.0f);
     m_map->scale = glm::vec3(1.0f);
 
+    // create RoadNetwork
     m_roadNetwork = std::make_shared<map::RoadNetwork>(m_map.get());
 
+    // create BuildingGenerator
+    m_buildingGenerator = std::make_shared<map::BuildingGenerator>(t_scene);
+
+    // create Renderer
     m_mapRenderer = std::make_unique<renderer::MapRenderer>(t_scene);
     m_roadNetworkRenderer = std::make_unique<renderer::RoadNetworkRenderer>(t_scene);
+    m_buildingsRenderer = std::make_unique<renderer::BuildingsRenderer>(t_scene);
 
+    // cretae an Astar instance
     m_astar = std::make_unique<map::Astar>(m_map.get());
 
+    // create entities
     CreateMapEntity();
     CreateRoadNetworkEntity();
+    CreateBuildingsEntity();
 }
 
 void sg::city::city::City::CreateMapEntity()
@@ -192,6 +209,23 @@ void sg::city::city::City::CreateRoadNetworkEntity()
     m_scene->GetApplicationContext()->registry.assign<ecs::RoadNetworkComponent>(
         entity,
         m_roadNetwork
+    );
+
+    m_scene->GetApplicationContext()->registry.assign<ogl::ecs::component::TransformComponent>(
+        entity,
+        m_map->position,
+        m_map->rotation,
+        m_map->scale
+    );
+}
+
+void sg::city::city::City::CreateBuildingsEntity()
+{
+    const auto entity{ m_scene->GetApplicationContext()->registry.create() };
+
+    m_scene->GetApplicationContext()->registry.assign<ecs::BuildingsComponent>(
+        entity,
+        m_buildingGenerator
     );
 
     m_scene->GetApplicationContext()->registry.assign<ogl::ecs::component::TransformComponent>(

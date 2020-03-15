@@ -7,6 +7,7 @@ namespace sg::city::map
 {
     class Map;
     class RoadNetwork;
+    class BuildingGenerator;
 }
 
 namespace sg::city::ecs
@@ -19,6 +20,11 @@ namespace sg::city::ecs
     struct RoadNetworkComponent
     {
         std::shared_ptr<map::RoadNetwork> roadNetwork;
+    };
+
+    struct BuildingsComponent
+    {
+        std::shared_ptr<map::BuildingGenerator> buildingGenerator;
     };
 
     struct PathComponent

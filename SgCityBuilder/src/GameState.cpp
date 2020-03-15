@@ -56,19 +56,21 @@ bool GameState::Input()
             }
 
             /*
-            const auto& tile{ m_map->GetTileByPosition(m_mapPoint) };
+            const auto& tile{ m_city->GetMap().GetTileByPosition(m_mapPoint) };
 
             if (m_currentTileType == sg::city::map::Map::TileType::RESIDENTIAL)
             {
                 GetApplicationContext()->GetEntityFactory().CreateModelEntity(
-                    "res/model/H1/h1.obj",
-                    glm::vec3(tile.GetMapX() + 0.5f, 2.4f, -tile.GetMapZ() + -0.45f),
+                    "res/model/Box/box.obj",
+                    glm::vec3(tile.GetMapX() + 0.5f, 0.5f, -tile.GetMapZ() + -0.5f),
                     glm::vec3(0.0f),
-                    glm::vec3(1.0f / 152.0f),
+                    glm::vec3(0.5f),
                     false
                 );
             }
+            */
 
+            /*
             if (m_currentTileType == sg::city::map::Map::TileType::COMMERCIAL)
             {
                 GetApplicationContext()->GetEntityFactory().CreateModelEntity(
@@ -101,9 +103,11 @@ void GameState::Render()
 {
     m_city->RenderMap();
     m_city->RenderRoadNetwork();
+    m_city->RenderBuildings();
+
     m_forwardRenderer->Render();
 
-    m_textRenderer->RenderText("SgCityBuilder", 10.0f, 10.0f, 0.25f, glm::vec3(0.4f));
+    m_textRenderer->RenderText("SgCityBuilder", 10.0f, 10.0f, 0.25f, glm::vec3(0.1f));
 
     RenderImGui();
 }
