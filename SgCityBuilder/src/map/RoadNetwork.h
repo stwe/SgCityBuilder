@@ -84,7 +84,7 @@ namespace sg::city::map
         // Update
         //-------------------------------------------------
 
-        void UpdateDirections();
+        void Update();
 
     protected:
 

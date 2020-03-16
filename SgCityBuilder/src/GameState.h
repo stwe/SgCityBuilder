@@ -63,7 +63,7 @@ private:
     ForwardRendererUniquePtr m_forwardRenderer;
     TextRendererUniquePtr m_textRenderer;
     MousePickerUniquePtr m_mousePicker;
-    sg::city::map::Map::TileType m_currentTileType{ sg::city::map::Map::TileType::TRAFFIC_NETWORK };
+    sg::city::map::Map::TileType m_currentTileType{ sg::city::map::Map::TileType::RESIDENTIAL };
     MoveSystemUniquePtr m_moveSystem;
 
     //-------------------------------------------------

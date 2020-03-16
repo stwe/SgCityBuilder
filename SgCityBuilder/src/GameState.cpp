@@ -1,5 +1,6 @@
 #include "GameState.h"
 #include "map/RoadNetwork.h"
+#include "map/BuildingGenerator.h"
 #include "map/Tile.h"
 #include "ecs/Components.h"
 #include "ecs/MoveSystem.h"
@@ -50,38 +51,14 @@ bool GameState::Input()
             {
                 m_city->GetRoadNetwork().StoreRoadOnPosition(m_mapPoint);
             }
+            else if (m_currentTileType == sg::city::map::Map::TileType::RESIDENTIAL)
+            {
+                m_city->GetBuildingGenerator().StoreBuildingOnPosition(m_mapPoint);
+            }
             else
             {
                 m_city->GetMap().ChangeTileTypeOnPosition(m_mapPoint, m_currentTileType);
             }
-
-            /*
-            const auto& tile{ m_city->GetMap().GetTileByPosition(m_mapPoint) };
-
-            if (m_currentTileType == sg::city::map::Map::TileType::RESIDENTIAL)
-            {
-                GetApplicationContext()->GetEntityFactory().CreateModelEntity(
-                    "res/model/Box/box.obj",
-                    glm::vec3(tile.GetMapX() + 0.5f, 0.5f, -tile.GetMapZ() + -0.5f),
-                    glm::vec3(0.0f),
-                    glm::vec3(0.5f),
-                    false
-                );
-            }
-            */
-
-            /*
-            if (m_currentTileType == sg::city::map::Map::TileType::COMMERCIAL)
-            {
-                GetApplicationContext()->GetEntityFactory().CreateModelEntity(
-                    "res/model/Tree_02/tree02.obj",
-                    glm::vec3(tile.GetMapX() + 0.5f, 0.0f, -tile.GetMapZ() + -0.5f),
-                    glm::vec3(0.0f, 0.0f, 0.0f),
-                    glm::vec3(1.0f / 2.0f),
-                    false
-                );
-            }
-            */
 
             m_city->GetMap().FindConnectedRegions();
         }

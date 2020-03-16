@@ -43,7 +43,7 @@ void sg::city::map::RoadNetwork::StoreRoadOnPosition(const glm::vec3& t_mapPoint
     // get Tile index by given map point
     const auto tileIndex{ m_map->GetTileIndexByPosition(t_mapPoint) };
 
-    // checks whether the Tile is already a stored as a Road
+    // checks whether the Tile is already stored as a Road
     if (m_lookupTable[tileIndex] > 0)
     {
         return;
@@ -113,7 +113,7 @@ void sg::city::map::RoadNetwork::StoreRoadOnPosition(const int t_mapX, const int
 // Update
 //-------------------------------------------------
 
-void sg::city::map::RoadNetwork::UpdateDirections()
+void sg::city::map::RoadNetwork::Update()
 {
     auto tileIndex{ 0 };
     for (auto positionInVbo : m_lookupTable)
@@ -206,6 +206,10 @@ void sg::city::map::RoadNetwork::Init()
     const auto lookupTableSize(m_map->GetMapSize() * m_map->GetMapSize());
     m_lookupTable.resize(lookupTableSize, NO_ROAD);
 }
+
+//-------------------------------------------------
+// Update
+//-------------------------------------------------
 
 sg::city::map::RoadNetwork::RoadType sg::city::map::RoadNetwork::GetRoadType(const Tile& t_tile)
 {

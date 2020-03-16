@@ -31,18 +31,18 @@ namespace sg::city::renderer
 
             auto view{ m_scene->GetApplicationContext()->registry.view<
                 ecs::BuildingsComponent,
-                ogl::ecs::component::TransformComponent>(entt::exclude<ecs::PathComponent>)
+                ogl::ecs::component::TransformComponent>(entt::exclude<ecs::PathComponent>) // todo: remove
             };
 
             for (auto entity : view)
             {
                 auto& buildingsComponent{ view.get<ecs::BuildingsComponent>(entity) };
 
-                shader.UpdateUniforms(*m_scene, entity, buildingsComponent.buildingGenerator->GetBuildingsMesh());
+                shader.UpdateUniforms(*m_scene, entity, buildingsComponent.buildingGenerator->GetMesh());
 
-                buildingsComponent.buildingGenerator->GetBuildingsMesh().InitDraw();
-                buildingsComponent.buildingGenerator->GetBuildingsMesh().DrawPrimitives();
-                buildingsComponent.buildingGenerator->GetBuildingsMesh().EndDraw();
+                buildingsComponent.buildingGenerator->GetMesh().InitDraw();
+                buildingsComponent.buildingGenerator->GetMesh().DrawInstanced(buildingsComponent.buildingGenerator->GetInstances());
+                buildingsComponent.buildingGenerator->GetMesh().EndDraw();
             }
 
             ogl::resource::ShaderProgram::Unbind();
@@ -53,7 +53,7 @@ namespace sg::city::renderer
     protected:
         void PrepareRendering() override
         {
-            //ogl::OpenGl::EnableFaceCulling();
+            //ogl::OpenGl::EnableFaceCulling(); // todo
         }
 
         void FinishRendering() override

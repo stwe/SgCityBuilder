@@ -73,6 +73,10 @@ namespace sg::city::city
         [[nodiscard]] map::RoadNetwork& GetRoadNetwork() noexcept;
         [[nodiscard]] RoadNetworkSharedPtr GetRoadNetworkPtr() const;
 
+        [[nodiscard]] const map::BuildingGenerator& GetBuildingGenerator() const noexcept;
+        [[nodiscard]] map::BuildingGenerator& GetBuildingGenerator() noexcept;
+        [[nodiscard]] BuildingGeneratorSharedPtr GetBuildingGeneratorPtr() const;
+
         [[nodiscard]] map::Astar& GetAstar() const noexcept;
 
         [[nodiscard]] float& GetTimePerDay();

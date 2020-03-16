@@ -63,6 +63,21 @@ sg::city::city::City::RoadNetworkSharedPtr sg::city::city::City::GetRoadNetworkP
     return m_roadNetwork;
 }
 
+const sg::city::map::BuildingGenerator& sg::city::city::City::GetBuildingGenerator() const noexcept
+{
+    return *m_buildingGenerator;
+}
+
+sg::city::map::BuildingGenerator& sg::city::city::City::GetBuildingGenerator() noexcept
+{
+    return *m_buildingGenerator;
+}
+
+sg::city::city::City::BuildingGeneratorSharedPtr sg::city::city::City::GetBuildingGeneratorPtr() const
+{
+    return m_buildingGenerator;
+}
+
 sg::city::map::Astar& sg::city::city::City::GetAstar() const noexcept
 {
     return *m_astar;
@@ -94,7 +109,8 @@ float sg::city::city::City::GetPopulation() const
 
 void sg::city::city::City::Update(const double t_dt)
 {
-    m_roadNetwork->UpdateDirections(); // todo: do this only when necessary
+    m_roadNetwork->Update(); // todo: do this only when necessary
+    m_buildingGenerator->Update();
 
     m_currentTime += static_cast<float>(t_dt);
 
@@ -169,7 +185,7 @@ void sg::city::city::City::Init(ogl::scene::Scene* t_scene, const int t_mapSize)
     m_roadNetwork = std::make_shared<map::RoadNetwork>(m_map.get());
 
     // create BuildingGenerator
-    m_buildingGenerator = std::make_shared<map::BuildingGenerator>(t_scene);
+    m_buildingGenerator = std::make_shared<map::BuildingGenerator>(m_map.get());
 
     // create Renderer
     m_mapRenderer = std::make_unique<renderer::MapRenderer>(t_scene);
