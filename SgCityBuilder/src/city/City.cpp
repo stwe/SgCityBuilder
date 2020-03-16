@@ -1,3 +1,12 @@
+// This file is part of the SgCityBuilder package.
+// 
+// Filename: City.cpp
+// Author:   stwe
+// 
+// License:  MIT
+// 
+// 2020 (c) stwe <https://github.com/stwe/SgCityBuilder>
+
 #include <Application.h>
 #include "City.h"
 #include "map/Map.h"

@@ -1,3 +1,12 @@
+// This file is part of the SgCityBuilder package.
+// 
+// Filename: Tile.h
+// Author:   stwe
+// 
+// License:  MIT
+// 
+// 2020 (c) stwe <https://github.com/stwe/SgCityBuilder>
+
 #pragma once
 
 #include <glm/vec2.hpp>

@@ -1,3 +1,12 @@
+// This file is part of the SgCityBuilder package.
+// 
+// Filename: CityApplication.cpp
+// Author:   stwe
+// 
+// License:  MIT
+// 
+// 2020 (c) stwe <https://github.com/stwe/SgCityBuilder>
+
 #include <SgOgl.h>
 #include <SgOglEntryPoint.h>
 #include "GameState.h"

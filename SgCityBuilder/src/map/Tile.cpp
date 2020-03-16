@@ -1,4 +1,12 @@
-//#include <Log.h>
+// This file is part of the SgCityBuilder package.
+// 
+// Filename: Tile.cpp
+// Author:   stwe
+// 
+// License:  MIT
+// 
+// 2020 (c) stwe <https://github.com/stwe/SgCityBuilder>
+
 #include "Tile.h"
 
 //-------------------------------------------------
