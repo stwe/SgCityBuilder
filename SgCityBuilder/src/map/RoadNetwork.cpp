@@ -275,7 +275,7 @@ sg::city::map::RoadNetwork::RoadType sg::city::map::RoadNetwork::GetRoadType(con
         break;
     case 6: roadType = RoadType::ROAD_C1;  // Sueden - Osten
         break;
-    case 7: roadType = RoadType::ROAD_X;   // Norden - Osten - Sueden
+    case 7: roadType = RoadType::ROAD_T2;  // Norden - Osten - Sueden
         break;
     case 8: roadType = RoadType::ROAD_H;   // Westen
         break;
@@ -283,13 +283,13 @@ sg::city::map::RoadNetwork::RoadType sg::city::map::RoadNetwork::GetRoadType(con
         break;
     case 10: roadType = RoadType::ROAD_H;  // Westen - Osten
         break;
-    case 11: roadType = RoadType::ROAD_X;  // Westen - Osten - Norden
+    case 11: roadType = RoadType::ROAD_T4; // Westen - Osten - Norden
         break;
-    case 12: roadType = RoadType::ROAD_C2; // Westen - Sueden // test c4
+    case 12: roadType = RoadType::ROAD_C2; // Westen - Sueden
         break;
-    case 13: roadType = RoadType::ROAD_X;  // Westen - Sueden - Norden
+    case 13: roadType = RoadType::ROAD_T3; // Westen - Sueden - Norden
         break;
-    case 14: roadType = RoadType::ROAD_X;  // Westen - Sueden - Osten
+    case 14: roadType = RoadType::ROAD_T1; // Westen - Sueden - Osten
         break;
     case 15: roadType = RoadType::ROAD_X;
         break;
