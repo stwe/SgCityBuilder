@@ -17,6 +17,7 @@
 #include "renderer/MapRenderer.h"
 #include "renderer/RoadNetworkRenderer.h"
 #include "renderer/BuildingsRenderer.h"
+#include "util/Line.h"
 
 //-------------------------------------------------
 // Ctors. / Dtor.
@@ -153,6 +154,9 @@ void sg::city::city::City::Update(const double t_dt)
 void sg::city::city::City::RenderMap() const
 {
     m_mapRenderer->Render();
+
+    // todo
+    m_line->Render();
 }
 
 void sg::city::city::City::RenderRoadNetwork() const
@@ -208,6 +212,10 @@ void sg::city::city::City::Init(ogl::scene::Scene* t_scene, const int t_mapSize)
     CreateMapEntity();
     CreateRoadNetworkEntity();
     CreateBuildingsEntity();
+
+    // init the Line util
+    m_line = std::make_unique<util::Line>(m_scene, *m_map);
+    m_line->AddLine(glm::vec3(1.0f, 0.1f, -1.0f), glm::vec3(1.0f, 0.1f, -2.0f), glm::vec3(1.0f, 0.0f, 0.0f));
 }
 
 void sg::city::city::City::CreateMapEntity()

@@ -35,6 +35,11 @@ namespace sg::city::renderer
     class BuildingsRenderer;
 }
 
+namespace sg::city::util
+{
+    class Line;
+}
+
 namespace sg::city::city
 {
     class City
@@ -48,6 +53,8 @@ namespace sg::city::city
         using MapRendererUniquePtr = std::unique_ptr<renderer::MapRenderer>;
         using RoadNetworkRendererUniquePtr = std::unique_ptr<renderer::RoadNetworkRenderer>;
         using BuildingsRendererUniquePtr = std::unique_ptr<renderer::BuildingsRenderer>;
+
+        using LineUniquePtr = std::unique_ptr<util::Line>;
 
         using PathPositionContainer = std::stack<glm::vec2>;
 
@@ -182,6 +189,11 @@ namespace sg::city::city
          *        The sum of all the Tiles populations and the populationPool.
          */
         float m_population{ 0.0f };
+
+        /**
+         * @brief Draw some lines for debug.
+         */
+        LineUniquePtr m_line;
 
         //-------------------------------------------------
         // Init

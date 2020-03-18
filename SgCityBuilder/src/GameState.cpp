@@ -16,6 +16,15 @@
 #include "input/MousePicker.h"
 #include "city/City.h"
 
+// todo: render circle
+// todo: render line
+
+// todo: remove roads
+// todo: remove buildings
+// todo: buildings of different heights
+// todo: load map
+// todo: select/unselect tiles
+
 //-------------------------------------------------
 // Ctors. / Dtor.
 //-------------------------------------------------
