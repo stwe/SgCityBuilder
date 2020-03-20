@@ -15,6 +15,7 @@
 #include <random>
 #include "Map.h"
 #include "Tile.h"
+#include "automata/AutoNode.h"
 
 //-------------------------------------------------
 // Ctors. / Dtor.
@@ -66,6 +67,16 @@ const sg::city::map::Map::TileContainer& sg::city::map::Map::GetTiles() const no
 sg::city::map::Map::TileContainer& sg::city::map::Map::GetTiles() noexcept
 {
     return m_tiles;
+}
+
+const sg::city::map::Map::AutoNodeContainer& sg::city::map::Map::GetAutoNodes() const noexcept
+{
+    return m_autoNodes;
+}
+
+sg::city::map::Map::AutoNodeContainer& sg::city::map::Map::GetAutoNodes() noexcept
+{
+    return m_autoNodes;
 }
 
 const sg::city::map::Tile& sg::city::map::Map::GetTileByIndex(const int t_tileIndex) const noexcept
@@ -124,23 +135,11 @@ void sg::city::map::Map::CreateMap(const int t_mapSize)
 
     LoadAndStoreTileTypeTextures();
 
-    // create Tiles
-    for (auto z{ 0 }; z < m_mapSize; ++z)
-    {
-        for (auto x{ 0 }; x < m_mapSize; ++x)
-        {
-            auto tile{ std::make_unique<Tile>(
-                static_cast<float>(x),
-                static_cast<float>(z),
-                TileType::NONE
-                )
-            };
+    CreateTiles();
+    CreateAutoNodes();
 
-            m_tiles.push_back(std::move(tile));
-        }
-    }
+    LinkTiles();
 
-    // store the neighbours of each Tile
     StoreNeighbours();
 
     // create an bind a new Vao
@@ -253,6 +252,174 @@ void sg::city::map::Map::LoadAndStoreTileTypeTextures()
     m_tileTypeTextures[static_cast<int>(TileType::COMMERCIAL)] = c;
     m_tileTypeTextures[static_cast<int>(TileType::INDUSTRIAL)] = i;
     m_tileTypeTextures[static_cast<int>(TileType::TRAFFIC_NETWORK)] = t;
+}
+
+void sg::city::map::Map::CreateTiles()
+{
+    for (auto z{ 0 }; z < m_mapSize; ++z)
+    {
+        for (auto x{ 0 }; x < m_mapSize; ++x)
+        {
+            auto tile{ std::make_unique<Tile>(
+                static_cast<float>(x),
+                static_cast<float>(z),
+                TileType::NONE
+                )
+            };
+
+            m_tiles.push_back(std::move(tile));
+        }
+    }
+}
+
+void sg::city::map::Map::CreateAutoNodes()
+{
+    for (auto& tile : m_tiles)
+    {
+        for (auto z{ 0 }; z < 7; ++z)
+        {
+            auto zOffset{ 0.0f };
+            switch (z)
+            {
+            case 0: zOffset = 0.000f; break;
+            case 1: zOffset = 0.083f; break;
+            case 2: zOffset = 0.333f; break;
+            case 3: zOffset = 0.500f; break;
+            case 4: zOffset = 0.667f; break;
+            case 5: zOffset = 0.917f; break;
+            case 6: zOffset = 1.000f; break;
+            default:;
+            }
+
+            for (auto x{ 0 }; x < 7; ++x)
+            {
+                auto xOffset{ 0.0f };
+                switch (x)
+                {
+                case 0: xOffset = 0.000f; break;
+                case 1: xOffset = 0.083f; break;
+                case 2: xOffset = 0.333f; break;
+                case 3: xOffset = 0.500f; break;
+                case 4: xOffset = 0.667f; break;
+                case 5: xOffset = 0.917f; break;
+                case 6: xOffset = 1.000f; break;
+                default:;
+                }
+
+                const auto position{ glm::vec3(tile->GetMapX() + xOffset, 0.0f, -tile->GetMapZ() + -zOffset) };
+                auto autoNode{ std::make_shared<automata::AutoNode>(position) };
+                m_autoNodes.push_back(autoNode);
+
+                tile->GetNavigationNodes().push_back(autoNode);
+            }
+        }
+    }
+}
+
+void sg::city::map::Map::LinkTiles()
+{
+    // todo
+
+    for (auto& tile : m_tiles)
+    {
+        auto& navigationNodes{ tile->GetNavigationNodes() };
+
+        // link north
+        if (static_cast<int>(tile->GetMapZ()) > 0)
+        {
+            //SG_OGL_LOG_INFO("Map Z: {}", static_cast<int>(tile->GetMapZ()));
+
+            for (auto i{ 0 }; i < 7; ++i)
+            {
+                /*
+                  0  1  2  3  4  5  6 ^
+                 42 43 44 45 46 47 48 |
+                */
+
+                const auto index{ ((static_cast<int>(tile->GetMapZ()) - 1) * 128 + (static_cast<int>(tile->GetMapX()))) * 49 };
+
+                //SG_OGL_LOG_INFO("nav: {}, auto: {}", 42 + i, index + i);
+
+                navigationNodes[42 + i] = m_autoNodes[index + i];
+            }
+        }
+        else
+        {
+            for (auto i{ 0 }; i < 7; ++i)
+            {
+                navigationNodes[42 + i].reset();
+            }
+        }
+
+        // link west
+        if (static_cast<int>(tile->GetMapX()) > 0)
+        {
+            for (auto i{ 6 }; i >= 0 ; --i)
+            {
+                /*
+                    <---
+                48  42
+                41  35
+                34  28
+                27  21
+                20  14
+                13   7
+                 6   0
+                */
+
+                const auto index{ (static_cast<int>(tile->GetMapZ()) * 128 + (static_cast<int>(tile->GetMapX()) - 1)) * 49 };
+
+                //SG_OGL_LOG_INFO("nav: {}, auto: {}", i * 7, index + 6 + i * 7);
+
+                navigationNodes[i * 7] = m_autoNodes[index + 6 + i * 7];
+            }
+        }
+        else
+        {
+            for (auto i{ 6 }; i >= 0; --i)
+            {
+                navigationNodes[i * 7].reset();
+            }
+        }
+
+        // link south
+        if (static_cast<int>(tile->GetMapZ()) < m_mapSize - 1)
+        {
+        }
+        else
+        {
+            for (auto i{ 0 }; i < 7; ++i)
+            {
+                navigationNodes[i].reset();
+            }
+        }
+
+        // link east
+        if (static_cast<int>(tile->GetMapX()) < m_mapSize - 1)
+        {
+        }
+        else
+        {
+            for (auto i{ 6 }; i >= 0; --i)
+            {
+                const auto index{ 6 + i * 7 };
+                navigationNodes[index].reset();
+            }
+        }
+
+        navigationNodes[9].reset();
+        navigationNodes[11].reset();
+        navigationNodes[15].reset();
+        navigationNodes[19].reset();
+        navigationNodes[29].reset();
+        navigationNodes[33].reset();
+        navigationNodes[37].reset();
+        navigationNodes[39].reset();
+        navigationNodes[0].reset();
+        navigationNodes[6].reset();
+        navigationNodes[42].reset();
+        navigationNodes[48].reset();
+    }
 }
 
 void sg::city::map::Map::StoreNeighbours()

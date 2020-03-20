@@ -30,6 +30,11 @@ namespace sg::ogl::resource
     class Mesh;
 }
 
+namespace sg::city::automata
+{
+    class AutoNode;
+}
+
 namespace sg::city::map
 {
     class Tile;
@@ -61,6 +66,8 @@ namespace sg::city::map
         using TileContainer = std::vector<TileUniquePtr>;
         using TileTypeContainer = std::vector<TileType>;
         using RandomColorContainer = std::map<int, ogl::Color>;
+        using AutoNodeSharedPtr = std::shared_ptr<automata::AutoNode>;
+        using AutoNodeContainer = std::vector<AutoNodeSharedPtr>;
 
         /**
          * @brief 200 predefined colors are generated to show contiguous regions.
@@ -109,6 +116,9 @@ namespace sg::city::map
 
         [[nodiscard]] const TileContainer& GetTiles() const noexcept;
         [[nodiscard]] TileContainer& GetTiles() noexcept;
+
+        [[nodiscard]] const AutoNodeContainer& GetAutoNodes() const noexcept;
+        [[nodiscard]] AutoNodeContainer& GetAutoNodes() noexcept;
 
         [[nodiscard]] const Tile& GetTileByIndex(int t_tileIndex) const noexcept;
         [[nodiscard]] Tile& GetTileByIndex(int t_tileIndex) noexcept;
@@ -170,6 +180,11 @@ namespace sg::city::map
         TileContainer m_tiles;
 
         /**
+         * @brief The container with all auto nodes.
+         */
+        AutoNodeContainer m_autoNodes;
+
+        /**
          * @brief The number of tiles in the x and z direction.
          */
         int m_mapSize{ 0 };
@@ -201,6 +216,9 @@ namespace sg::city::map
         [[nodiscard]] int32_t GetVerticesCountOfMap() const;
 
         void LoadAndStoreTileTypeTextures();
+        void CreateTiles();
+        void CreateAutoNodes();
+        void LinkTiles();
         void StoreNeighbours();
         void CreateRandomColors();
 

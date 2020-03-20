@@ -78,6 +78,16 @@ glm::vec3 sg::city::map::Tile::GetCenter() const
         );
 }
 
+const sg::city::map::Tile::AutoNodeContainer& sg::city::map::Tile::GetNavigationNodes() const noexcept
+{
+    return m_navigationNodes;
+}
+
+sg::city::map::Tile::AutoNodeContainer& sg::city::map::Tile::GetNavigationNodes() noexcept
+{
+    return m_navigationNodes;
+}
+
 //-------------------------------------------------
 // Setter
 //-------------------------------------------------

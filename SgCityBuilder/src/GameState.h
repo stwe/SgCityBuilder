@@ -17,11 +17,6 @@ namespace sg::city::city
     class City;
 }
 
-namespace sg::city::ecs
-{
-    class MoveSystem;
-}
-
 namespace sg::city::input
 {
     class MousePicker;
@@ -35,7 +30,6 @@ public:
     using ForwardRendererUniquePtr = std::unique_ptr<sg::ogl::ecs::system::ForwardRenderSystem>;
     using TextRendererUniquePtr = std::unique_ptr<sg::ogl::ecs::system::TextRenderSystem>;
     using MousePickerUniquePtr = std::unique_ptr<sg::city::input::MousePicker>;
-    using MoveSystemUniquePtr = std::unique_ptr<sg::city::ecs::MoveSystem>;
     using CityUniquePtr = std::unique_ptr<sg::city::city::City>;
 
     //-------------------------------------------------
@@ -73,7 +67,6 @@ private:
     TextRendererUniquePtr m_textRenderer;
     MousePickerUniquePtr m_mousePicker;
     sg::city::map::Map::TileType m_currentTileType{ sg::city::map::Map::TileType::RESIDENTIAL };
-    MoveSystemUniquePtr m_moveSystem;
 
     //-------------------------------------------------
     // Helper

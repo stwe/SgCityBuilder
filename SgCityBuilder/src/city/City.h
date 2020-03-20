@@ -37,7 +37,7 @@ namespace sg::city::renderer
 
 namespace sg::city::util
 {
-    class Line;
+    class Debug;
 }
 
 namespace sg::city::city
@@ -54,7 +54,7 @@ namespace sg::city::city
         using RoadNetworkRendererUniquePtr = std::unique_ptr<renderer::RoadNetworkRenderer>;
         using BuildingsRendererUniquePtr = std::unique_ptr<renderer::BuildingsRenderer>;
 
-        using LineUniquePtr = std::unique_ptr<util::Line>;
+        using DebugUniquePtr = std::unique_ptr<util::Debug>;
 
         using PathPositionContainer = std::stack<glm::vec2>;
 
@@ -99,6 +99,8 @@ namespace sg::city::city
         [[nodiscard]] int GetDay() const;
         [[nodiscard]] float GetPopulationPool() const;
         [[nodiscard]] float GetPopulation() const;
+
+        [[nodiscard]] util::Debug& GetDebug();
 
         //-------------------------------------------------
         // Logic
@@ -191,9 +193,9 @@ namespace sg::city::city
         float m_population{ 0.0f };
 
         /**
-         * @brief Draw some lines for debug.
+         * @brief Render additional debug information.
          */
-        LineUniquePtr m_line;
+        DebugUniquePtr m_debug;
 
         //-------------------------------------------------
         // Init

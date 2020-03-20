@@ -15,9 +15,7 @@
 #include "ecs/MoveSystem.h"
 #include "input/MousePicker.h"
 #include "city/City.h"
-
-// todo: render circle
-// todo: render line
+#include "util/Debug.h"
 
 // todo: remove roads
 // todo: remove buildings
@@ -88,7 +86,6 @@ bool GameState::Input()
 bool GameState::Update(const double t_dt)
 {
     m_scene->GetCurrentCamera().Update(t_dt);
-    m_moveSystem->Update(t_dt);
     m_city->Update(t_dt);
 
     return true;
@@ -131,44 +128,32 @@ void GameState::Init()
 
     m_city = std::make_unique<sg::city::city::City>("SgCity", m_scene.get(), 128);
 
-    // example "car" model
-    const auto entity{ GetApplicationContext()->GetEntityFactory().CreateModelEntity(
-        "res/model/Plane1/plane1.obj",
-        glm::vec3(0.5f, 0.1f, -0.5f),
-        glm::vec3(0.0f),
-        glm::vec3(1.0f / 16.0f),
-        false
-    ) };
-
     m_mousePicker = std::make_unique<sg::city::input::MousePicker>(m_scene.get(), m_city->GetMapPtr());
     m_forwardRenderer = std::make_unique<sg::ogl::ecs::system::ForwardRenderSystem>(m_scene.get());
     m_textRenderer = std::make_unique<sg::ogl::ecs::system::TextRenderSystem>(m_scene.get(), "res/font/bitter/Bitter-Italic.otf");
 
     CreateExampleRoads();
-
-    // Find an example path 0,0 --> 3,3
-    auto path{ m_city->Path(0, 0, 3, 3) };
-    GetApplicationContext()->registry.assign<sg::city::ecs::PathComponent>(entity, path, 0.15f, 0.15f);
-    GetApplicationContext()->registry.assign<sg::city::ecs::MapComponent>(entity, m_city->GetMapPtr());
-
-    m_moveSystem = std::make_unique<sg::city::ecs::MoveSystem>(m_scene.get());
 }
 
 void GameState::CreateExampleRoads() const
 {
     auto& roadNetwork{ m_city->GetRoadNetwork() };
-    roadNetwork.StoreRoadOnPosition(0, 0);
-    roadNetwork.StoreRoadOnPosition(0, 1);
-    roadNetwork.StoreRoadOnPosition(0, 2);
-    roadNetwork.StoreRoadOnPosition(0, 3);
+    roadNetwork.StoreRoadOnPosition(1, 1);
+    roadNetwork.StoreRoadOnPosition(1, 2);
     roadNetwork.StoreRoadOnPosition(1, 3);
-    roadNetwork.StoreRoadOnPosition(2, 3);
-    roadNetwork.StoreRoadOnPosition(3, 3);
-    roadNetwork.StoreRoadOnPosition(3, 2);
+    roadNetwork.StoreRoadOnPosition(1, 4);
+    roadNetwork.StoreRoadOnPosition(2, 4);
+    roadNetwork.StoreRoadOnPosition(3, 4);
+    roadNetwork.StoreRoadOnPosition(4, 4);
+    roadNetwork.StoreRoadOnPosition(4, 3);
+    roadNetwork.StoreRoadOnPosition(4, 2);
+    roadNetwork.StoreRoadOnPosition(4, 1);
+    roadNetwork.StoreRoadOnPosition(2, 1);
     roadNetwork.StoreRoadOnPosition(3, 1);
-    roadNetwork.StoreRoadOnPosition(3, 0);
-    roadNetwork.StoreRoadOnPosition(1, 0);
-    roadNetwork.StoreRoadOnPosition(2, 0);
+
+    // to render the auto nodes
+    auto& debug{ m_city->GetDebug() };
+    debug.InitAutoNodesMesh(true);
 }
 
 //-------------------------------------------------

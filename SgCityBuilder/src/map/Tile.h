@@ -37,6 +37,8 @@ namespace sg::city::map
 
         using VertexContainer = std::vector<float>;
         using NeighbourContainer = std::array<Tile*, static_cast<int>(Directions::SIZE)>;
+        using AutoNodeSharedPtr = std::shared_ptr<automata::AutoNode>;
+        using AutoNodeContainer = std::vector<AutoNodeSharedPtr>;
 
         //-------------------------------------------------
         // Public member
@@ -81,6 +83,9 @@ namespace sg::city::map
          * @return glm::vec3
          */
         [[nodiscard]] glm::vec3 GetCenter() const;
+
+        [[nodiscard]] const AutoNodeContainer& GetNavigationNodes() const noexcept;
+        [[nodiscard]] AutoNodeContainer& GetNavigationNodes() noexcept;
 
         //-------------------------------------------------
         // Setter
@@ -145,6 +150,11 @@ namespace sg::city::map
          * @brief The region Id of the Tile. Tiles in the same region are connected.
          */
         int m_region{ 0 };
+
+        /**
+         * @brief Each Tile links to multiple auto nodes.
+         */
+        AutoNodeContainer m_navigationNodes;
 
         //-------------------------------------------------
         // Init
