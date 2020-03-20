@@ -126,7 +126,7 @@ void GameState::Init()
     m_scene = std::make_unique<sg::ogl::scene::Scene>(GetApplicationContext());
     m_scene->SetCurrentCamera(m_firstPersonCamera);
 
-    m_city = std::make_unique<sg::city::city::City>("SgCity", m_scene.get(), 128);
+    m_city = std::make_unique<sg::city::city::City>("SgCity", m_scene.get(), 6);
 
     m_mousePicker = std::make_unique<sg::city::input::MousePicker>(m_scene.get(), m_city->GetMapPtr());
     m_forwardRenderer = std::make_unique<sg::ogl::ecs::system::ForwardRenderSystem>(m_scene.get());

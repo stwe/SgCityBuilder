@@ -318,46 +318,38 @@ void sg::city::map::Map::CreateAutoNodes()
 
 void sg::city::map::Map::LinkTiles()
 {
-    // todo
-
     for (auto& tile : m_tiles)
     {
         auto& navigationNodes{ tile->GetNavigationNodes() };
 
-        // link north
+        // north
         if (static_cast<int>(tile->GetMapZ()) > 0)
         {
-            //SG_OGL_LOG_INFO("Map Z: {}", static_cast<int>(tile->GetMapZ()));
-
             for (auto i{ 0 }; i < 7; ++i)
             {
                 /*
-                  0  1  2  3  4  5  6 ^
-                 42 43 44 45 46 47 48 |
+                  0  1  2  3  4  5  6
+                 42 43 44 45 46 47 48
                 */
 
-                const auto index{ ((static_cast<int>(tile->GetMapZ()) - 1) * 128 + (static_cast<int>(tile->GetMapX()))) * 49 };
-
-                //SG_OGL_LOG_INFO("nav: {}, auto: {}", 42 + i, index + i);
-
-                navigationNodes[42 + i] = m_autoNodes[index + i];
+                const auto idx{ GetTileIndexByPosition(static_cast<int>(tile->GetMapX()), static_cast<int>(tile->GetMapZ()) - 1) * 49 };
+                navigationNodes[i] = m_autoNodes[idx + 42 + i];
             }
         }
         else
         {
             for (auto i{ 0 }; i < 7; ++i)
             {
-                navigationNodes[42 + i].reset();
+                navigationNodes[i].reset();
             }
         }
 
-        // link west
+        // west
         if (static_cast<int>(tile->GetMapX()) > 0)
         {
             for (auto i{ 6 }; i >= 0 ; --i)
             {
                 /*
-                    <---
                 48  42
                 41  35
                 34  28
@@ -367,11 +359,8 @@ void sg::city::map::Map::LinkTiles()
                  6   0
                 */
 
-                const auto index{ (static_cast<int>(tile->GetMapZ()) * 128 + (static_cast<int>(tile->GetMapX()) - 1)) * 49 };
-
-                //SG_OGL_LOG_INFO("nav: {}, auto: {}", i * 7, index + 6 + i * 7);
-
-                navigationNodes[i * 7] = m_autoNodes[index + 6 + i * 7];
+                const auto idx{ GetTileIndexByPosition(static_cast<int>(tile->GetMapX() - 1), static_cast<int>(tile->GetMapZ())) * 49 };
+                navigationNodes[i * 7] = m_autoNodes[idx + 6 + i * 7];
             }
         }
         else
@@ -382,7 +371,7 @@ void sg::city::map::Map::LinkTiles()
             }
         }
 
-        // link south
+        // south
         if (static_cast<int>(tile->GetMapZ()) < m_mapSize - 1)
         {
         }
@@ -390,11 +379,11 @@ void sg::city::map::Map::LinkTiles()
         {
             for (auto i{ 0 }; i < 7; ++i)
             {
-                navigationNodes[i].reset();
+                navigationNodes[42 + i].reset();
             }
         }
 
-        // link east
+        // east
         if (static_cast<int>(tile->GetMapX()) < m_mapSize - 1)
         {
         }
@@ -402,23 +391,22 @@ void sg::city::map::Map::LinkTiles()
         {
             for (auto i{ 6 }; i >= 0; --i)
             {
-                const auto index{ 6 + i * 7 };
-                navigationNodes[index].reset();
+                navigationNodes[6 + i * 7].reset();
             }
         }
 
-        navigationNodes[9].reset();
-        navigationNodes[11].reset();
-        navigationNodes[15].reset();
-        navigationNodes[19].reset();
-        navigationNodes[29].reset();
-        navigationNodes[33].reset();
         navigationNodes[37].reset();
         navigationNodes[39].reset();
-        navigationNodes[0].reset();
-        navigationNodes[6].reset();
+        navigationNodes[29].reset();
+        navigationNodes[33].reset();
+        navigationNodes[15].reset();
+        navigationNodes[19].reset();
+        navigationNodes[9].reset();
+        navigationNodes[11].reset();
         navigationNodes[42].reset();
         navigationNodes[48].reset();
+        navigationNodes[0].reset();
+        navigationNodes[6].reset();
     }
 }
 
