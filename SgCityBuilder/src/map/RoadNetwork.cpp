@@ -111,6 +111,9 @@ void sg::city::map::RoadNetwork::StoreRoadOnPosition(const glm::vec3& t_mapPoint
 
     // update draw count
     m_roadNetworkMesh->GetVao().SetDrawCount(nrTiles * Tile::VERTICES_PER_TILE);
+
+    // update the RoadNetwork
+    Update();
 }
 
 void sg::city::map::RoadNetwork::StoreRoadOnPosition(const int t_mapX, const int t_mapZ)
@@ -122,6 +125,7 @@ void sg::city::map::RoadNetwork::StoreRoadOnPosition(const int t_mapX, const int
 // Update
 //-------------------------------------------------
 
+// todo: make private
 void sg::city::map::RoadNetwork::Update()
 {
     auto tileIndex{ 0 };

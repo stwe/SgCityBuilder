@@ -124,9 +124,6 @@ sg::city::util::Debug& sg::city::city::City::GetDebug()
 
 void sg::city::city::City::Update(const double t_dt)
 {
-    m_roadNetwork->Update(); // todo: do this only when necessary
-    m_buildingGenerator->Update();
-
     m_currentTime += static_cast<float>(t_dt);
 
     if (m_currentTime < m_timePerDay)

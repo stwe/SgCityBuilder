@@ -11,8 +11,6 @@
 #include "map/RoadNetwork.h"
 #include "map/BuildingGenerator.h"
 #include "map/Tile.h"
-#include "ecs/Components.h"
-#include "ecs/MoveSystem.h"
 #include "input/MousePicker.h"
 #include "city/City.h"
 #include "util/Debug.h"
@@ -66,6 +64,10 @@ bool GameState::Input()
             if (m_currentTileType == sg::city::map::Map::TileType::TRAFFIC_NETWORK)
             {
                 m_city->GetRoadNetwork().StoreRoadOnPosition(m_mapPoint);
+
+                // to render the generated AutoNodes
+                auto& debug{ m_city->GetDebug() };
+                debug.InitAutoNodesMesh(true);
             }
             else if (m_currentTileType == sg::city::map::Map::TileType::RESIDENTIAL)
             {
@@ -97,8 +99,6 @@ void GameState::Render()
     m_city->RenderRoadNetwork();
     m_city->RenderBuildings();
 
-    m_forwardRenderer->Render();
-
     m_textRenderer->RenderText("SgCityBuilder", 10.0f, 10.0f, 0.25f, glm::vec3(0.1f));
 
     RenderImGui();
@@ -129,7 +129,6 @@ void GameState::Init()
     m_city = std::make_unique<sg::city::city::City>("SgCity", m_scene.get(), 6);
 
     m_mousePicker = std::make_unique<sg::city::input::MousePicker>(m_scene.get(), m_city->GetMapPtr());
-    m_forwardRenderer = std::make_unique<sg::ogl::ecs::system::ForwardRenderSystem>(m_scene.get());
     m_textRenderer = std::make_unique<sg::ogl::ecs::system::TextRenderSystem>(m_scene.get(), "res/font/bitter/Bitter-Italic.otf");
 
     CreateExampleRoads();
@@ -151,7 +150,7 @@ void GameState::CreateExampleRoads() const
     roadNetwork.StoreRoadOnPosition(2, 1);
     roadNetwork.StoreRoadOnPosition(3, 1);
 
-    // to render the auto nodes
+    // to render the generated AutoNodes
     auto& debug{ m_city->GetDebug() };
     debug.InitAutoNodesMesh(true);
 }

@@ -74,6 +74,9 @@ void sg::city::map::BuildingGenerator::StoreBuildingOnPosition(const glm::vec3& 
 
     // Add a building (there is currently only one type of building)
     AddBuildingInstance(t_mapPoint);
+
+    // update BuildingGenerator
+    Update();
 }
 
 //-------------------------------------------------
