@@ -15,6 +15,7 @@
 #include <camera/Camera.h>
 #include "Debug.h"
 #include "automata/AutoNode.h"
+#include "automata/AutoTrack.h"
 #include "shader/LineShader.h"
 #include "shader/NodeShader.h"
 #include "map/Map.h"
@@ -41,33 +42,10 @@ sg::city::util::Debug::~Debug() noexcept
 }
 
 //-------------------------------------------------
-// Lines
+// Render
 //-------------------------------------------------
 
-void sg::city::util::Debug::AddLine(const glm::vec3& t_position0, const glm::vec3& t_position1, const glm::vec3& t_color)
-{
-    auto lineMesh{ std::make_unique<ogl::resource::Mesh>() };
-
-    const ogl::buffer::BufferLayout bufferLayout{
-        { ogl::buffer::VertexAttributeType::POSITION, "aPosition" },
-        { ogl::buffer::VertexAttributeType::COLOR, "aColor" },
-    };
-
-    VertexContainer vertices{
-        t_position0.x, t_position0.y, t_position0.z, t_color.x, t_color.y, t_color.z,
-        t_position1.x, t_position1.y, t_position1.z, t_color.x, t_color.y, t_color.z,
-    };
-
-    lineMesh->GetVao().AddVertexDataVbo(vertices.data(), 2, bufferLayout);
-
-    m_lineMeshContainer.push_back(std::move(lineMesh));
-}
-
-//-------------------------------------------------
-// Logic
-//-------------------------------------------------
-
-void sg::city::util::Debug::RenderLines()
+void sg::city::util::Debug::RenderAutoTrackLines()
 {
     auto& shader{ m_scene->GetApplicationContext()->GetShaderManager().GetShaderProgram<shader::LineShader>() };
     shader.Bind();
@@ -87,8 +65,13 @@ void sg::city::util::Debug::RenderLines()
     ogl::resource::ShaderProgram::Unbind();
 }
 
-void sg::city::util::Debug::RenderAutoNodes()
+void sg::city::util::Debug::RenderAutoNodes(const float t_size) const
 {
+    if (!m_nodesMesh || m_nodesMesh->GetVao().GetDrawCount() == 0)
+    {
+        return;
+    }
+
     auto& shader{ m_scene->GetApplicationContext()->GetShaderManager().GetShaderProgram<shader::NodeShader>() };
     shader.Bind();
 
@@ -97,7 +80,7 @@ void sg::city::util::Debug::RenderAutoNodes()
 
     shader.SetUniform("mvpMatrix", mvp);
 
-    glPointSize(4);
+    glPointSize(t_size);
 
     m_nodesMesh->InitDraw();
     m_nodesMesh->DrawPrimitives(GL_POINTS);
@@ -107,17 +90,17 @@ void sg::city::util::Debug::RenderAutoNodes()
 }
 
 //-------------------------------------------------
-// Init
+// Update
 //-------------------------------------------------
 
-void sg::city::util::Debug::InitAutoNodesMesh(const bool t_trafficOnly)
+void sg::city::util::Debug::UpdateAutoNodesMesh(const bool t_trafficOnly)
 {
-    m_nodeVertices.clear();
-
     if (m_nodesMesh)
     {
         m_nodesMesh.reset();
     }
+
+    VertexContainer vertexContainer;
 
     for (auto& tile : m_map->GetTiles())
     {
@@ -130,13 +113,26 @@ void sg::city::util::Debug::InitAutoNodesMesh(const bool t_trafficOnly)
             {
                 if (autoNode)
                 {
-                    m_nodeVertices.push_back(autoNode->position.x);
-                    m_nodeVertices.push_back(0.025f);
-                    m_nodeVertices.push_back(autoNode->position.z);
+                    // position
+                    vertexContainer.push_back(autoNode->position.x);
+                    vertexContainer.push_back(VERTEX_HEIGHT);
+                    vertexContainer.push_back(autoNode->position.z);
 
-                    m_nodeVertices.push_back(0.0f);
-                    m_nodeVertices.push_back(0.0f);
-                    m_nodeVertices.push_back(1.0f);
+                    // color
+                    if (autoNode->block)
+                    {
+                        // red
+                        vertexContainer.push_back(1.0f);
+                        vertexContainer.push_back(0.0f);
+                        vertexContainer.push_back(0.0f);
+                    }
+                    else
+                    {
+                        // green
+                        vertexContainer.push_back(0.0f);
+                        vertexContainer.push_back(1.0f);
+                        vertexContainer.push_back(0.0f);
+                    }
                 }
             }
         }
@@ -149,5 +145,48 @@ void sg::city::util::Debug::InitAutoNodesMesh(const bool t_trafficOnly)
         { ogl::buffer::VertexAttributeType::COLOR, "aColor" },
     };
 
-    m_nodesMesh->GetVao().AddVertexDataVbo(m_nodeVertices.data(), static_cast<int32_t>(m_nodeVertices.size()) / 6, bufferLayout);
+    m_nodesMesh->GetVao().AddVertexDataVbo(vertexContainer.data(), static_cast<int32_t>(vertexContainer.size()) / 6, bufferLayout);
+}
+
+void sg::city::util::Debug::UpdateAutoTrackMeshes()
+{
+    if (!m_lineMeshContainer.empty())
+    {
+        m_lineMeshContainer.clear();
+    }
+
+    for (auto& tile : m_map->GetTiles())
+    {
+        for (auto& autoTrack : tile->GetAutoTracks())
+        {
+            AddAutoTrackLine(
+                glm::vec3(autoTrack->startNode->position.x, VERTEX_HEIGHT, autoTrack->startNode->position.z),
+                glm::vec3(autoTrack->endNode->position.x, VERTEX_HEIGHT, autoTrack->endNode->position.z),
+                glm::vec3(0.0f, 0.0f, 1.0f)
+            );
+        }
+    }
+}
+
+//-------------------------------------------------
+// Helper
+//-------------------------------------------------
+
+void sg::city::util::Debug::AddAutoTrackLine(const glm::vec3& t_position0, const glm::vec3& t_position1, const glm::vec3& t_color)
+{
+    auto lineMesh{ std::make_unique<ogl::resource::Mesh>() };
+
+    const ogl::buffer::BufferLayout bufferLayout{
+        { ogl::buffer::VertexAttributeType::POSITION, "aPosition" },
+        { ogl::buffer::VertexAttributeType::COLOR, "aColor" },
+    };
+
+    VertexContainer vertices{
+        t_position0.x, t_position0.y, t_position0.z, t_color.x, t_color.y, t_color.z,
+        t_position1.x, t_position1.y, t_position1.z, t_color.x, t_color.y, t_color.z,
+    };
+
+    lineMesh->GetVao().AddVertexDataVbo(vertices.data(), 2, bufferLayout);
+
+    m_lineMeshContainer.push_back(std::move(lineMesh));
 }

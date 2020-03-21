@@ -10,7 +10,14 @@
 #pragma once
 
 #include <glm/vec2.hpp>
+#include <list>
 #include "Map.h"
+
+namespace sg::city::automata
+{
+    class AutoNode;
+    class AutoTrack;
+}
 
 namespace sg::city::map
 {
@@ -39,6 +46,8 @@ namespace sg::city::map
         using NeighbourContainer = std::array<Tile*, static_cast<int>(Directions::SIZE)>;
         using AutoNodeSharedPtr = std::shared_ptr<automata::AutoNode>;
         using AutoNodeContainer = std::vector<AutoNodeSharedPtr>;
+        using AutoTrackSharedPtr = std::shared_ptr<automata::AutoTrack>;
+        using AutoTrackContainer = std::list<AutoTrackSharedPtr>;
 
         //-------------------------------------------------
         // Public member
@@ -86,6 +95,9 @@ namespace sg::city::map
 
         [[nodiscard]] const AutoNodeContainer& GetNavigationNodes() const noexcept;
         [[nodiscard]] AutoNodeContainer& GetNavigationNodes() noexcept;
+
+        [[nodiscard]] const AutoTrackContainer& GetAutoTracks() const noexcept;
+        [[nodiscard]] AutoTrackContainer& GetAutoTracks() noexcept;
 
         //-------------------------------------------------
         // Setter
@@ -155,6 +167,11 @@ namespace sg::city::map
          * @brief Each Tile links to multiple auto nodes.
          */
         AutoNodeContainer m_navigationNodes;
+
+        /**
+         * @brief Each Tile can have a number of auto tracks.
+         */
+        AutoTrackContainer m_autoTracks;
 
         //-------------------------------------------------
         // Init

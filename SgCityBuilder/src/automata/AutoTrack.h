@@ -40,7 +40,14 @@ namespace sg::city::automata
         // Ctors. / Dtor.
         //-------------------------------------------------
 
+        AutoTrack() = default;
 
+        AutoTrack(const AutoTrack& t_other) = delete;
+        AutoTrack(AutoTrack&& t_other) noexcept = delete;
+        AutoTrack& operator=(const AutoTrack& t_other) = delete;
+        AutoTrack& operator=(AutoTrack&& t_other) noexcept = delete;
+
+        ~AutoTrack() noexcept = default;
 
     protected:
 

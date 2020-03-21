@@ -16,9 +16,13 @@ namespace sg::ogl::resource
     class Mesh;
 }
 
+namespace sg::city::city
+{
+    class City;
+}
+
 namespace sg::city::map
 {
-    class Map;
     class Tile;
 
     class RoadNetwork
@@ -64,7 +68,7 @@ namespace sg::city::map
 
         RoadNetwork() = delete;
 
-        explicit RoadNetwork(Map* t_map);
+        explicit RoadNetwork(city::City* t_city);
 
         RoadNetwork(const RoadNetwork& t_other) = delete;
         RoadNetwork(RoadNetwork&& t_other) noexcept = delete;
@@ -94,14 +98,15 @@ namespace sg::city::map
         //-------------------------------------------------
 
         void Update();
+        void UpdateAutoTracks();
 
     protected:
 
     private:
         /**
-         * @brief A pointer to the parent Map.
+         * @brief A pointer to the parent City.
          */
-        Map* m_map{ nullptr };
+        city::City* m_city{ nullptr };
 
         /**
          * @brief A Mesh instance for the RoadNetwork.
@@ -147,5 +152,11 @@ namespace sg::city::map
         static RoadType GetRoadType(const Tile& t_tile);
 
         void UpdateVbo();
+
+        //-------------------------------------------------
+        // Helper
+        //-------------------------------------------------
+
+        void AddAutoTrack(Tile& t_tile, int t_fromNodeIndex, int t_toNodeIndex) const;
     };
 }

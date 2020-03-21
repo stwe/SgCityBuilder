@@ -88,6 +88,16 @@ sg::city::map::Tile::AutoNodeContainer& sg::city::map::Tile::GetNavigationNodes(
     return m_navigationNodes;
 }
 
+const sg::city::map::Tile::AutoTrackContainer& sg::city::map::Tile::GetAutoTracks() const noexcept
+{
+    return m_autoTracks;
+}
+
+sg::city::map::Tile::AutoTrackContainer& sg::city::map::Tile::GetAutoTracks() noexcept
+{
+    return m_autoTracks;
+}
+
 //-------------------------------------------------
 // Setter
 //-------------------------------------------------

@@ -13,7 +13,6 @@
 #include "map/Tile.h"
 #include "input/MousePicker.h"
 #include "city/City.h"
-#include "util/Debug.h"
 
 // todo: remove roads
 // todo: remove buildings
@@ -64,10 +63,6 @@ bool GameState::Input()
             if (m_currentTileType == sg::city::map::Map::TileType::TRAFFIC_NETWORK)
             {
                 m_city->GetRoadNetwork().StoreRoadOnPosition(m_mapPoint);
-
-                // to render the generated AutoNodes
-                auto& debug{ m_city->GetDebug() };
-                debug.InitAutoNodesMesh(true);
             }
             else if (m_currentTileType == sg::city::map::Map::TileType::RESIDENTIAL)
             {
@@ -149,10 +144,6 @@ void GameState::CreateExampleRoads() const
     roadNetwork.StoreRoadOnPosition(4, 1);
     roadNetwork.StoreRoadOnPosition(2, 1);
     roadNetwork.StoreRoadOnPosition(3, 1);
-
-    // to render the generated AutoNodes
-    auto& debug{ m_city->GetDebug() };
-    debug.InitAutoNodesMesh(true);
 }
 
 //-------------------------------------------------

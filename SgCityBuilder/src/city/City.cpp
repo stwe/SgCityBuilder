@@ -158,7 +158,7 @@ void sg::city::city::City::RenderMap() const
     m_mapRenderer->Render();
 
     m_debug->RenderAutoNodes();
-    //m_debug->RenderLines();
+    m_debug->RenderAutoTrackLines();
 }
 
 void sg::city::city::City::RenderRoadNetwork() const
@@ -197,7 +197,7 @@ void sg::city::city::City::Init(ogl::scene::Scene* t_scene, const int t_mapSize)
     m_map->scale = glm::vec3(1.0f);
 
     // create RoadNetwork
-    m_roadNetwork = std::make_shared<map::RoadNetwork>(m_map.get());
+    m_roadNetwork = std::make_shared<map::RoadNetwork>(this);
 
     // create BuildingGenerator
     m_buildingGenerator = std::make_shared<map::BuildingGenerator>(m_map.get());

@@ -83,6 +83,7 @@ void sg::city::map::BuildingGenerator::StoreBuildingOnPosition(const glm::vec3& 
 // Update
 //-------------------------------------------------
 
+// todo make private
 void sg::city::map::BuildingGenerator::Update()
 {
     UpdateVbo();

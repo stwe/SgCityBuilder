@@ -10,18 +10,26 @@
 #pragma once
 
 #include <glm/vec3.hpp>
+#include <list>
+#include <memory>
 
 namespace sg::city::automata
 {
+    class AutoTrack;
+
     class AutoNode
     {
     public:
+        using AutoTrackSharedPtr = std::shared_ptr<AutoTrack>;
+        using AutoTrackContainer = std::list<AutoTrackSharedPtr>;
+
         //-------------------------------------------------
         // Public member
         //-------------------------------------------------
 
         glm::vec3 position{ glm::vec3(0.0f) };
         bool block{ false };
+        AutoTrackContainer autoTracks;
 
         //-------------------------------------------------
         // Ctors. / Dtor.
