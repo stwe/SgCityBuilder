@@ -222,9 +222,9 @@ void sg::city::map::RoadNetwork::UpdateAutoTracks()
         switch (GetRoadType(tile))
         {
         case RoadType::ROAD_H: AddAutoTrack(tile, 28, 34);
-                               AddAutoTrack(tile, 14, 20);
+                               AddAutoTrack(tile, 14, 20, true);
                                break;
-        case RoadType::ROAD_V: AddAutoTrack(tile, 44, 2);
+        case RoadType::ROAD_V: AddAutoTrack(tile, 44, 2, true);
                                AddAutoTrack(tile, 46, 4);
                                break;
 
@@ -457,7 +457,7 @@ void sg::city::map::RoadNetwork::UpdateVbo()
 // Helper
 //-------------------------------------------------
 
-void sg::city::map::RoadNetwork::AddAutoTrack(Tile& t_tile, const int t_fromNodeIndex, const int t_toNodeIndex) const
+void sg::city::map::RoadNetwork::AddAutoTrack(Tile& t_tile, const int t_fromNodeIndex, const int t_toNodeIndex, const bool t_safeCarAutoTrack) const
 {
     if (t_tile.GetNavigationNodes()[t_fromNodeIndex] && t_tile.GetNavigationNodes()[t_toNodeIndex])
     {
@@ -467,6 +467,11 @@ void sg::city::map::RoadNetwork::AddAutoTrack(Tile& t_tile, const int t_fromNode
         track->tile = &t_tile;
 
         t_tile.GetAutoTracks().push_back(track);
+
+        if (t_safeCarAutoTrack)
+        {
+            t_tile.safeCarAutoTrack = track;
+        }
 
         t_tile.GetNavigationNodes()[t_fromNodeIndex]->autoTracks.push_back(track);
         t_tile.GetNavigationNodes()[t_toNodeIndex]->autoTracks.push_back(track);

@@ -12,6 +12,11 @@
 #include <memory>
 #include <stack>
 
+namespace sg::city::automata
+{
+    class Automata;
+}
+
 namespace sg::city::map
 {
     class Map;
@@ -21,6 +26,11 @@ namespace sg::city::map
 
 namespace sg::city::ecs
 {
+    struct AutomataComponent
+    {
+        std::shared_ptr<automata::Automata> automata;
+    };
+
     struct MapComponent
     {
         std::shared_ptr<map::Map> map;

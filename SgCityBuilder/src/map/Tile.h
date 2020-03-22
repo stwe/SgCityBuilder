@@ -54,6 +54,7 @@ namespace sg::city::map
         //-------------------------------------------------
 
         float population{ 0.0 };
+        AutoTrackSharedPtr safeCarAutoTrack;
 
         //-------------------------------------------------
         // Ctors. / Dtor.

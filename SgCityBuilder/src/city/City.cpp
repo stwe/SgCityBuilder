@@ -18,6 +18,9 @@
 #include "renderer/RoadNetworkRenderer.h"
 #include "renderer/BuildingsRenderer.h"
 #include "util/Debug.h"
+#include "automata/AutoNode.h"
+#include "automata/AutoTrack.h"
+#include "automata/Automata.h"
 
 //-------------------------------------------------
 // Ctors. / Dtor.
@@ -181,6 +184,35 @@ sg::city::city::City::PathPositionContainer sg::city::city::City::Path(const int
     const auto toTileIndex{ m_map->GetTileIndexByPosition(t_toMapX, t_toMapZ) };
 
     return m_astar->FindPath(fromTileIndex, toTileIndex);
+}
+
+//-------------------------------------------------
+// Spawn
+//-------------------------------------------------
+
+void sg::city::city::City::SpawnCar(const glm::vec3& t_mapPoint)
+{
+    // get Tile at position
+    auto& tile{ m_map->GetTileByPosition(t_mapPoint) };
+
+    // get a safe AutoTrack
+    auto& safeAutoTrack{ tile.safeCarAutoTrack };
+    if (!safeAutoTrack)
+    {
+        return;
+    }
+
+    SG_OGL_LOG_INFO("Spawn new Car at map x: {}, map z: {}", tile.GetMapX(), tile.GetMapZ());
+
+    // create an Automata
+    auto automata{ std::make_shared<automata::Automata>() };
+    automata->autoLength = 0.2f;
+    automata->currentTrack = safeAutoTrack;
+    automata->currentTrack->automatas.push_back(automata);
+    automata->originNode = safeAutoTrack->startNode;
+    automata->Update(0.0f);
+
+    automatas.push_back(automata);
 }
 
 //-------------------------------------------------

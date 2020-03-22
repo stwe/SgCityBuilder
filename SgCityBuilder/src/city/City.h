@@ -13,10 +13,16 @@
 #include <string>
 #include <stack>
 #include <glm/vec2.hpp>
+#include <glm/vec3.hpp>
 
 namespace sg::ogl::scene
 {
     class Scene;
+}
+
+namespace sg::city::automata
+{
+    class Automata;
 }
 
 namespace sg::city::map
@@ -58,9 +64,14 @@ namespace sg::city::city
 
         using PathPositionContainer = std::stack<glm::vec2>;
 
+        using AutomataSharedPtr = std::shared_ptr<automata::Automata>;
+        using AutomataContainer = std::list<AutomataSharedPtr>;
+
         static constexpr auto BIRTH_RATE{ 0.00055f };
         static constexpr auto DEATH_RATE{ 0.00023f };
         static constexpr auto MOVE_POPULATION_RATE{ 4 };
+
+        AutomataContainer automatas;
 
         //-------------------------------------------------
         // Ctors. / Dtor.
@@ -116,6 +127,12 @@ namespace sg::city::city
         //-------------------------------------------------
 
         [[nodiscard]] PathPositionContainer Path(int t_fromMapX, int t_fromMapZ, int t_toMapX, int t_toMapZ) const;
+
+        //-------------------------------------------------
+        // Spawn
+        //-------------------------------------------------
+
+        void SpawnCar(const glm::vec3& t_mapPoint);
 
     protected:
 

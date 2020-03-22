@@ -10,6 +10,8 @@
 #pragma once
 
 #include <memory>
+#include <glm/vec3.hpp>
+#include <list>
 
 namespace sg::city::map
 {
@@ -19,11 +21,14 @@ namespace sg::city::map
 namespace sg::city::automata
 {
     class AutoNode;
+    class Automata;
 
     class AutoTrack
     {
     public:
         using AutoNodeSharedPtr = std::shared_ptr<AutoNode>;
+        using AutomataSharedPtr = std::shared_ptr<Automata>;
+        using AutomataContainer = std::list<AutomataSharedPtr>;
 
         //-------------------------------------------------
         // Public member
@@ -35,6 +40,8 @@ namespace sg::city::automata
         map::Tile* tile{ nullptr };
 
         float trackLength{ 1.0f };
+
+        AutomataContainer automatas;
 
         //-------------------------------------------------
         // Ctors. / Dtor.
@@ -48,6 +55,12 @@ namespace sg::city::automata
         AutoTrack& operator=(AutoTrack&& t_other) noexcept = delete;
 
         ~AutoTrack() noexcept = default;
+
+        //-------------------------------------------------
+        // Getter
+        //-------------------------------------------------
+
+        [[nodiscard]] glm::vec3 GetPosition(float t_dt, const AutoNodeSharedPtr& t_node) const;
 
     protected:
 

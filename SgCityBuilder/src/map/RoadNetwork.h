@@ -157,6 +157,6 @@ namespace sg::city::map
         // Helper
         //-------------------------------------------------
 
-        void AddAutoTrack(Tile& t_tile, int t_fromNodeIndex, int t_toNodeIndex) const;
+        void AddAutoTrack(Tile& t_tile, int t_fromNodeIndex, int t_toNodeIndex, bool t_safeCarAutoTrack = false) const;
     };
 }

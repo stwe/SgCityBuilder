@@ -13,6 +13,8 @@
 #include "map/Tile.h"
 #include "input/MousePicker.h"
 #include "city/City.h"
+#include "automata/Automata.h"
+#include "ecs/Components.h"
 
 // todo: remove roads
 // todo: remove buildings
@@ -75,6 +77,32 @@ bool GameState::Input()
 
             m_city->GetMap().FindConnectedRegions();
         }
+
+        // spwan a single car
+        /*
+        if (!m_changed)
+        {
+            m_city->SpawnCar(m_mapPoint);
+
+            for (auto& automata : m_city->automatas)
+            {
+                auto e{ GetApplicationContext()->GetEntityFactory().CreateModelEntity(
+                    "res/model/Plane1/plane1.obj",
+                    glm::vec3(automata->pos.x, 0.015f, automata->pos.z),
+                    glm::vec3(0.0f),
+                    glm::vec3(0.125f / 4.0f),
+                    false
+                ) };
+
+                GetApplicationContext()->registry.assign<sg::city::ecs::AutomataComponent>(
+                    e,
+                    automata
+                );
+            }
+
+            m_changed = true;
+        }
+        */
     }
 
     return true;
@@ -85,6 +113,25 @@ bool GameState::Update(const double t_dt)
     m_scene->GetCurrentCamera().Update(t_dt);
     m_city->Update(t_dt);
 
+    for (auto& automata : m_city->automatas)
+    {
+        automata->Update(t_dt);
+    }
+
+    auto view{ m_scene->GetApplicationContext()->registry.view<
+            sg::ogl::ecs::component::ModelComponent,
+            sg::ogl::ecs::component::TransformComponent,
+            sg::city::ecs::AutomataComponent>()
+    };
+
+    for (auto entity : view)
+    {
+        auto& automataComponent{ view.get<sg::city::ecs::AutomataComponent>(entity) };
+        auto& transformComponent{ view.get<sg::ogl::ecs::component::TransformComponent>(entity) };
+
+        transformComponent.position = glm::vec3(automataComponent.automata->pos.x, 0.015f, automataComponent.automata->pos.z);
+    }
+
     return true;
 }
 
@@ -93,6 +140,8 @@ void GameState::Render()
     m_city->RenderMap();
     m_city->RenderRoadNetwork();
     m_city->RenderBuildings();
+
+    m_forwardRenderer->Render();
 
     m_textRenderer->RenderText("SgCityBuilder", 10.0f, 10.0f, 0.25f, glm::vec3(0.1f));
 
@@ -125,8 +174,9 @@ void GameState::Init()
 
     m_mousePicker = std::make_unique<sg::city::input::MousePicker>(m_scene.get(), m_city->GetMapPtr());
     m_textRenderer = std::make_unique<sg::ogl::ecs::system::TextRenderSystem>(m_scene.get(), "res/font/bitter/Bitter-Italic.otf");
+    m_forwardRenderer = std::make_unique<sg::ogl::ecs::system::ForwardRenderSystem>(m_scene.get());
 
-    CreateExampleRoads();
+    //CreateExampleRoads();
 }
 
 void GameState::CreateExampleRoads() const
