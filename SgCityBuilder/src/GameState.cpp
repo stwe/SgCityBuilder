@@ -62,20 +62,24 @@ bool GameState::Input()
 
         if (m_mapPoint.x >= 0.0)
         {
+            SG_OGL_LOG_INFO("x: {}, z: {}", m_mapPoint.x, m_mapPoint.z);
+
             if (m_currentTileType == sg::city::map::Map::TileType::TRAFFIC_NETWORK)
             {
-                m_city->GetRoadNetwork().StoreRoadOnPosition(m_mapPoint);
+                //m_city->GetRoadNetwork().StoreRoadOnPosition(m_mapPoint);
             }
             else if (m_currentTileType == sg::city::map::Map::TileType::RESIDENTIAL)
             {
-                m_city->GetBuildingGenerator().StoreBuildingOnPosition(m_mapPoint);
+               // m_city->GetBuildingGenerator().StoreBuildingOnPosition(m_mapPoint);
             }
             else
             {
-                m_city->GetMap().ChangeTileTypeOnPosition(m_mapPoint, m_currentTileType);
+                //m_city->GetMap().ChangeTileTypeOnPosition(m_mapPoint, m_currentTileType);
             }
 
-            m_city->GetMap().FindConnectedRegions();
+            m_city->GetMap().ChangeTileTypeOnMapPosition(m_mapPoint.x, m_mapPoint.z, m_currentTileType);
+
+            //m_city->GetMap().FindConnectedRegions();
         }
 
         // spwan a single car
@@ -113,6 +117,7 @@ bool GameState::Update(const double t_dt)
     m_scene->GetCurrentCamera().Update(t_dt);
     m_city->Update(t_dt);
 
+    /*
     for (auto& automata : m_city->automatas)
     {
         automata->Update(t_dt);
@@ -131,6 +136,7 @@ bool GameState::Update(const double t_dt)
 
         transformComponent.position = glm::vec3(automataComponent.automata->pos.x, 0.015f, automataComponent.automata->pos.z);
     }
+    */
 
     return true;
 }
@@ -138,10 +144,10 @@ bool GameState::Update(const double t_dt)
 void GameState::Render()
 {
     m_city->RenderMap();
-    m_city->RenderRoadNetwork();
-    m_city->RenderBuildings();
+    //m_city->RenderRoadNetwork();
+    //m_city->RenderBuildings();
 
-    m_forwardRenderer->Render();
+    //m_forwardRenderer->Render();
 
     m_textRenderer->RenderText("SgCityBuilder", 10.0f, 10.0f, 0.25f, glm::vec3(0.1f));
 
@@ -281,9 +287,9 @@ void GameState::RenderImGui()
 
     if (m_mapPoint.x >= 0.0)
     {
-        const auto& tile{ m_city->GetMap().GetTileByPosition(m_mapPoint) };
-        ImGui::Text("Current Tile x: %g", tile.GetMapX());
-        ImGui::Text("Current Tile z: %g", tile.GetMapZ());
+        //const auto& tile{ m_city->GetMap().GetTileByPosition(m_mapPoint) };
+        //ImGui::Text("Current Tile x: %i", tile.GetMapX());
+        //ImGui::Text("Current Tile z: %i", tile.GetMapZ());
     }
 
     ImGui::Text("Current number of regions: %i", m_city->GetMap().GetNumRegions());

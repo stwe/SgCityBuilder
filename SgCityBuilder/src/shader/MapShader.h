@@ -14,6 +14,7 @@
 #include <camera/Camera.h>
 #include <Window.h>
 #include "ecs/Components.h"
+#include "map/Map.h"
 
 namespace sg::city::shader
 {
@@ -38,11 +39,11 @@ namespace sg::city::shader
             SetUniform("tileTexture[3]", 3);
             SetUniform("tileTexture[4]", 4);
 
-            ogl::resource::TextureManager::BindForReading(mapComponent.map->GetTileTypeTextures()[0], GL_TEXTURE0);
-            ogl::resource::TextureManager::BindForReading(mapComponent.map->GetTileTypeTextures()[1], GL_TEXTURE1);
-            ogl::resource::TextureManager::BindForReading(mapComponent.map->GetTileTypeTextures()[2], GL_TEXTURE2);
-            ogl::resource::TextureManager::BindForReading(mapComponent.map->GetTileTypeTextures()[3], GL_TEXTURE3);
-            ogl::resource::TextureManager::BindForReading(mapComponent.map->GetTileTypeTextures()[4], GL_TEXTURE4);
+            ogl::resource::TextureManager::BindForReading(mapComponent.map->GetTileTypeTextures().at(map::Map::TileType::NONE), GL_TEXTURE0);
+            ogl::resource::TextureManager::BindForReading(mapComponent.map->GetTileTypeTextures().at(map::Map::TileType::RESIDENTIAL), GL_TEXTURE1);
+            ogl::resource::TextureManager::BindForReading(mapComponent.map->GetTileTypeTextures().at(map::Map::TileType::COMMERCIAL), GL_TEXTURE2);
+            ogl::resource::TextureManager::BindForReading(mapComponent.map->GetTileTypeTextures().at(map::Map::TileType::INDUSTRIAL), GL_TEXTURE3);
+            ogl::resource::TextureManager::BindForReading(mapComponent.map->GetTileTypeTextures().at(map::Map::TileType::TRAFFIC_NETWORK), GL_TEXTURE4);
         }
 
         [[nodiscard]] std::string GetFolderName() const override

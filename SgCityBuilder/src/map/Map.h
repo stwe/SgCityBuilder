@@ -9,10 +9,6 @@
 
 #pragma once
 
-#include <vector>
-#include <array>
-#include <map>
-#include <memory>
 #include <glm/vec3.hpp>
 
 namespace sg::ogl
@@ -48,26 +44,36 @@ namespace sg::city::map
             RESIDENTIAL,
             COMMERCIAL,
             INDUSTRIAL,
-            TRAFFIC_NETWORK, // roads or rails
-            SIZE
+            TRAFFIC_NETWORK // roads or rails
         };
 
-        static constexpr std::array<glm::vec3, static_cast<int>(TileType::SIZE)> TILE_TYPE_COLOR{
-            glm::vec3(0.0f, 0.5f, 0.0f), // green:  None
-            glm::vec3(0.0f, 0.8f, 0.0f), // lime:   Residential
-            glm::vec3(0.0f, 0.0f, 0.8f), // blue:   Commercial
-            glm::vec3(0.8f, 0.8f, 0.0f), // yellow: Industrial
-            glm::vec3(0.8f, 0.8f, 0.8f), // white:  Traffic Network
+        struct TileTypeHash
+        {
+            std::size_t operator()(TileType t_tileType) const
+            {
+                return static_cast<std::size_t>(t_tileType);
+            }
         };
 
-        using TileTypeTextureContainer = std::array<uint32_t, static_cast<int>(TileType::SIZE)>;
-        using MeshUniquePtr = std::unique_ptr<ogl::resource::Mesh>;
-        using TileUniquePtr = std::unique_ptr<Tile>;
-        using TileContainer = std::vector<TileUniquePtr>;
-        using TileTypeContainer = std::vector<TileType>;
-        using RandomColorContainer = std::map<int, ogl::Color>;
-        using AutoNodeSharedPtr = std::shared_ptr<automata::AutoNode>;
-        using AutoNodeContainer = std::vector<AutoNodeSharedPtr>;
+        inline static const std::unordered_map<TileType, glm::vec3, TileTypeHash> TILE_TYPE_COLOR
+        {
+            { TileType::NONE, glm::vec3(0.0f, 0.5f, 0.0f) },
+            { TileType::RESIDENTIAL, glm::vec3(0.0f, 0.8f, 0.0f) },
+            { TileType::COMMERCIAL, glm::vec3(0.0f, 0.0f, 0.8f) },
+            { TileType::INDUSTRIAL, glm::vec3(0.8f, 0.8f, 0.0f) },
+            { TileType::TRAFFIC_NETWORK, glm::vec3(0.8f, 0.8f, 0.8f) }
+        };
+
+        /**
+         * @brief Tile types that can build regions.
+         */
+        inline static const std::vector<TileType> REGION_TILE_TYPES
+        {
+            TileType::RESIDENTIAL,
+            TileType::COMMERCIAL,
+            TileType::INDUSTRIAL,
+            TileType::TRAFFIC_NETWORK
+        };
 
         /**
          * @brief 200 predefined colors are generated to show contiguous regions.
@@ -75,6 +81,18 @@ namespace sg::city::map
         static constexpr auto MAX_REGION_COLORS{ 200 };
 
         static constexpr auto NO_REGION{ 0 };
+
+        using TileTypeTextureContainer = std::unordered_map<TileType, uint32_t, TileTypeHash>;
+
+        using MeshUniquePtr = std::unique_ptr<ogl::resource::Mesh>;
+
+        using TileSharedPtr = std::shared_ptr<Tile>;
+        using TileContainer = std::vector<TileSharedPtr>;
+
+        using RandomColorContainer = std::unordered_map<int, ogl::Color>;
+
+        using NavigationNodeSharedPtr = std::shared_ptr<automata::AutoNode>;
+        using NavigationNodeContainer = std::vector<NavigationNodeSharedPtr>;
 
         //-------------------------------------------------
         // Public member
@@ -108,30 +126,42 @@ namespace sg::city::map
 
         [[nodiscard]] ogl::scene::Scene* GetScene() const;
 
+        [[nodiscard]] int GetMapSize() const;
+
         [[nodiscard]] const TileTypeTextureContainer& GetTileTypeTextures() const noexcept;
         [[nodiscard]] TileTypeTextureContainer& GetTileTypeTextures() noexcept;
-
-        [[nodiscard]] const ogl::resource::Mesh& GetMapMesh() const noexcept;
-        [[nodiscard]] ogl::resource::Mesh& GetMapMesh() noexcept;
 
         [[nodiscard]] const TileContainer& GetTiles() const noexcept;
         [[nodiscard]] TileContainer& GetTiles() noexcept;
 
-        [[nodiscard]] const AutoNodeContainer& GetAutoNodes() const noexcept;
-        [[nodiscard]] AutoNodeContainer& GetAutoNodes() noexcept;
+        [[nodiscard]] const NavigationNodeContainer& GetNavigationNodes() const noexcept;
+        [[nodiscard]] NavigationNodeContainer& GetNavigationNodes() noexcept;
+
+        [[nodiscard]] const ogl::resource::Mesh& GetMapMesh() const noexcept;
+        [[nodiscard]] ogl::resource::Mesh& GetMapMesh() noexcept;
+
+        [[nodiscard]] int GetNumRegions() const;
+
+        [[nodiscard]] uint32_t GetFloatCountOfMap() const;
+
+        //-------------------------------------------------
+        // Get Tile
+        //-------------------------------------------------
 
         [[nodiscard]] const Tile& GetTileByIndex(int t_tileIndex) const noexcept;
         [[nodiscard]] Tile& GetTileByIndex(int t_tileIndex) noexcept;
 
-        [[nodiscard]] const Tile& GetTileByPosition(const glm::vec3& t_mapPoint) const noexcept;
-        [[nodiscard]] Tile& GetTileByPosition(const glm::vec3& t_mapPoint) noexcept;
-
-        [[nodiscard]] int GetMapSize() const;
-
-        [[nodiscard]] int GetNumRegions() const;
+        /**
+         * @brief The tiles are stored in a 1D array (m_tiles). The function calculates the
+         *        index from the Tile position in Object Space.
+         * @param t_mapX The Map-x position of the Tile in Object Space.
+         * @param t_mapZ The Map-z position of the Tile in Object Space.
+         * @return The Tile index of the Tile in the Map.
+         */
+        [[nodiscard]] int GetTileMapIndexByMapPosition(int t_mapX, int t_mapZ) const;
 
         //-------------------------------------------------
-        // Create
+        // Create Map
         //-------------------------------------------------
 
         void CreateMap(int t_mapSize);
@@ -140,21 +170,13 @@ namespace sg::city::map
         // Update
         //-------------------------------------------------
 
-        void ChangeTileTypeOnPosition(const glm::vec3& t_mapPoint, TileType t_tileType);
-
-        //-------------------------------------------------
-        // Helper
-        //-------------------------------------------------
-
-        [[nodiscard]] uint32_t GetFloatCountOfMap() const;
-        [[nodiscard]] int GetTileIndexByPosition(const glm::vec3& t_mapPoint) const;
-        [[nodiscard]] int GetTileIndexByPosition(int t_x, int t_z) const;
+        void ChangeTileTypeOnMapPosition(int t_mapX, int t_mapZ, TileType t_tileType);
 
         //-------------------------------------------------
         // Regions
         //-------------------------------------------------
 
-        void FindConnectedRegions();
+        //void FindConnectedRegions();
 
     protected:
 
@@ -165,14 +187,14 @@ namespace sg::city::map
         ogl::scene::Scene* m_scene{ nullptr };
 
         /**
-         * @brief An array that contains a texture Id for each TileType.
+         * @brief The number of tiles in the x and z direction.
          */
-        TileTypeTextureContainer m_tileTypeTextures{ 0,0,0,0,0 };
+        int m_mapSize{ 0 };
 
         /**
-         * @brief A Mesh instance for the Map.
+         * @brief A container that stores a texture Id for each TileType.
          */
-        MeshUniquePtr m_mapMesh;
+        TileTypeTextureContainer m_tileTypeTextures;
 
         /**
          * @brief A container holding the Tile instances.
@@ -180,14 +202,19 @@ namespace sg::city::map
         TileContainer m_tiles;
 
         /**
-         * @brief The container with all auto nodes.
+         * @brief A container with randomly generated colors that e.g. can be used to display tile regions.
          */
-        AutoNodeContainer m_autoNodes;
+        RandomColorContainer m_randomColors;
 
         /**
-         * @brief The number of tiles in the x and z direction.
+         * @brief The container with the navigation nodes.
          */
-        int m_mapSize{ 0 };
+        NavigationNodeContainer m_navigationNodes;
+
+        /**
+         * @brief A Mesh instance for the Map.
+         */
+        MeshUniquePtr m_mapMesh;
 
         /**
          * @brief The Id of Vbo holding the vertices.
@@ -199,28 +226,22 @@ namespace sg::city::map
          */
         int m_numRegions{ 0 };
 
-        /**
-         * @brief Tiles of these types can build regions.
-         */
-        TileTypeContainer m_tileTypes{ TileType::RESIDENTIAL, TileType::COMMERCIAL, TileType::INDUSTRIAL, TileType::TRAFFIC_NETWORK };
+        //-------------------------------------------------
+        // Init
+        //-------------------------------------------------
 
-        /**
-         * @brief A container with randomly generated colors that e.g. can be used to display tile regions.
-         */
-        RandomColorContainer m_randomColors;
+        void StoreTileTypeTextures();
+        void CreateTiles();
+        void StoreTileNeighbours();
+        void CreateRandomColors();
+        void CreateNavigationNodes();
+        //void LinkTilesForNavigation();
 
         //-------------------------------------------------
         // Helper
         //-------------------------------------------------
 
         [[nodiscard]] int32_t GetVerticesCountOfMap() const;
-
-        void LoadAndStoreTileTypeTextures();
-        void CreateTiles();
-        void CreateAutoNodes();
-        void LinkTiles();
-        void StoreNeighbours();
-        void CreateRandomColors();
 
         //-------------------------------------------------
         // Vbo
@@ -229,12 +250,11 @@ namespace sg::city::map
         void CreateVbo();
         void StoreTilesInVbo();
         void UpdateMapVboByTileIndex(int t_tileIndex) const;
-        void UpdateMapVboByPosition(const glm::vec3& t_mapPoint) const;
 
         //-------------------------------------------------
         // Regions
         //-------------------------------------------------
 
-        void DepthSearch(Tile& t_startTile, int t_region);
+        //void DepthSearch(Tile& t_startTile, int t_region);
     };
 }

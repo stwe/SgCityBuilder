@@ -30,11 +30,16 @@ sg::city::city::City::City(std::string t_name, ogl::scene::Scene* t_scene, const
     : m_name{ std::move(t_name) }
     , m_scene{ t_scene }
 {
+    SG_OGL_CORE_ASSERT(t_scene, "[City::City()] Null pointer.")
+
+    SG_OGL_LOG_DEBUG("[City::City()] Construct City.");
+
     Init(m_scene, t_mapSize);
 }
 
 sg::city::city::City::~City() noexcept
 {
+    SG_OGL_LOG_DEBUG("[City::City()] Destruct City.");
 }
 
 //-------------------------------------------------
@@ -178,6 +183,7 @@ void sg::city::city::City::RenderBuildings() const
 // Path
 //-------------------------------------------------
 
+/*
 sg::city::city::City::PathPositionContainer sg::city::city::City::Path(const int t_fromMapX, const int t_fromMapZ, const int t_toMapX, const int t_toMapZ) const
 {
     const auto fromTileIndex{ m_map->GetTileIndexByPosition(t_fromMapX, t_fromMapZ) };
@@ -185,11 +191,13 @@ sg::city::city::City::PathPositionContainer sg::city::city::City::Path(const int
 
     return m_astar->FindPath(fromTileIndex, toTileIndex);
 }
+*/
 
 //-------------------------------------------------
 // Spawn
 //-------------------------------------------------
 
+/*
 void sg::city::city::City::SpawnCar(const glm::vec3& t_mapPoint)
 {
     // get Tile at position
@@ -214,6 +222,7 @@ void sg::city::city::City::SpawnCar(const glm::vec3& t_mapPoint)
 
     automatas.push_back(automata);
 }
+*/
 
 //-------------------------------------------------
 // Init

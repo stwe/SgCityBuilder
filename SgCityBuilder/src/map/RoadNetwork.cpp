@@ -58,16 +58,20 @@ void sg::city::map::RoadNetwork::StoreRoadOnPosition(const glm::vec3& t_mapPoint
     auto& map{ m_city->GetMap() };
 
     // get Tile index by given map point
-    const auto tileIndex{ map.GetTileIndexByPosition(t_mapPoint) };
+    //const auto tileIndex{ map.GetTileIndexByPosition(t_mapPoint) };
 
     // checks whether the Tile is already stored as a Road
+    /*
     if (m_lookupTable[tileIndex] > 0)
     {
         return;
     }
+    */
 
     // update TileType
-    map.ChangeTileTypeOnPosition(t_mapPoint, Map::TileType::TRAFFIC_NETWORK);
+    //map.ChangeTileTypeOnPosition(t_mapPoint, Map::TileType::TRAFFIC_NETWORK);
+
+    /*
 
     // get the vertices of the Tile and make a !copy!
     auto vertices{ map.GetTileByIndex(tileIndex).GetVerticesContainer() };
@@ -122,6 +126,7 @@ void sg::city::map::RoadNetwork::StoreRoadOnPosition(const glm::vec3& t_mapPoint
 
     // update the RoadNetwork
     Update();
+    */
 }
 
 void sg::city::map::RoadNetwork::StoreRoadOnPosition(const int t_mapX, const int t_mapZ)
@@ -366,33 +371,34 @@ sg::city::map::RoadNetwork::RoadType sg::city::map::RoadNetwork::GetRoadType(con
 
     uint8_t roadNeighbours{ 0 };
 
-    if (neighbours[static_cast<int>(Tile::Directions::NORTH)])
+    /*
+    if (neighbours[static_cast<int>(Tile::Direction::NORTH)])
     {
-        if (neighbours[static_cast<int>(Tile::Directions::NORTH)]->GetType() == Map::TileType::TRAFFIC_NETWORK)
+        if (neighbours[static_cast<int>(Tile::Direction::NORTH)]->GetType() == Map::TileType::TRAFFIC_NETWORK)
         {
             roadNeighbours = NORTH;
         }
     }
 
-    if (neighbours[static_cast<int>(Tile::Directions::EAST)])
+    if (neighbours[static_cast<int>(Tile::Direction::EAST)])
     {
-        if (neighbours[static_cast<int>(Tile::Directions::EAST)]->GetType() == Map::TileType::TRAFFIC_NETWORK)
+        if (neighbours[static_cast<int>(Tile::Direction::EAST)]->GetType() == Map::TileType::TRAFFIC_NETWORK)
         {
             roadNeighbours |= EAST;
         }
     }
 
-    if (neighbours[static_cast<int>(Tile::Directions::SOUTH)])
+    if (neighbours[static_cast<int>(Tile::Direction::SOUTH)])
     {
-        if (neighbours[static_cast<int>(Tile::Directions::SOUTH)]->GetType() == Map::TileType::TRAFFIC_NETWORK)
+        if (neighbours[static_cast<int>(Tile::Direction::SOUTH)]->GetType() == Map::TileType::TRAFFIC_NETWORK)
         {
             roadNeighbours |= SOUTH;
         }
     }
 
-    if (neighbours[static_cast<int>(Tile::Directions::WEST)])
+    if (neighbours[static_cast<int>(Tile::Direction::WEST)])
     {
-        if (neighbours[static_cast<int>(Tile::Directions::WEST)]->GetType() == Map::TileType::TRAFFIC_NETWORK)
+        if (neighbours[static_cast<int>(Tile::Direction::WEST)]->GetType() == Map::TileType::TRAFFIC_NETWORK)
         {
             roadNeighbours |= WEST;
         }
@@ -435,7 +441,8 @@ sg::city::map::RoadNetwork::RoadType sg::city::map::RoadNetwork::GetRoadType(con
         break;
     default: roadType = RoadType::ROAD_V;
     }
-
+    */
+    RoadType roadType;
     return roadType;
 }
 

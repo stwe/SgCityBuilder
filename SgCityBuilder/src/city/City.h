@@ -126,13 +126,13 @@ namespace sg::city::city
         // Path
         //-------------------------------------------------
 
-        [[nodiscard]] PathPositionContainer Path(int t_fromMapX, int t_fromMapZ, int t_toMapX, int t_toMapZ) const;
+        //[[nodiscard]] PathPositionContainer Path(int t_fromMapX, int t_fromMapZ, int t_toMapX, int t_toMapZ) const;
 
         //-------------------------------------------------
         // Spawn
         //-------------------------------------------------
 
-        void SpawnCar(const glm::vec3& t_mapPoint);
+        //void SpawnCar(const glm::vec3& t_mapPoint);
 
     protected:
 

@@ -61,16 +61,18 @@ uint32_t sg::city::map::BuildingGenerator::GetInstances() const
 void sg::city::map::BuildingGenerator::StoreBuildingOnPosition(const glm::vec3& t_mapPoint)
 {
     // get Tile index by given map point
-    const auto tileIndex{ m_map->GetTileIndexByPosition(t_mapPoint) };
+    //const auto tileIndex{ m_map->GetTileIndexByPosition(t_mapPoint) };
 
     // checks whether the Tile is already stored as a building
+    /*
     if (m_lookupTable[tileIndex] > 0)
     {
         return;
     }
+    */
 
     // update TileType
-    m_map->ChangeTileTypeOnPosition(t_mapPoint, Map::TileType::RESIDENTIAL);
+    //m_map->ChangeTileTypeOnPosition(t_mapPoint, Map::TileType::RESIDENTIAL);
 
     // Add a building (there is currently only one type of building)
     AddBuildingInstance(t_mapPoint);
@@ -206,16 +208,18 @@ void sg::city::map::BuildingGenerator::Init()
 
 void sg::city::map::BuildingGenerator::AddBuildingInstance(const glm::vec3& t_mapPoint)
 {
-    auto& tile{ m_map->GetTileByPosition(t_mapPoint) };
+    //auto& tile{ m_map->GetTileByPosition(t_mapPoint) };
+
+    // todo: use Bottom left instead mapX
 
     ogl::math::Transform transform;
-    transform.position = glm::vec3(tile.GetMapX() + 0.5f, 0.5f, -tile.GetMapZ() + -0.5f);
+    //transform.position = glm::vec3(tile.GetMapX() + 0.5f, 0.5f, -tile.GetMapZ() + -0.5f);
     transform.scale = glm::vec3(1.0f);
 
     m_matrices.push_back(static_cast<glm::mat4>(transform));
 
     m_instances = static_cast<int>(m_matrices.size());
-    m_lookupTable[m_map->GetTileIndexByPosition(t_mapPoint)] = m_instances;
+    //m_lookupTable[m_map->GetTileIndexByPosition(t_mapPoint)] = m_instances;
 }
 
 //-------------------------------------------------
