@@ -33,7 +33,7 @@ glm::vec3 sg::city::input::MousePicker::GetCurrentMouseDirection() const
     return m_currentMouseDirection;
 }
 
-glm::vec3 sg::city::input::MousePicker::GetCurrentMapPoint() const
+glm::ivec3 sg::city::input::MousePicker::GetCurrentMapPoint() const
 {
     return m_currentMapPoint;
 }

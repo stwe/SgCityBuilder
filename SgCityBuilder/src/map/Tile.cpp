@@ -234,7 +234,7 @@ void sg::city::map::Tile::SetType(const Map::TileType t_type)
     m_type = t_type;
 
     // we use the TileType number as value for the texture
-    SetTexture(static_cast<float>(static_cast<int>(m_type)));
+    SetTexture(static_cast<float>(m_type));
 
     // we use the TileType color as Tile color
     SetColor(Map::TILE_TYPE_COLOR.at(m_type));
@@ -307,6 +307,6 @@ void sg::city::map::Tile::Create()
     SetVertexPositions();
     SetNormal(DEFAULT_NORMAL);
     SetColor(Map::TILE_TYPE_COLOR.at(m_type));
-    SetTexture(static_cast<float>(static_cast<int>(m_type)));
+    SetTexture(static_cast<float>(m_type));
     SetUv();
 }

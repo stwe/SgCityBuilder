@@ -113,6 +113,16 @@ sg::city::map::Tile& sg::city::map::Map::GetTileByIndex(const int t_tileIndex) n
     return *m_tiles[t_tileIndex];
 }
 
+const sg::city::map::Tile& sg::city::map::Map::GetTileByMapPosition(const int t_mapX, const int t_mapZ) const noexcept
+{
+    return *m_tiles[GetTileMapIndexByMapPosition(t_mapX, t_mapZ)];
+}
+
+sg::city::map::Tile& sg::city::map::Map::GetTileByMapPosition(const int t_mapX, const int t_mapZ) noexcept
+{
+    return *m_tiles[GetTileMapIndexByMapPosition(t_mapX, t_mapZ)];
+}
+
 int sg::city::map::Map::GetTileMapIndexByMapPosition(const int t_mapX, const int t_mapZ) const
 {
     return t_mapZ * m_mapSize + t_mapX;

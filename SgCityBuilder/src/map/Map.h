@@ -151,6 +151,9 @@ namespace sg::city::map
         [[nodiscard]] const Tile& GetTileByIndex(int t_tileIndex) const noexcept;
         [[nodiscard]] Tile& GetTileByIndex(int t_tileIndex) noexcept;
 
+        [[nodiscard]] const Tile& GetTileByMapPosition(int t_mapX, int t_mapZ) const noexcept;
+        [[nodiscard]] Tile& GetTileByMapPosition(int t_mapX, int t_mapZ) noexcept;
+
         /**
          * @brief The tiles are stored in a 1D array (m_tiles). The function calculates the
          *        index from the Tile position in Object Space.

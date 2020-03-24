@@ -44,7 +44,7 @@ namespace sg::city::input
         //-------------------------------------------------
 
         [[nodiscard]] glm::vec3 GetCurrentMouseDirection() const;
-        [[nodiscard]] glm::vec3 GetCurrentMapPoint() const;
+        [[nodiscard]] glm::ivec3 GetCurrentMapPoint() const;
 
         //-------------------------------------------------
         // Logic

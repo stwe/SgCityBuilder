@@ -60,7 +60,7 @@ bool GameState::Input()
 
         m_mapPoint = m_mousePicker->GetCurrentMapPoint();
 
-        if (m_mapPoint.x >= 0.0)
+        if (m_mapPoint.x >= 0)
         {
             SG_OGL_LOG_INFO("x: {}, z: {}", m_mapPoint.x, m_mapPoint.z);
 
@@ -285,11 +285,11 @@ void GameState::RenderImGui()
     ImGui::Separator();
     ImGui::Spacing();
 
-    if (m_mapPoint.x >= 0.0)
+    if (m_mapPoint.x >= 0)
     {
-        //const auto& tile{ m_city->GetMap().GetTileByPosition(m_mapPoint) };
-        //ImGui::Text("Current Tile x: %i", tile.GetMapX());
-        //ImGui::Text("Current Tile z: %i", tile.GetMapZ());
+        const auto& tile{ m_city->GetMap().GetTileByMapPosition(m_mapPoint.x, m_mapPoint.z) };
+        ImGui::Text("Current Tile x: %i", tile.GetMapX());
+        ImGui::Text("Current Tile z: %i", tile.GetMapZ());
     }
 
     ImGui::Text("Current number of regions: %i", m_city->GetMap().GetNumRegions());
