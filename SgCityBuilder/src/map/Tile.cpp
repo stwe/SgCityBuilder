@@ -7,7 +7,16 @@
 // 
 // 2020 (c) stwe <https://github.com/stwe/SgCityBuilder>
 
+#include <Application.h>
+#include <Window.h>
+#include <camera/Camera.h>
+#include <resource/Mesh.h>
+#include <resource/ShaderManager.h>
+#include <scene/Scene.h>
+#include <math/Transform.h>
 #include "Tile.h"
+#include "automata/AutoNode.h"
+#include "shader/NodeShader.h"
 
 //-------------------------------------------------
 // Ctors. / Dtor.
@@ -279,6 +288,76 @@ std::string sg::city::map::Tile::TileTypeToString(const Map::TileType t_type)
         case Map::TileType::INDUSTRIAL: return "Industrial Zone";
         case Map::TileType::TRAFFIC_NETWORK: return "Roads or rails";
     }
+}
+
+//-------------------------------------------------
+// Debug
+//-------------------------------------------------
+
+void sg::city::map::Tile::CreateNavigationNodesMesh()
+{
+    SG_OGL_CORE_ASSERT(!m_navigationNodes.empty(), "[Tile::CreateNavigationNodesMesh()] No navigation nodes available.")
+
+    VertexContainer vertexContainer;
+
+    for (auto& node : m_navigationNodes)
+    {
+        // position
+        vertexContainer.push_back(node->position.x);
+        vertexContainer.push_back(VERTEX_HEIGHT);
+        vertexContainer.push_back(node->position.z);
+
+        // color
+        if (node->block)
+        {
+            // red
+            vertexContainer.push_back(1.0f);
+            vertexContainer.push_back(0.0f);
+            vertexContainer.push_back(0.0f);
+        }
+        else
+        {
+            // green
+            vertexContainer.push_back(0.0f);
+            vertexContainer.push_back(1.0f);
+            vertexContainer.push_back(0.0f);
+        }
+    }
+
+    m_navigationNodesMesh = std::make_unique<ogl::resource::Mesh>();
+
+    const ogl::buffer::BufferLayout bufferLayout{
+        { ogl::buffer::VertexAttributeType::POSITION, "aPosition" },
+        { ogl::buffer::VertexAttributeType::COLOR, "aColor" },
+    };
+
+    m_navigationNodesMesh->GetVao().AddVertexDataVbo(vertexContainer.data(), static_cast<int32_t>(vertexContainer.size()) / 6, bufferLayout);
+}
+
+void sg::city::map::Tile::RenderNavigationNodes(const ogl::scene::Scene* const t_scene, const Map* const t_map) const
+{
+    SG_OGL_CORE_ASSERT(m_navigationNodesMesh, "[Tile::RenderNavigationNodes()] Null pointer.")
+
+    ogl::math::Transform t;
+    t.position = t_map->position;
+    t.rotation = t_map->rotation;
+    t.scale = t_map->scale;
+
+    auto& shader{ t_scene->GetApplicationContext()->GetShaderManager().GetShaderProgram<shader::NodeShader>() };
+    shader.Bind();
+
+    const auto projectionMatrix{ t_scene->GetApplicationContext()->GetWindow().GetProjectionMatrix() };
+    const auto mvp{ projectionMatrix * t_scene->GetCurrentCamera().GetViewMatrix() * static_cast<glm::mat4>(t) };
+
+    shader.SetUniform("mvpMatrix", mvp);
+
+    glPointSize(POINT_SIZE);
+
+    m_navigationNodesMesh->InitDraw();
+    m_navigationNodesMesh->DrawPrimitives(GL_POINTS);
+    m_navigationNodesMesh->EndDraw();
+
+    ogl::resource::ShaderProgram::Unbind();
 }
 
 //-------------------------------------------------

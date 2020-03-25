@@ -54,6 +54,14 @@ namespace sg::city::map
 
         static constexpr auto MAX_POPULATION{ 50 };
 
+        // The default height for debug stuff.
+
+        static constexpr auto VERTEX_HEIGHT{ 0.015 };
+
+        // GL_POINTS size
+
+        static constexpr auto POINT_SIZE{ 4.0f };
+
         // Bottom left T1
 
         static constexpr auto BOTTOM_LEFT_POS_X_T1{ 0 };
@@ -179,6 +187,8 @@ namespace sg::city::map
         using AutoTrackSharedPtr = std::shared_ptr<automata::AutoTrack>;
         using AutoTrackContainer = std::list<AutoTrackSharedPtr>;
 
+        using MeshUniquePtr = std::unique_ptr<ogl::resource::Mesh>;
+
         //-------------------------------------------------
         // Public member
         //-------------------------------------------------
@@ -288,6 +298,22 @@ namespace sg::city::map
 
         static std::string TileTypeToString(Map::TileType t_type);
 
+        //-------------------------------------------------
+        // Debug
+        //-------------------------------------------------
+
+        /**
+         * @brief Create a Mesh from the Tile navigation nodes.
+         */
+        void CreateNavigationNodesMesh();
+
+        /**
+         * @brief Render the navigation nodes Mesh of this Tile.
+         * @param t_scene Raw pointer to the Scene.
+         * @param t_map Raw pointer to the Map.
+         */
+        void RenderNavigationNodes(const ogl::scene::Scene* t_scene, const Map* t_map) const;
+
     protected:
 
     private:
@@ -350,6 +376,12 @@ namespace sg::city::map
          * @brief Each Tile can have a number of auto tracks.
          */
         AutoTrackContainer m_autoTracks;
+
+        /**
+         * @brief A Mesh with one Vertex for each navigation node.
+         *        Used for debugging purposes.
+         */
+        MeshUniquePtr m_navigationNodesMesh;
 
         //-------------------------------------------------
         // Init

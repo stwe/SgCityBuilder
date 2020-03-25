@@ -51,7 +51,7 @@ bool GameState::Input()
 
     m_scene->GetCurrentCamera().Input();
 
-    if (GetApplicationContext()->GetMouseInput().IsLeftButtonPressed())
+    if (sg::ogl::input::MouseInput::IsLeftButtonPressed())
     {
         m_mousePicker->Update(
             static_cast<float>(GetApplicationContext()->GetMouseInput().GetCurrentPos().x),
@@ -80,6 +80,9 @@ bool GameState::Input()
             m_city->GetMap().ChangeTileTypeOnMapPosition(m_mapPoint.x, m_mapPoint.z, m_currentTileType);
 
             //m_city->GetMap().FindConnectedRegions();
+
+            // delete mouse state
+            sg::ogl::input::MouseInput::ClearMouseStates();
         }
 
         // spwan a single car
@@ -144,6 +147,8 @@ bool GameState::Update(const double t_dt)
 void GameState::Render()
 {
     m_city->RenderMap();
+    m_city->GetMap().RenderTileNavigationNodes(1, 1);
+
     //m_city->RenderRoadNetwork();
     //m_city->RenderBuildings();
 
@@ -176,7 +181,7 @@ void GameState::Init()
     m_scene = std::make_unique<sg::ogl::scene::Scene>(GetApplicationContext());
     m_scene->SetCurrentCamera(m_firstPersonCamera);
 
-    m_city = std::make_unique<sg::city::city::City>("SgCity", m_scene.get(), 6);
+    m_city = std::make_unique<sg::city::city::City>("SgCity", m_scene.get(), MAP_SIZE);
 
     m_mousePicker = std::make_unique<sg::city::input::MousePicker>(m_scene.get(), m_city->GetMapPtr());
     m_textRenderer = std::make_unique<sg::ogl::ecs::system::TextRenderSystem>(m_scene.get(), "res/font/bitter/Bitter-Italic.otf");

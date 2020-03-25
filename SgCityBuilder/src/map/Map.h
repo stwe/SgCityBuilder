@@ -181,6 +181,18 @@ namespace sg::city::map
 
         //void FindConnectedRegions();
 
+        //-------------------------------------------------
+        // Debug
+        //-------------------------------------------------
+
+        /**
+         * @brief Function for convenience. Render the navigation nodes of a
+         *        Tile on a given Object Space position.
+         * @param t_mapX The Map-x position of the Tile in Object Space.
+         * @param t_mapZ The Map-z position of the Tile in Object Space.
+         */
+        void RenderTileNavigationNodes(int t_mapX, int t_mapZ);
+
     protected:
 
     private:
@@ -259,5 +271,15 @@ namespace sg::city::map
         //-------------------------------------------------
 
         //void DepthSearch(Tile& t_startTile, int t_region);
+
+        //-------------------------------------------------
+        // Debug
+        //-------------------------------------------------
+
+        /**
+         * @brief For Debug only.
+         *        Create Meshes for all the navigation nodes of a Tile.
+         */
+        void CreateTileNavigationNodesMeshes();
     };
 }

@@ -13,10 +13,12 @@
 #include <scene/Scene.h>
 #include <resource/Mesh.h>
 #include <resource/TextureManager.h>
+#include <resource/ShaderManager.h>
 #include <random>
 #include "Map.h"
 #include "Tile.h"
 #include "automata/AutoNode.h"
+#include "shader/NodeShader.h"
 
 //-------------------------------------------------
 // Ctors. / Dtor.
@@ -28,6 +30,8 @@ sg::city::map::Map::Map(ogl::scene::Scene* t_scene)
     SG_OGL_CORE_ASSERT(t_scene, "[Map::Map()] Null pointer.")
 
     SG_OGL_LOG_DEBUG("[Map::Map()] Construct Map.");
+
+    m_scene->GetApplicationContext()->GetShaderManager().AddShaderProgram<shader::NodeShader>();
 }
 
 sg::city::map::Map::~Map() noexcept
@@ -141,6 +145,8 @@ void sg::city::map::Map::CreateMap(const int t_mapSize)
     StoreTileNeighbours();
     CreateRandomColors();
     CreateNavigationNodes();
+    CreateTileNavigationNodesMeshes(); // for Debug only
+
     //LinkTilesForNavigation();
 
     // create an bind a new Vao
@@ -165,7 +171,6 @@ void sg::city::map::Map::CreateMap(const int t_mapSize)
 void sg::city::map::Map::ChangeTileTypeOnMapPosition(const int t_mapX, const int t_mapZ, const TileType t_tileType)
 {
     const auto tileIndex{ GetTileMapIndexByMapPosition(t_mapX, t_mapZ) };
-
     auto& tile{ *m_tiles[tileIndex] };
 
     if (tile.GetType() != t_tileType)
@@ -173,6 +178,18 @@ void sg::city::map::Map::ChangeTileTypeOnMapPosition(const int t_mapX, const int
         tile.SetType(t_tileType);
         UpdateMapVboByTileIndex(tileIndex);
     }
+}
+
+//-------------------------------------------------
+// Debug
+//-------------------------------------------------
+
+void sg::city::map::Map::RenderTileNavigationNodes(const int t_mapX, const int t_mapZ)
+{
+    SG_OGL_CORE_ASSERT(t_mapX < m_mapSize, "[Map::RenderTileNavigationNodes()] Invalid x position.")
+    SG_OGL_CORE_ASSERT(t_mapZ < m_mapSize, "[Map::RenderTileNavigationNodes()] Invalid z position.")
+
+    m_tiles[GetTileMapIndexByMapPosition(t_mapX, t_mapZ)]->RenderNavigationNodes(m_scene, this);
 }
 
 //-------------------------------------------------
@@ -272,7 +289,6 @@ void sg::city::map::Map::StoreTileNeighbours()
         {
             const auto tileIndex{ GetTileMapIndexByMapPosition(x, z) };
 
-            // North since we render in -z direction ( mapSize = 6    :    z < 5 )
             if (z < m_mapSize - 1)
             {
                 m_tiles[tileIndex]->GetNeighbours().emplace(Tile::Direction::NORTH, m_tiles[GetTileMapIndexByMapPosition(x, z + 1)]);
@@ -280,7 +296,7 @@ void sg::city::map::Map::StoreTileNeighbours()
 
             if (x < m_mapSize - 1)
             {
-                m_tiles[tileIndex]->GetNeighbours().emplace(Tile::Direction::WEST, m_tiles[GetTileMapIndexByMapPosition(x + 1, z)]);
+                m_tiles[tileIndex]->GetNeighbours().emplace(Tile::Direction::EAST, m_tiles[GetTileMapIndexByMapPosition(x + 1, z)]);
             }
 
             if (z > 0)
@@ -290,7 +306,7 @@ void sg::city::map::Map::StoreTileNeighbours()
 
             if (x > 0)
             {
-                m_tiles[tileIndex]->GetNeighbours().emplace(Tile::Direction::EAST, m_tiles[GetTileMapIndexByMapPosition(x - 1, z)]);
+                m_tiles[tileIndex]->GetNeighbours().emplace(Tile::Direction::WEST, m_tiles[GetTileMapIndexByMapPosition(x - 1, z)]);
             }
         }
     }
@@ -552,3 +568,17 @@ void sg::city::map::Map::DepthSearch(Tile& t_startTile, const int t_region)
     }
 }
 */
+
+//-------------------------------------------------
+// Debug
+//-------------------------------------------------
+
+void sg::city::map::Map::CreateTileNavigationNodesMeshes()
+{
+    SG_OGL_CORE_ASSERT(!m_tiles.empty(), "[Map::CreateTileNavigationNodesMeshes()] No Tiles available.")
+
+    for (auto& tile : m_tiles)
+    {
+        tile->CreateNavigationNodesMesh();
+    }
+}
