@@ -282,75 +282,141 @@ void sg::city::map::RoadNetwork::UpdateAutoTracks(Tile& t_tile, const RoadType t
     // add auto tracks
     switch (t_roadType)
     {
-    case RoadType::ROAD_H: AddAutoTrack(t_tile, 28, 34);
+    case RoadType::ROAD_H: AddAutoTrack(t_tile, 34, 28);
                            AddAutoTrack(t_tile, 14, 20, true);
                            break;
     case RoadType::ROAD_V: AddAutoTrack(t_tile, 44, 2, true);
-                           AddAutoTrack(t_tile, 46, 4);
+                           AddAutoTrack(t_tile, 4, 46);
                            break;
 
-    case RoadType::ROAD_C1: AddAutoTrack(t_tile, 2, 30);
-                            AddAutoTrack(t_tile, 30, 34);
+                           /*
+                            *  --------->
+                            * |
+                            * |
+                            * |
+                            */
+    case RoadType::ROAD_C1: AddAutoTrack(t_tile, 34, 30);
+                            AddAutoTrack(t_tile, 30, 2);
                             AddAutoTrack(t_tile, 4, 18);
                             AddAutoTrack(t_tile, 18, 20);
                             break;
-    case RoadType::ROAD_C2: AddAutoTrack(t_tile, 28, 32);
-                            AddAutoTrack(t_tile, 32, 4);
+
+                            /*
+                             *  <---------
+                             *            |
+                             *            |
+                             *            |
+                             */
+    case RoadType::ROAD_C2: AddAutoTrack(t_tile, 4, 32);
+                            AddAutoTrack(t_tile, 32, 28);
                             AddAutoTrack(t_tile, 14, 16);
                             AddAutoTrack(t_tile, 16, 2);
-                            break;
-    case RoadType::ROAD_C3: AddAutoTrack(t_tile, 44, 16);
-                            AddAutoTrack(t_tile, 16, 20);
-                            AddAutoTrack(t_tile, 46, 32);
-                            AddAutoTrack(t_tile, 32, 34);
-                            break;
-    case RoadType::ROAD_C4: AddAutoTrack(t_tile, 44, 30);
-                            AddAutoTrack(t_tile, 30, 28);
-                            AddAutoTrack(t_tile, 46, 18);
-                            AddAutoTrack(t_tile, 18, 14);
                             break;
 
-    case RoadType::ROAD_T1: AddAutoTrack(t_tile, 28, 30);
-                            AddAutoTrack(t_tile, 30, 32);
-                            AddAutoTrack(t_tile, 32, 34);
-                            AddAutoTrack(t_tile, 14, 16);
-                            AddAutoTrack(t_tile, 16, 18);
-                            AddAutoTrack(t_tile, 18, 20);
-                            AddAutoTrack(t_tile, 30, 16);
-                            AddAutoTrack(t_tile, 16, 2);
-                            AddAutoTrack(t_tile, 32, 18);
-                            AddAutoTrack(t_tile, 18, 4);
-                            break;
-    case RoadType::ROAD_T4: AddAutoTrack(t_tile, 28, 30);
-                            AddAutoTrack(t_tile, 30, 32);
-                            AddAutoTrack(t_tile, 32, 34);
-                            AddAutoTrack(t_tile, 14, 16);
-                            AddAutoTrack(t_tile, 16, 18);
-                            AddAutoTrack(t_tile, 18, 20);
-                            AddAutoTrack(t_tile, 30, 16);
-                            AddAutoTrack(t_tile, 30, 44);
-                            AddAutoTrack(t_tile, 32, 18);
+                            /*
+                             * |
+                             * |
+                             * |
+                             *  --------->
+                             */
+    case RoadType::ROAD_C3: AddAutoTrack(t_tile, 44, 16);
+                            AddAutoTrack(t_tile, 16, 20);
+                            AddAutoTrack(t_tile, 34, 32);
                             AddAutoTrack(t_tile, 32, 46);
                             break;
+
+                            /*
+                             *           |
+                             *           |
+                             *           |
+                             * <---------
+                             */
+    case RoadType::ROAD_C4: AddAutoTrack(t_tile, 44, 30);
+                            AddAutoTrack(t_tile, 30, 28);
+                            AddAutoTrack(t_tile, 14, 18);
+                            AddAutoTrack(t_tile, 18, 46);
+                            break;
+
+                            /*
+                             *  <--------->
+                             *       |
+                             *       |
+                             *       |
+                             */
+    case RoadType::ROAD_T1: AddAutoTrack(t_tile, 34, 32);
+                            AddAutoTrack(t_tile, 32, 30);
+                            AddAutoTrack(t_tile, 30, 28);
+
+                            AddAutoTrack(t_tile, 14, 16);
+                            AddAutoTrack(t_tile, 16, 18);
+                            AddAutoTrack(t_tile, 18, 20);
+
+                            AddAutoTrack(t_tile, 30, 16);
+                            AddAutoTrack(t_tile, 16, 2);
+
+                            AddAutoTrack(t_tile, 4, 18);
+                            AddAutoTrack(t_tile, 18, 32);
+                            break;
+
+                            /*
+                             *       |
+                             *       |
+                             *       |
+                             *  <--------->
+                             */
+    case RoadType::ROAD_T4: AddAutoTrack(t_tile, 34, 32);
+                            AddAutoTrack(t_tile, 32, 30);
+                            AddAutoTrack(t_tile, 30, 28);
+
+                            AddAutoTrack(t_tile, 14, 16);
+                            AddAutoTrack(t_tile, 16, 18);
+                            AddAutoTrack(t_tile, 18, 20);
+
+                            AddAutoTrack(t_tile, 44, 30);
+                            AddAutoTrack(t_tile, 30, 16);
+
+                            AddAutoTrack(t_tile, 18, 32);
+                            AddAutoTrack(t_tile, 32, 46);
+                            break;
+
+                            /*
+                             * |
+                             * |________
+                             * |
+                             * |
+                             */
     case RoadType::ROAD_T2: AddAutoTrack(t_tile, 44, 30);
                             AddAutoTrack(t_tile, 30, 16);
                             AddAutoTrack(t_tile, 16, 2);
-                            AddAutoTrack(t_tile, 46, 32);
-                            AddAutoTrack(t_tile, 32, 18);
-                            AddAutoTrack(t_tile, 18, 4);
-                            AddAutoTrack(t_tile, 30, 32);
-                            AddAutoTrack(t_tile, 32, 34);
+
+                            AddAutoTrack(t_tile, 4, 18);
+                            AddAutoTrack(t_tile, 18, 32);
+                            AddAutoTrack(t_tile, 32, 46);
+
+                            AddAutoTrack(t_tile, 34, 32);
+                            AddAutoTrack(t_tile, 32, 30);
+
                             AddAutoTrack(t_tile, 16, 18);
                             AddAutoTrack(t_tile, 18, 20);
                             break;
+
+                            /*
+                             *         |
+                             * ________|
+                             *         |
+                             *         |
+                             */
     case RoadType::ROAD_T3: AddAutoTrack(t_tile, 44, 30);
                             AddAutoTrack(t_tile, 30, 16);
                             AddAutoTrack(t_tile, 16, 2);
-                            AddAutoTrack(t_tile, 46, 32);
-                            AddAutoTrack(t_tile, 32, 18);
-                            AddAutoTrack(t_tile, 18, 4);
-                            AddAutoTrack(t_tile, 28, 30);
-                            AddAutoTrack(t_tile, 30, 32);
+
+                            AddAutoTrack(t_tile, 4, 18);
+                            AddAutoTrack(t_tile, 18, 32);
+                            AddAutoTrack(t_tile, 32, 46);
+
+                            AddAutoTrack(t_tile, 32, 30);
+                            AddAutoTrack(t_tile, 30, 28);
+
                             AddAutoTrack(t_tile, 14, 16);
                             AddAutoTrack(t_tile, 16, 18);
                             break;
@@ -358,12 +424,15 @@ void sg::city::map::RoadNetwork::UpdateAutoTracks(Tile& t_tile, const RoadType t
     case RoadType::ROAD_X: AddAutoTrack(t_tile, 44, 30);
                            AddAutoTrack(t_tile, 30, 16);
                            AddAutoTrack(t_tile, 16, 2);
-                           AddAutoTrack(t_tile, 46, 32);
-                           AddAutoTrack(t_tile, 32, 18);
-                           AddAutoTrack(t_tile, 18, 4);
-                           AddAutoTrack(t_tile, 28, 30);
-                           AddAutoTrack(t_tile, 30, 32);
-                           AddAutoTrack(t_tile, 32, 34);
+
+                           AddAutoTrack(t_tile, 4, 18);
+                           AddAutoTrack(t_tile, 18, 32);
+                           AddAutoTrack(t_tile, 32, 46);
+
+                           AddAutoTrack(t_tile, 34, 32);
+                           AddAutoTrack(t_tile, 32, 30);
+                           AddAutoTrack(t_tile, 30, 28);
+
                            AddAutoTrack(t_tile, 14, 16);
                            AddAutoTrack(t_tile, 16, 18);
                            AddAutoTrack(t_tile, 18, 20);
