@@ -16,7 +16,9 @@
 #include <math/Transform.h>
 #include "Tile.h"
 #include "automata/AutoNode.h"
+#include "automata/AutoTrack.h"
 #include "shader/NodeShader.h"
+#include "shader/LineShader.h"
 
 //-------------------------------------------------
 // Ctors. / Dtor.
@@ -337,6 +339,50 @@ void sg::city::map::Tile::CreateNavigationNodesMesh()
     m_navigationNodesMesh->GetVao().AddVertexDataVbo(vertexContainer.data(), static_cast<int32_t>(vertexContainer.size()) / 6, bufferLayout);
 }
 
+void sg::city::map::Tile::CreateAutoTracksMesh()
+{
+    SG_OGL_CORE_ASSERT(!m_autoTracks.empty(), "[Tile::CreateAutoTracksMesh()] No auto tracks available.")
+
+    if (m_autoTracksMesh)
+    {
+        m_autoTracksMesh.reset();
+    }
+
+    VertexContainer vertexContainer;
+
+    for (auto& autoTrack : m_autoTracks)
+    {
+        // start
+        vertexContainer.push_back(autoTrack->startNode->position.x);
+        vertexContainer.push_back(VERTEX_HEIGHT);
+        vertexContainer.push_back(autoTrack->startNode->position.z);
+
+        // color
+        vertexContainer.push_back(0.0f);
+        vertexContainer.push_back(0.0f);
+        vertexContainer.push_back(1.0f);
+
+        // end
+        vertexContainer.push_back(autoTrack->endNode->position.x);
+        vertexContainer.push_back(VERTEX_HEIGHT);
+        vertexContainer.push_back(autoTrack->endNode->position.z);
+
+        // color
+        vertexContainer.push_back(0.0f);
+        vertexContainer.push_back(0.0f);
+        vertexContainer.push_back(1.0f);
+    }
+
+    m_autoTracksMesh = std::make_unique<ogl::resource::Mesh>();
+
+    const ogl::buffer::BufferLayout bufferLayout{
+        { ogl::buffer::VertexAttributeType::POSITION, "aPosition" },
+        { ogl::buffer::VertexAttributeType::COLOR, "aColor" },
+    };
+
+    m_autoTracksMesh->GetVao().AddVertexDataVbo(vertexContainer.data(), static_cast<int32_t>(m_autoTracks.size()) * 2, bufferLayout);
+}
+
 void sg::city::map::Tile::RenderNavigationNodes(const ogl::scene::Scene* const t_scene, const Map* const t_map) const
 {
     SG_OGL_CORE_ASSERT(m_navigationNodesMesh, "[Tile::RenderNavigationNodes()] Null pointer.")
@@ -359,6 +405,33 @@ void sg::city::map::Tile::RenderNavigationNodes(const ogl::scene::Scene* const t
     m_navigationNodesMesh->InitDraw();
     m_navigationNodesMesh->DrawPrimitives(GL_POINTS);
     m_navigationNodesMesh->EndDraw();
+
+    ogl::resource::ShaderProgram::Unbind();
+}
+
+void sg::city::map::Tile::RenderAutoTracks(const ogl::scene::Scene* t_scene, const Map* t_map) const
+{
+    if (!m_autoTracksMesh)
+    {
+        return;
+    }
+
+    ogl::math::Transform t;
+    t.position = t_map->position;
+    t.rotation = t_map->rotation;
+    t.scale = t_map->scale;
+
+    auto& shader{ t_scene->GetApplicationContext()->GetShaderManager().GetShaderProgram<shader::LineShader>() };
+    shader.Bind();
+
+    const auto projectionMatrix{ t_scene->GetApplicationContext()->GetWindow().GetProjectionMatrix() };
+    const auto mvp{ projectionMatrix * t_scene->GetCurrentCamera().GetViewMatrix() * static_cast<glm::mat4>(t) };
+
+    shader.SetUniform("mvpMatrix", mvp);
+
+    m_autoTracksMesh->InitDraw();
+    m_autoTracksMesh->DrawPrimitives(GL_LINES);
+    m_autoTracksMesh->EndDraw();
 
     ogl::resource::ShaderProgram::Unbind();
 }

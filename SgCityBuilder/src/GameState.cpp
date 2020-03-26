@@ -202,9 +202,11 @@ void GameState::CreateExampleRoads() const
 void GameState::RenderDebug() const
 {
     //m_city->GetMap().RenderTileNavigationNodes(1, 1);
+
     for (auto& tile : m_city->GetMap().GetTiles())
     {
         tile->RenderNavigationNodes(m_scene.get(), &m_city->GetMap());
+        tile->RenderAutoTracks(m_scene.get(), &m_city->GetMap());
     }
 }
 

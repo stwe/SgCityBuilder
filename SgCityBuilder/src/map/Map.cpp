@@ -19,6 +19,7 @@
 #include "Tile.h"
 #include "automata/AutoNode.h"
 #include "shader/NodeShader.h"
+#include "shader/LineShader.h"
 
 //-------------------------------------------------
 // Ctors. / Dtor.
@@ -31,8 +32,9 @@ sg::city::map::Map::Map(ogl::scene::Scene* t_scene)
 
     SG_OGL_LOG_DEBUG("[Map::Map()] Construct Map.");
 
-    // add the NodeShader to the ShaderManager
+    // shader needed for debug
     m_scene->GetApplicationContext()->GetShaderManager().AddShaderProgram<shader::NodeShader>();
+    m_scene->GetApplicationContext()->GetShaderManager().AddShaderProgram<shader::LineShader>();
 }
 
 sg::city::map::Map::~Map() noexcept

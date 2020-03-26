@@ -308,11 +308,23 @@ namespace sg::city::map
         void CreateNavigationNodesMesh();
 
         /**
-         * @brief Render the navigation nodes Mesh of this Tile.
+         * @brief Create a Mesh from the Tile auto tracks.
+         */
+        void CreateAutoTracksMesh();
+
+        /**
+         * @brief Render the navigation nodes.
          * @param t_scene Raw pointer to the Scene.
          * @param t_map Raw pointer to the Map.
          */
         void RenderNavigationNodes(const ogl::scene::Scene* t_scene, const Map* t_map) const;
+
+        /**
+         * @brief Render the auto tracks.
+         * @param t_scene Raw pointer to the Scene.
+         * @param t_map Raw pointer to the Map.
+         */
+        void RenderAutoTracks(const ogl::scene::Scene* t_scene, const Map* t_map) const;
 
     protected:
 
@@ -382,6 +394,11 @@ namespace sg::city::map
          *        Used for debugging purposes.
          */
         MeshUniquePtr m_navigationNodesMesh;
+
+        /**
+         * @brief Mesh holding the whole auto tracks for debug.
+         */
+        MeshUniquePtr m_autoTracksMesh;
 
         //-------------------------------------------------
         // Init

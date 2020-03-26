@@ -503,6 +503,7 @@ void sg::city::map::RoadNetwork::UpdateStoredRoads()
         // update auto tracks
 
         UpdateAutoTracks(tile, roadTypeEnum);
+        tile.CreateAutoTracksMesh(); // for debug only
 
         // next
 
