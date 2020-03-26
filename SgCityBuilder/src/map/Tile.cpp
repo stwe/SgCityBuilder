@@ -302,25 +302,28 @@ void sg::city::map::Tile::CreateNavigationNodesMesh()
 
     for (auto& node : m_navigationNodes)
     {
-        // position
-        vertexContainer.push_back(node->position.x);
-        vertexContainer.push_back(VERTEX_HEIGHT);
-        vertexContainer.push_back(node->position.z);
+        if (node)
+        {
+            // position
+            vertexContainer.push_back(node->position.x);
+            vertexContainer.push_back(VERTEX_HEIGHT);
+            vertexContainer.push_back(node->position.z);
 
-        // color
-        if (node->block)
-        {
-            // red
-            vertexContainer.push_back(1.0f);
-            vertexContainer.push_back(0.0f);
-            vertexContainer.push_back(0.0f);
-        }
-        else
-        {
-            // green
-            vertexContainer.push_back(0.0f);
-            vertexContainer.push_back(1.0f);
-            vertexContainer.push_back(0.0f);
+            // color
+            if (node->block)
+            {
+                // red
+                vertexContainer.push_back(1.0f);
+                vertexContainer.push_back(0.0f);
+                vertexContainer.push_back(0.0f);
+            }
+            else
+            {
+                // green
+                vertexContainer.push_back(0.0f);
+                vertexContainer.push_back(1.0f);
+                vertexContainer.push_back(0.0f);
+            }
         }
     }
 

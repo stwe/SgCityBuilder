@@ -76,6 +76,7 @@ private:
 
     void Init();
     void CreateExampleRoads() const;
+    void RenderDebug();
 
     //-------------------------------------------------
     // ImGui

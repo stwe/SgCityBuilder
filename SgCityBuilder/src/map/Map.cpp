@@ -31,6 +31,7 @@ sg::city::map::Map::Map(ogl::scene::Scene* t_scene)
 
     SG_OGL_LOG_DEBUG("[Map::Map()] Construct Map.");
 
+    // add the NodeShader to the ShaderManager
     m_scene->GetApplicationContext()->GetShaderManager().AddShaderProgram<shader::NodeShader>();
 }
 
@@ -71,16 +72,6 @@ const sg::city::map::Map::TileContainer& sg::city::map::Map::GetTiles() const no
 sg::city::map::Map::TileContainer& sg::city::map::Map::GetTiles() noexcept
 {
     return m_tiles;
-}
-
-const sg::city::map::Map::NavigationNodeContainer& sg::city::map::Map::GetNavigationNodes() const noexcept
-{
-    return m_navigationNodes;
-}
-
-sg::city::map::Map::NavigationNodeContainer& sg::city::map::Map::GetNavigationNodes() noexcept
-{
-    return m_navigationNodes;
 }
 
 const sg::ogl::resource::Mesh& sg::city::map::Map::GetMapMesh() const noexcept
@@ -129,6 +120,9 @@ sg::city::map::Tile& sg::city::map::Map::GetTileByMapPosition(const int t_mapX, 
 
 int sg::city::map::Map::GetTileMapIndexByMapPosition(const int t_mapX, const int t_mapZ) const
 {
+    SG_OGL_CORE_ASSERT(t_mapX < m_mapSize, "[Map::GetTileMapIndexByMapPosition()] Invalid x position.")
+    SG_OGL_CORE_ASSERT(t_mapZ < m_mapSize, "[Map::GetTileMapIndexByMapPosition()] Invalid z position.")
+
     return t_mapZ * m_mapSize + t_mapX;
 }
 
@@ -145,9 +139,10 @@ void sg::city::map::Map::CreateMap(const int t_mapSize)
     StoreTileNeighbours();
     CreateRandomColors();
     CreateNavigationNodes();
-    CreateTileNavigationNodesMeshes(); // for Debug only
+    LinkTileNavigationNodes();
 
-    //LinkTilesForNavigation();
+    // for Debug only
+    CreateTileNavigationNodesMeshes();
 
     // create an bind a new Vao
     m_mapMesh = std::make_unique<ogl::resource::Mesh>();
@@ -369,96 +364,54 @@ void sg::city::map::Map::CreateNavigationNodes()
                 default:;
                 }
 
-                auto navigationNode{ std::make_shared<automata::AutoNode>(glm::vec3(tile->GetWorldX() + xOffset, 0.0f, tile->GetWorldZ() + zOffset)) };
-
-                // store the node as Tile node
-                tile->GetNavigationNodes().push_back(navigationNode);
-
-                // additionally store the node in a container with all nodes
-                m_navigationNodes.push_back(navigationNode);
+                // converting unique_ptr to shared_ptr
+                tile->GetNavigationNodes().push_back(std::make_unique<automata::AutoNode>(glm::vec3(tile->GetWorldX() + xOffset, 0.0f, tile->GetWorldZ() + zOffset)));
             }
         }
     }
 }
 
-/*
-void sg::city::map::Map::LinkTilesForNavigation()
+void sg::city::map::Map::LinkTileNavigationNodes()
 {
+    SG_OGL_LOG_DEBUG("[Map::LinkTileNavigationNodes()] Link neighboring navigation nodes.");
+
+    for (auto z{ 0 }; z < m_mapSize; ++z)
+    {
+        for (auto x{ 0 }; x < m_mapSize; ++x)
+        {
+            auto& currentTile{ m_tiles[GetTileMapIndexByMapPosition(x, z)] };
+
+            if (z < m_mapSize - 1)
+            {
+                auto& north{ currentTile->GetNeighbours().at(Tile::Direction::NORTH) };
+
+                currentTile->GetNavigationNodes()[42] = north->GetNavigationNodes()[0];
+                currentTile->GetNavigationNodes()[43] = north->GetNavigationNodes()[1];
+                currentTile->GetNavigationNodes()[44] = north->GetNavigationNodes()[2];
+                currentTile->GetNavigationNodes()[45] = north->GetNavigationNodes()[3];
+                currentTile->GetNavigationNodes()[46] = north->GetNavigationNodes()[4];
+                currentTile->GetNavigationNodes()[47] = north->GetNavigationNodes()[5];
+                currentTile->GetNavigationNodes()[48] = north->GetNavigationNodes()[6];
+            }
+
+            if (x < m_mapSize - 1)
+            {
+                auto& east{ currentTile->GetNeighbours().at(Tile::Direction::EAST) };
+
+                currentTile->GetNavigationNodes()[48] = east->GetNavigationNodes()[42];
+                currentTile->GetNavigationNodes()[41] = east->GetNavigationNodes()[35];
+                currentTile->GetNavigationNodes()[34] = east->GetNavigationNodes()[28];
+                currentTile->GetNavigationNodes()[27] = east->GetNavigationNodes()[21];
+                currentTile->GetNavigationNodes()[20] = east->GetNavigationNodes()[14];
+                currentTile->GetNavigationNodes()[13] = east->GetNavigationNodes()[7];
+                currentTile->GetNavigationNodes()[6] = east->GetNavigationNodes()[0];
+            }
+        }
+    }
+
     for (auto& tile : m_tiles)
     {
         auto& navigationNodes{ tile->GetNavigationNodes() };
-
-        // north
-        if (static_cast<int>(tile->GetMapZ()) > 0)
-        {
-            for (auto i{ 0 }; i < 7; ++i)
-            {
-                //  0  1  2  3  4  5  6
-                // 42 43 44 45 46 47 48
-                
-                // todo: use Bottom left instead map coords
-                const auto idx{ GetTileIndexByPosition(static_cast<int>(tile->GetMapX()), static_cast<int>(tile->GetMapZ()) - 1) * 49 };
-                navigationNodes[i] = m_navigationNodes[idx + 42 + i];
-            }
-        }
-        else
-        {
-            for (auto i{ 0 }; i < 7; ++i)
-            {
-                navigationNodes[i].reset();
-            }
-        }
-
-        // west
-        if (static_cast<int>(tile->GetMapX()) > 0)
-        {
-            for (auto i{ 6 }; i >= 0; --i)
-            {
-                //
-                //48  42
-                //41  35
-                //34  28
-                //27  21
-                //20  14
-                //13   7
-                 //6   0
-                //
-
-                const auto idx{ GetTileIndexByPosition(static_cast<int>(tile->GetMapX() - 1), static_cast<int>(tile->GetMapZ())) * 49 };
-                navigationNodes[i * 7] = m_navigationNodes[idx + 6 + i * 7];
-            }
-        }
-        else
-        {
-            for (auto i{ 6 }; i >= 0; --i)
-            {
-                navigationNodes[i * 7].reset();
-            }
-        }
-
-        // south
-        if (static_cast<int>(tile->GetMapZ()) < m_mapSize - 1)
-        {
-        }
-        else
-        {
-            for (auto i{ 0 }; i < 7; ++i)
-            {
-                navigationNodes[42 + i].reset();
-            }
-        }
-
-        // east
-        if (static_cast<int>(tile->GetMapX()) < m_mapSize - 1)
-        {
-        }
-        else
-        {
-            for (auto i{ 6 }; i >= 0; --i)
-            {
-                navigationNodes[6 + i * 7].reset();
-            }
-        }
 
         navigationNodes[37].reset();
         navigationNodes[39].reset();
@@ -468,13 +421,14 @@ void sg::city::map::Map::LinkTilesForNavigation()
         navigationNodes[19].reset();
         navigationNodes[9].reset();
         navigationNodes[11].reset();
+
+        // the 4 corners
         navigationNodes[42].reset();
         navigationNodes[48].reset();
         navigationNodes[0].reset();
         navigationNodes[6].reset();
     }
 }
-*/
 
 //-------------------------------------------------
 // Helper
@@ -576,6 +530,8 @@ void sg::city::map::Map::DepthSearch(Tile& t_startTile, const int t_region)
 void sg::city::map::Map::CreateTileNavigationNodesMeshes()
 {
     SG_OGL_CORE_ASSERT(!m_tiles.empty(), "[Map::CreateTileNavigationNodesMeshes()] No Tiles available.")
+
+    SG_OGL_LOG_DEBUG("[Map::CreateTileNavigationNodesMeshes()] Create a mesh with all navigation nodes.");
 
     for (auto& tile : m_tiles)
     {

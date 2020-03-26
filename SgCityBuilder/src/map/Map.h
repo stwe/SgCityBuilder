@@ -91,9 +91,6 @@ namespace sg::city::map
 
         using RandomColorContainer = std::unordered_map<int, ogl::Color>;
 
-        using NavigationNodeSharedPtr = std::shared_ptr<automata::AutoNode>;
-        using NavigationNodeContainer = std::vector<NavigationNodeSharedPtr>;
-
         //-------------------------------------------------
         // Public member
         //-------------------------------------------------
@@ -133,9 +130,6 @@ namespace sg::city::map
 
         [[nodiscard]] const TileContainer& GetTiles() const noexcept;
         [[nodiscard]] TileContainer& GetTiles() noexcept;
-
-        [[nodiscard]] const NavigationNodeContainer& GetNavigationNodes() const noexcept;
-        [[nodiscard]] NavigationNodeContainer& GetNavigationNodes() noexcept;
 
         [[nodiscard]] const ogl::resource::Mesh& GetMapMesh() const noexcept;
         [[nodiscard]] ogl::resource::Mesh& GetMapMesh() noexcept;
@@ -222,11 +216,6 @@ namespace sg::city::map
         RandomColorContainer m_randomColors;
 
         /**
-         * @brief The container with the navigation nodes.
-         */
-        NavigationNodeContainer m_navigationNodes;
-
-        /**
          * @brief A Mesh instance for the Map.
          */
         MeshUniquePtr m_mapMesh;
@@ -250,7 +239,7 @@ namespace sg::city::map
         void StoreTileNeighbours();
         void CreateRandomColors();
         void CreateNavigationNodes();
-        //void LinkTilesForNavigation();
+        void LinkTileNavigationNodes();
 
         //-------------------------------------------------
         // Helper

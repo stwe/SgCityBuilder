@@ -147,7 +147,8 @@ bool GameState::Update(const double t_dt)
 void GameState::Render()
 {
     m_city->RenderMap();
-    m_city->GetMap().RenderTileNavigationNodes(1, 1);
+
+    RenderDebug();
 
     //m_city->RenderRoadNetwork();
     //m_city->RenderBuildings();
@@ -205,6 +206,15 @@ void GameState::CreateExampleRoads() const
     roadNetwork.StoreRoadOnPosition(4, 1);
     roadNetwork.StoreRoadOnPosition(2, 1);
     roadNetwork.StoreRoadOnPosition(3, 1);
+}
+
+void GameState::RenderDebug()
+{
+    //m_city->GetMap().RenderTileNavigationNodes(1, 1);
+    for (auto& tile : m_city->GetMap().GetTiles())
+    {
+        tile->RenderNavigationNodes(m_scene.get(), &m_city->GetMap());
+    }
 }
 
 //-------------------------------------------------
