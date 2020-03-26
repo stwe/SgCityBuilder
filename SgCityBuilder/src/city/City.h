@@ -41,11 +41,6 @@ namespace sg::city::renderer
     class BuildingsRenderer;
 }
 
-namespace sg::city::util
-{
-    class Debug;
-}
-
 namespace sg::city::city
 {
     class City
@@ -59,8 +54,6 @@ namespace sg::city::city
         using MapRendererUniquePtr = std::unique_ptr<renderer::MapRenderer>;
         using RoadNetworkRendererUniquePtr = std::unique_ptr<renderer::RoadNetworkRenderer>;
         using BuildingsRendererUniquePtr = std::unique_ptr<renderer::BuildingsRenderer>;
-
-        using DebugUniquePtr = std::unique_ptr<util::Debug>;
 
         using PathPositionContainer = std::stack<glm::vec2>;
 
@@ -77,7 +70,7 @@ namespace sg::city::city
         // Ctors. / Dtor.
         //-------------------------------------------------
 
-        City(std::string t_name, ogl::scene::Scene* t_scene, int t_mapSize = 128);
+        City(std::string t_name, ogl::scene::Scene* t_scene, int t_mapSize = 64);
 
         City(const City& t_other) = delete;
         City(City&& t_other) noexcept = delete;
@@ -110,8 +103,6 @@ namespace sg::city::city
         [[nodiscard]] int GetDay() const;
         [[nodiscard]] float GetPopulationPool() const;
         [[nodiscard]] float GetPopulation() const;
-
-        [[nodiscard]] util::Debug& GetDebug();
 
         //-------------------------------------------------
         // Logic
@@ -208,11 +199,6 @@ namespace sg::city::city
          *        The sum of all the Tiles populations and the populationPool.
          */
         float m_population{ 0.0f };
-
-        /**
-         * @brief Render additional debug information.
-         */
-        DebugUniquePtr m_debug;
 
         //-------------------------------------------------
         // Init

@@ -17,7 +17,6 @@
 #include "renderer/MapRenderer.h"
 #include "renderer/RoadNetworkRenderer.h"
 #include "renderer/BuildingsRenderer.h"
-#include "util/Debug.h"
 #include "automata/AutoNode.h"
 #include "automata/AutoTrack.h"
 #include "automata/Automata.h"
@@ -121,11 +120,6 @@ float sg::city::city::City::GetPopulation() const
     return m_population;
 }
 
-sg::city::util::Debug& sg::city::city::City::GetDebug()
-{
-    return *m_debug;
-}
-
 //-------------------------------------------------
 // Logic
 //-------------------------------------------------
@@ -164,9 +158,6 @@ void sg::city::city::City::Update(const double t_dt)
 void sg::city::city::City::RenderMap() const
 {
     m_mapRenderer->Render();
-
-    m_debug->RenderAutoNodes();
-    m_debug->RenderAutoTrackLines();
 }
 
 void sg::city::city::City::RenderRoadNetwork() const
@@ -255,9 +246,6 @@ void sg::city::city::City::Init(ogl::scene::Scene* t_scene, const int t_mapSize)
     CreateMapEntity();
     CreateRoadNetworkEntity();
     CreateBuildingsEntity();
-
-    // init the Debug util
-    m_debug = std::make_unique<util::Debug>(m_scene, m_map.get());
 }
 
 void sg::city::city::City::CreateMapEntity()

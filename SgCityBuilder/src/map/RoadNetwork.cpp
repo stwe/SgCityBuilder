@@ -11,13 +11,12 @@
 #include <scene/Scene.h>
 #include <resource/Mesh.h>
 #include <resource/TextureManager.h>
+#include <Core.h>
 #include "RoadNetwork.h"
 #include "Tile.h"
-#include "Map.h"
 #include "city/City.h"
 #include "automata/AutoNode.h"
 #include "automata/AutoTrack.h"
-#include "util/Debug.h"
 
 //-------------------------------------------------
 // Ctors. / Dtor.
@@ -26,7 +25,16 @@
 sg::city::map::RoadNetwork::RoadNetwork(city::City* t_city)
     : m_city{ t_city }
 {
+    SG_OGL_CORE_ASSERT(t_city, "[RoadNetwork::RoadNetwork()] Null pointer.")
+
+    SG_OGL_LOG_DEBUG("[RoadNetwork::RoadNetwork()] Construct RoadNetwork.");
+
     Init();
+}
+
+sg::city::map::RoadNetwork::~RoadNetwork() noexcept
+{
+    SG_OGL_LOG_DEBUG("RoadNetwork::~RoadNetwork()] Destruct RoadNetwork.");
 }
 
 //-------------------------------------------------
@@ -52,65 +60,65 @@ uint32_t sg::city::map::RoadNetwork::GetRoadTextureAtlasId() const
 // Add Road
 //-------------------------------------------------
 
-void sg::city::map::RoadNetwork::StoreRoadOnPosition(const glm::vec3& t_mapPoint)
+void sg::city::map::RoadNetwork::StoreRoadOnMapPosition(const int t_mapX, const int t_mapZ)
 {
     // get Map
     auto& map{ m_city->GetMap() };
 
     // get Tile index by given map point
-    //const auto tileIndex{ map.GetTileIndexByPosition(t_mapPoint) };
+    const auto tileIndex{ map.GetTileMapIndexByMapPosition(t_mapX, t_mapZ) };
 
     // checks whether the Tile is already stored as a Road
-    /*
     if (m_lookupTable[tileIndex] > 0)
     {
+        SG_OGL_LOG_INFO("[RoadNetwork::StoreRoadOnMapPosition()] The Tile {} is already stored as a road", tileIndex);
+
         return;
     }
-    */
 
     // update TileType
-    //map.ChangeTileTypeOnPosition(t_mapPoint, Map::TileType::TRAFFIC_NETWORK);
-
-    /*
+    map.ChangeTileTypeOnMapPosition(t_mapX, t_mapZ, Map::TileType::TRAFFIC_NETWORK);
 
     // get the vertices of the Tile and make a !copy!
     auto vertices{ map.GetTileByIndex(tileIndex).GetVerticesContainer() };
 
-    // we use the same vertices of the tile, but just a little bit higher (y = 0.001f)
-    vertices[1] = 0.001f;
-    vertices[13] = 0.001f;
-    vertices[25] = 0.001f;
-    vertices[37] = 0.001f;
-    vertices[49] = 0.001f;
-    vertices[61] = 0.001f;
+    // we use the same vertices as for the tile, but just a little bit higher (y = 0.001f)
+    vertices[Tile::BOTTOM_LEFT_POS_Y_T1] = ROAD_VERTICES_HEIGHT;
+    vertices[Tile::BOTTOM_RIGHT_POS_Y_T1] = ROAD_VERTICES_HEIGHT;
+    vertices[Tile::TOP_LEFT_POS_Y_T1] = ROAD_VERTICES_HEIGHT;
 
-    // set a default texture value
+    vertices[Tile::TOP_LEFT_POS_Y_T2] = ROAD_VERTICES_HEIGHT;
+    vertices[Tile::BOTTOM_RIGHT_POS_Y_T2] = ROAD_VERTICES_HEIGHT;
+    vertices[Tile::TOP_RIGHT_POS_Y_T2] = ROAD_VERTICES_HEIGHT;
+
+    // set a default texture number - the value is unused
     const auto unused{ 0.0f };
-    vertices[9] = unused;
-    vertices[21] = unused;
-    vertices[33] = unused;
-    vertices[45] = unused;
-    vertices[57] = unused;
-    vertices[69] = unused;
+    vertices[Tile::BOTTOM_LEFT_TEXTURE_NR_T1] = unused;
+    vertices[Tile::BOTTOM_RIGHT_TEXTURE_NR_T1] = unused;
+    vertices[Tile::TOP_LEFT_TEXTURE_NR_T1] = unused;
+
+    vertices[Tile::TOP_LEFT_TEXTURE_NR_T2] = unused;
+    vertices[Tile::BOTTOM_RIGHT_TEXTURE_NR_T2] = unused;
+    vertices[Tile::TOP_RIGHT_TEXTURE_NR_T2] = unused;
 
     // set initial uv values
-    vertices[10] /= TEXTURE_ATLAS_ROWS;
-    vertices[11] /= TEXTURE_ATLAS_ROWS;
+    vertices[Tile::BOTTOM_LEFT_TEXTURE_X_T1] /= TEXTURE_ATLAS_ROWS;
+    vertices[Tile::BOTTOM_LEFT_TEXTURE_Y_T1] /= TEXTURE_ATLAS_ROWS;
 
-    vertices[22] /= TEXTURE_ATLAS_ROWS;
-    vertices[23] /= TEXTURE_ATLAS_ROWS;
+    vertices[Tile::BOTTOM_RIGHT_TEXTURE_X_T1] /= TEXTURE_ATLAS_ROWS;
+    vertices[Tile::BOTTOM_RIGHT_TEXTURE_Y_T1] /= TEXTURE_ATLAS_ROWS;
 
-    vertices[34] /= TEXTURE_ATLAS_ROWS;
-    vertices[35] /= TEXTURE_ATLAS_ROWS;
+    vertices[Tile::TOP_LEFT_TEXTURE_X_T1] /= TEXTURE_ATLAS_ROWS;
+    vertices[Tile::TOP_LEFT_TEXTURE_Y_T1] /= TEXTURE_ATLAS_ROWS;
 
-    vertices[46] /= TEXTURE_ATLAS_ROWS;
-    vertices[47] /= TEXTURE_ATLAS_ROWS;
+    vertices[Tile::TOP_LEFT_TEXTURE_X_T2] /= TEXTURE_ATLAS_ROWS;
+    vertices[Tile::TOP_LEFT_TEXTURE_Y_T2] /= TEXTURE_ATLAS_ROWS;
 
-    vertices[58] /= TEXTURE_ATLAS_ROWS;
-    vertices[59] /= TEXTURE_ATLAS_ROWS;
+    vertices[Tile::BOTTOM_RIGHT_TEXTURE_X_T2] /= TEXTURE_ATLAS_ROWS;
+    vertices[Tile::BOTTOM_RIGHT_TEXTURE_Y_T2] /= TEXTURE_ATLAS_ROWS;
 
-    vertices[70] /= TEXTURE_ATLAS_ROWS;
-    vertices[71] /= TEXTURE_ATLAS_ROWS;
+    vertices[Tile::TOP_RIGHT_TEXTURE_X_T2] /= TEXTURE_ATLAS_ROWS;
+    vertices[Tile::TOP_RIGHT_TEXTURE_Y_T2] /= TEXTURE_ATLAS_ROWS;
 
     // insert the Tile vertices at the end of the container with all vertices
     m_vertices.insert(m_vertices.end(), vertices.begin(), vertices.end());
@@ -124,200 +132,8 @@ void sg::city::map::RoadNetwork::StoreRoadOnPosition(const glm::vec3& t_mapPoint
     // update draw count
     m_roadNetworkMesh->GetVao().SetDrawCount(nrTiles * Tile::VERTICES_PER_TILE);
 
-    // update the RoadNetwork
-    Update();
-    */
-}
-
-void sg::city::map::RoadNetwork::StoreRoadOnPosition(const int t_mapX, const int t_mapZ)
-{
-    StoreRoadOnPosition(glm::vec3(static_cast<float>(t_mapX), 0.0f, static_cast<float>(t_mapZ)));
-}
-
-//-------------------------------------------------
-// Update
-//-------------------------------------------------
-
-// todo: make private
-void sg::city::map::RoadNetwork::Update()
-{
-    // get Map
-    auto& map{ m_city->GetMap() };
-
-    auto tileIndex{ 0 };
-    for (auto positionInVbo : m_lookupTable)
-    {
-        if (positionInVbo == NO_ROAD)
-        {
-            tileIndex++;
-            continue; // skip entry
-        }
-
-        // get the Tile
-        auto& tile{ map.GetTileByIndex(tileIndex) };
-
-        // determine the RoadType depending on the road direction and the neighbors
-        const auto roadType{ static_cast<int>(GetRoadType(tile)) };
-
-        // update uv values
-        const auto offset{ (positionInVbo - 1) * Tile::FLOATS_PER_TILE };
-
-        const auto column{ roadType % static_cast<int>(TEXTURE_ATLAS_ROWS) };
-        const auto xOffset{ static_cast<float>(column) / TEXTURE_ATLAS_ROWS };
-
-        const auto row{ roadType / static_cast<int>(TEXTURE_ATLAS_ROWS) };
-        const auto yOffset{ 1.0f - static_cast<float>(row) / TEXTURE_ATLAS_ROWS };
-
-        // bl
-        m_vertices[static_cast<size_t>(offset) + 10] = (0.0f / TEXTURE_ATLAS_ROWS) + xOffset;
-        m_vertices[static_cast<size_t>(offset) + 11] = (0.0f / TEXTURE_ATLAS_ROWS) + yOffset;
-
-        // br
-        m_vertices[static_cast<size_t>(offset) + 22] = (1.0f / TEXTURE_ATLAS_ROWS) + xOffset;
-        m_vertices[static_cast<size_t>(offset) + 23] = (0.0f / TEXTURE_ATLAS_ROWS) + yOffset;
-
-        // tl
-        m_vertices[static_cast<size_t>(offset) + 34] = (0.0f / TEXTURE_ATLAS_ROWS) + xOffset;
-        m_vertices[static_cast<size_t>(offset) + 35] = (1.0f / TEXTURE_ATLAS_ROWS) + yOffset;
-
-        // tl
-        m_vertices[static_cast<size_t>(offset) + 46] = (0.0f / TEXTURE_ATLAS_ROWS) + xOffset;
-        m_vertices[static_cast<size_t>(offset) + 47] = (1.0f / TEXTURE_ATLAS_ROWS) + yOffset;
-
-        // br
-        m_vertices[static_cast<size_t>(offset) + 58] = (1.0f / TEXTURE_ATLAS_ROWS) + xOffset;
-        m_vertices[static_cast<size_t>(offset) + 59] = (0.0f / TEXTURE_ATLAS_ROWS) + yOffset;
-
-        // tr
-        m_vertices[static_cast<size_t>(offset) + 70] = (1.0f / TEXTURE_ATLAS_ROWS) + xOffset;
-        m_vertices[static_cast<size_t>(offset) + 71] = (1.0f / TEXTURE_ATLAS_ROWS) + yOffset;
-
-        tileIndex++;
-    }
-
-    UpdateVbo();
-
-    UpdateAutoTracks();
-
-    m_city->GetDebug().UpdateAutoNodesMesh(true);
-    m_city->GetDebug().UpdateAutoTrackMeshes();
-}
-
-void sg::city::map::RoadNetwork::UpdateAutoTracks()
-{
-    // get Map
-    auto& map{ m_city->GetMap() };
-
-    auto tileIndex{ 0 };
-    for (auto positionInVbo : m_lookupTable)
-    {
-        if (positionInVbo == NO_ROAD)
-        {
-            tileIndex++;
-            continue; // skip entry
-        }
-
-        // get the Tile
-        auto& tile{ map.GetTileByIndex(tileIndex) };
-
-        // clear the list of AutoTracks
-        tile.GetAutoTracks().clear();
-
-        // add traffic auto tracks
-        switch (GetRoadType(tile))
-        {
-        case RoadType::ROAD_H: AddAutoTrack(tile, 28, 34);
-                               AddAutoTrack(tile, 14, 20, true);
-                               break;
-        case RoadType::ROAD_V: AddAutoTrack(tile, 44, 2, true);
-                               AddAutoTrack(tile, 46, 4);
-                               break;
-
-        case RoadType::ROAD_C1: AddAutoTrack(tile, 2, 30);
-                                AddAutoTrack(tile, 30, 34);
-                                AddAutoTrack(tile, 4, 18);
-                                AddAutoTrack(tile, 18, 20);
-                                break;
-        case RoadType::ROAD_C2: AddAutoTrack(tile, 28, 32);
-                                AddAutoTrack(tile, 32, 4);
-                                AddAutoTrack(tile, 14, 16);
-                                AddAutoTrack(tile, 16, 2);
-                                break;
-        case RoadType::ROAD_C3: AddAutoTrack(tile, 44, 16);
-                                AddAutoTrack(tile, 16, 20);
-                                AddAutoTrack(tile, 46, 32);
-                                AddAutoTrack(tile, 32, 34);
-                                break;
-        case RoadType::ROAD_C4: AddAutoTrack(tile, 44, 30);
-                                AddAutoTrack(tile, 30, 28);
-                                AddAutoTrack(tile, 46, 18);
-                                AddAutoTrack(tile, 18, 14);
-                                break;
-
-        case RoadType::ROAD_T1: AddAutoTrack(tile, 28, 30);
-                                AddAutoTrack(tile, 30, 32);
-                                AddAutoTrack(tile, 32, 34);
-                                AddAutoTrack(tile, 14, 16);
-                                AddAutoTrack(tile, 16, 18);
-                                AddAutoTrack(tile, 18, 20);
-                                AddAutoTrack(tile, 30, 16);
-                                AddAutoTrack(tile, 16, 2);
-                                AddAutoTrack(tile, 32, 18);
-                                AddAutoTrack(tile, 18, 4);
-                                break;
-        case RoadType::ROAD_T4: AddAutoTrack(tile, 28, 30);
-                                AddAutoTrack(tile, 30, 32);
-                                AddAutoTrack(tile, 32, 34);
-                                AddAutoTrack(tile, 14, 16);
-                                AddAutoTrack(tile, 16, 18);
-                                AddAutoTrack(tile, 18, 20);
-                                AddAutoTrack(tile, 30, 16);
-                                AddAutoTrack(tile, 30, 44);
-                                AddAutoTrack(tile, 32, 18);
-                                AddAutoTrack(tile, 32, 46);
-                                break;
-        case RoadType::ROAD_T2: AddAutoTrack(tile, 44, 30);
-                                AddAutoTrack(tile, 30, 16);
-                                AddAutoTrack(tile, 16, 2);
-                                AddAutoTrack(tile, 46, 32);
-                                AddAutoTrack(tile, 32, 18);
-                                AddAutoTrack(tile, 18, 4);
-                                AddAutoTrack(tile, 30, 32);
-                                AddAutoTrack(tile, 32, 34);
-                                AddAutoTrack(tile, 16, 18);
-                                AddAutoTrack(tile, 18, 20);
-                                break;
-        case RoadType::ROAD_T3: AddAutoTrack(tile, 44, 30);
-                                AddAutoTrack(tile, 30, 16);
-                                AddAutoTrack(tile, 16, 2);
-                                AddAutoTrack(tile, 46, 32);
-                                AddAutoTrack(tile, 32, 18);
-                                AddAutoTrack(tile, 18, 4);
-                                AddAutoTrack(tile, 28, 30);
-                                AddAutoTrack(tile, 30, 32);
-                                AddAutoTrack(tile, 14, 16);
-                                AddAutoTrack(tile, 16, 18);
-                                break;
-
-        case RoadType::ROAD_X: AddAutoTrack(tile, 44, 30);
-                               AddAutoTrack(tile, 30, 16);
-                               AddAutoTrack(tile, 16, 2);
-                               AddAutoTrack(tile, 46, 32);
-                               AddAutoTrack(tile, 32, 18);
-                               AddAutoTrack(tile, 18, 4);
-                               AddAutoTrack(tile, 28, 30);
-                               AddAutoTrack(tile, 30, 32);
-                               AddAutoTrack(tile, 32, 34);
-                               AddAutoTrack(tile, 14, 16);
-                               AddAutoTrack(tile, 16, 18);
-                               AddAutoTrack(tile, 18, 20);
-                               break;
-
-        default:;
-        }
-
-        tileIndex++;
-    }
+    // update all stored roads
+    UpdateStoredRoads();
 }
 
 //-------------------------------------------------
@@ -339,6 +155,8 @@ void sg::city::map::RoadNetwork::CreateVbo()
 
 void sg::city::map::RoadNetwork::Init()
 {
+    SG_OGL_LOG_DEBUG("[RoadNetwork::Init()] Initialize RoadNetwork.");
+
     // get Map
     auto& map{ m_city->GetMap() };
 
@@ -365,40 +183,39 @@ void sg::city::map::RoadNetwork::Init()
 // Update
 //-------------------------------------------------
 
-sg::city::map::RoadNetwork::RoadType sg::city::map::RoadNetwork::GetRoadType(const Tile& t_tile)
+sg::city::map::RoadNetwork::RoadType sg::city::map::RoadNetwork::DetermineRoadType(const Tile& t_tile)
 {
     const auto& neighbours{ t_tile.GetNeighbours() };
 
     uint8_t roadNeighbours{ 0 };
 
-    /*
-    if (neighbours[static_cast<int>(Tile::Direction::NORTH)])
+    if (neighbours.count(Tile::Direction::NORTH))
     {
-        if (neighbours[static_cast<int>(Tile::Direction::NORTH)]->GetType() == Map::TileType::TRAFFIC_NETWORK)
+        if (neighbours.at(Tile::Direction::NORTH)->GetType() == Map::TileType::TRAFFIC_NETWORK)
         {
             roadNeighbours = NORTH;
         }
     }
 
-    if (neighbours[static_cast<int>(Tile::Direction::EAST)])
+    if (neighbours.count(Tile::Direction::EAST))
     {
-        if (neighbours[static_cast<int>(Tile::Direction::EAST)]->GetType() == Map::TileType::TRAFFIC_NETWORK)
+        if (neighbours.at(Tile::Direction::EAST)->GetType() == Map::TileType::TRAFFIC_NETWORK)
         {
             roadNeighbours |= EAST;
         }
     }
 
-    if (neighbours[static_cast<int>(Tile::Direction::SOUTH)])
+    if (neighbours.count(Tile::Direction::SOUTH))
     {
-        if (neighbours[static_cast<int>(Tile::Direction::SOUTH)]->GetType() == Map::TileType::TRAFFIC_NETWORK)
+        if (neighbours.at(Tile::Direction::SOUTH)->GetType() == Map::TileType::TRAFFIC_NETWORK)
         {
             roadNeighbours |= SOUTH;
         }
     }
 
-    if (neighbours[static_cast<int>(Tile::Direction::WEST)])
+    if (neighbours.count(Tile::Direction::WEST))
     {
-        if (neighbours[static_cast<int>(Tile::Direction::WEST)]->GetType() == Map::TileType::TRAFFIC_NETWORK)
+        if (neighbours.at(Tile::Direction::WEST)->GetType() == Map::TileType::TRAFFIC_NETWORK)
         {
             roadNeighbours |= WEST;
         }
@@ -407,16 +224,14 @@ sg::city::map::RoadNetwork::RoadType sg::city::map::RoadNetwork::GetRoadType(con
     RoadType roadType;
     switch (roadNeighbours)
     {
-    case 0: roadType = RoadType::ROAD_V;   // keine Nachbarn
-        break;
+    case 0:                                // keine Nachbarn
     case 1: roadType = RoadType::ROAD_V;   // Norden
         break;
     case 2: roadType = RoadType::ROAD_H;   // Osten
         break;
     case 3: roadType = RoadType::ROAD_C3;  // Norden - Osten
         break;
-    case 4: roadType = RoadType::ROAD_V;   // Sueden
-        break;
+    case 4:                                // Sueden
     case 5: roadType = RoadType::ROAD_V;   // Sueden - Norden
         break;
     case 6: roadType = RoadType::ROAD_C1;  // Sueden - Osten
@@ -441,8 +256,7 @@ sg::city::map::RoadNetwork::RoadType sg::city::map::RoadNetwork::GetRoadType(con
         break;
     default: roadType = RoadType::ROAD_V;
     }
-    */
-    RoadType roadType;
+
     return roadType;
 }
 
@@ -458,6 +272,189 @@ void sg::city::map::RoadNetwork::UpdateVbo()
         glBufferSubData(GL_ARRAY_BUFFER, 0, nrTiles * Tile::SIZE_IN_BYTES_PER_TILE, m_vertices.data());
         ogl::buffer::Vbo::UnbindVbo();
     }
+}
+
+void sg::city::map::RoadNetwork::UpdateAutoTracks()
+{
+    // get Map
+    auto& map{ m_city->GetMap() };
+
+    auto tileIndex{ 0 };
+    for (auto positionInVbo : m_lookupTable)
+    {
+        if (positionInVbo == NO_ROAD)
+        {
+            tileIndex++;
+            continue; // skip entry
+        }
+
+        // get the Tile
+        auto& tile{ map.GetTileByIndex(tileIndex) };
+
+        // clear the list of AutoTracks
+        tile.GetAutoTracks().clear();
+
+        // add traffic auto tracks
+        switch (DetermineRoadType(tile))
+        {
+        case RoadType::ROAD_H: AddAutoTrack(tile, 28, 34);
+            AddAutoTrack(tile, 14, 20, true);
+            break;
+        case RoadType::ROAD_V: AddAutoTrack(tile, 44, 2, true);
+            AddAutoTrack(tile, 46, 4);
+            break;
+
+        case RoadType::ROAD_C1: AddAutoTrack(tile, 2, 30);
+            AddAutoTrack(tile, 30, 34);
+            AddAutoTrack(tile, 4, 18);
+            AddAutoTrack(tile, 18, 20);
+            break;
+        case RoadType::ROAD_C2: AddAutoTrack(tile, 28, 32);
+            AddAutoTrack(tile, 32, 4);
+            AddAutoTrack(tile, 14, 16);
+            AddAutoTrack(tile, 16, 2);
+            break;
+        case RoadType::ROAD_C3: AddAutoTrack(tile, 44, 16);
+            AddAutoTrack(tile, 16, 20);
+            AddAutoTrack(tile, 46, 32);
+            AddAutoTrack(tile, 32, 34);
+            break;
+        case RoadType::ROAD_C4: AddAutoTrack(tile, 44, 30);
+            AddAutoTrack(tile, 30, 28);
+            AddAutoTrack(tile, 46, 18);
+            AddAutoTrack(tile, 18, 14);
+            break;
+
+        case RoadType::ROAD_T1: AddAutoTrack(tile, 28, 30);
+            AddAutoTrack(tile, 30, 32);
+            AddAutoTrack(tile, 32, 34);
+            AddAutoTrack(tile, 14, 16);
+            AddAutoTrack(tile, 16, 18);
+            AddAutoTrack(tile, 18, 20);
+            AddAutoTrack(tile, 30, 16);
+            AddAutoTrack(tile, 16, 2);
+            AddAutoTrack(tile, 32, 18);
+            AddAutoTrack(tile, 18, 4);
+            break;
+        case RoadType::ROAD_T4: AddAutoTrack(tile, 28, 30);
+            AddAutoTrack(tile, 30, 32);
+            AddAutoTrack(tile, 32, 34);
+            AddAutoTrack(tile, 14, 16);
+            AddAutoTrack(tile, 16, 18);
+            AddAutoTrack(tile, 18, 20);
+            AddAutoTrack(tile, 30, 16);
+            AddAutoTrack(tile, 30, 44);
+            AddAutoTrack(tile, 32, 18);
+            AddAutoTrack(tile, 32, 46);
+            break;
+        case RoadType::ROAD_T2: AddAutoTrack(tile, 44, 30);
+            AddAutoTrack(tile, 30, 16);
+            AddAutoTrack(tile, 16, 2);
+            AddAutoTrack(tile, 46, 32);
+            AddAutoTrack(tile, 32, 18);
+            AddAutoTrack(tile, 18, 4);
+            AddAutoTrack(tile, 30, 32);
+            AddAutoTrack(tile, 32, 34);
+            AddAutoTrack(tile, 16, 18);
+            AddAutoTrack(tile, 18, 20);
+            break;
+        case RoadType::ROAD_T3: AddAutoTrack(tile, 44, 30);
+            AddAutoTrack(tile, 30, 16);
+            AddAutoTrack(tile, 16, 2);
+            AddAutoTrack(tile, 46, 32);
+            AddAutoTrack(tile, 32, 18);
+            AddAutoTrack(tile, 18, 4);
+            AddAutoTrack(tile, 28, 30);
+            AddAutoTrack(tile, 30, 32);
+            AddAutoTrack(tile, 14, 16);
+            AddAutoTrack(tile, 16, 18);
+            break;
+
+        case RoadType::ROAD_X: AddAutoTrack(tile, 44, 30);
+            AddAutoTrack(tile, 30, 16);
+            AddAutoTrack(tile, 16, 2);
+            AddAutoTrack(tile, 46, 32);
+            AddAutoTrack(tile, 32, 18);
+            AddAutoTrack(tile, 18, 4);
+            AddAutoTrack(tile, 28, 30);
+            AddAutoTrack(tile, 30, 32);
+            AddAutoTrack(tile, 32, 34);
+            AddAutoTrack(tile, 14, 16);
+            AddAutoTrack(tile, 16, 18);
+            AddAutoTrack(tile, 18, 20);
+            break;
+
+        default:;
+        }
+
+        tileIndex++;
+    }
+}
+
+void sg::city::map::RoadNetwork::UpdateStoredRoads()
+{
+    // get Map
+    auto& map{ m_city->GetMap() };
+
+    // update textures
+
+    auto tileIndex{ 0 };
+    for (auto positionInVbo : m_lookupTable)
+    {
+        // only update road Tiles that are already in the Vbo
+        if (positionInVbo == NO_ROAD)
+        {
+            tileIndex++;
+            continue; // skip entry
+        }
+
+        // get the Tile
+        auto& tile{ map.GetTileByIndex(tileIndex) };
+
+        // determine the RoadType depending on the road direction and the neighbors
+        const auto roadType{ static_cast<int>(DetermineRoadType(tile)) };
+
+        // update uv values
+
+        const auto offset{ (static_cast<size_t>(positionInVbo) - 1) * Tile::FLOATS_PER_TILE };
+
+        const auto column{ roadType % static_cast<int>(TEXTURE_ATLAS_ROWS) };
+        const auto xOffset{ static_cast<float>(column) / TEXTURE_ATLAS_ROWS };
+
+        const auto row{ roadType / static_cast<int>(TEXTURE_ATLAS_ROWS) };
+        const auto yOffset{ 1.0f - static_cast<float>(row) / TEXTURE_ATLAS_ROWS };
+
+        // bl
+        m_vertices[offset + Tile::BOTTOM_LEFT_TEXTURE_X_T1] = (0.0f / TEXTURE_ATLAS_ROWS) + xOffset;
+        m_vertices[offset + Tile::BOTTOM_LEFT_TEXTURE_Y_T1] = (0.0f / TEXTURE_ATLAS_ROWS) + yOffset;
+
+        // br
+        m_vertices[offset + Tile::BOTTOM_RIGHT_TEXTURE_X_T1] = (1.0f / TEXTURE_ATLAS_ROWS) + xOffset;
+        m_vertices[offset + Tile::BOTTOM_RIGHT_TEXTURE_Y_T1] = (0.0f / TEXTURE_ATLAS_ROWS) + yOffset;
+
+        // tl
+        m_vertices[offset + Tile::TOP_LEFT_TEXTURE_X_T1] = (0.0f / TEXTURE_ATLAS_ROWS) + xOffset;
+        m_vertices[offset + Tile::TOP_LEFT_TEXTURE_Y_T1] = (1.0f / TEXTURE_ATLAS_ROWS) + yOffset;
+
+        // tl
+        m_vertices[offset + Tile::TOP_LEFT_TEXTURE_X_T2] = (0.0f / TEXTURE_ATLAS_ROWS) + xOffset;
+        m_vertices[offset + Tile::TOP_LEFT_TEXTURE_Y_T2] = (1.0f / TEXTURE_ATLAS_ROWS) + yOffset;
+
+        // br
+        m_vertices[offset + Tile::BOTTOM_RIGHT_TEXTURE_X_T2] = (1.0f / TEXTURE_ATLAS_ROWS) + xOffset;
+        m_vertices[offset + Tile::BOTTOM_RIGHT_TEXTURE_Y_T2] = (0.0f / TEXTURE_ATLAS_ROWS) + yOffset;
+
+        // tr
+        m_vertices[offset + Tile::TOP_RIGHT_TEXTURE_X_T2] = (1.0f / TEXTURE_ATLAS_ROWS) + xOffset;
+        m_vertices[offset + Tile::TOP_RIGHT_TEXTURE_Y_T2] = (1.0f / TEXTURE_ATLAS_ROWS) + yOffset;
+
+        tileIndex++;
+    }
+
+    // write the new vertex data in the Vbo
+    UpdateVbo();
+
+    UpdateAutoTracks();
 }
 
 //-------------------------------------------------

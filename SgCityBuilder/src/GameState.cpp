@@ -62,22 +62,14 @@ bool GameState::Input()
 
         if (m_mapPoint.x >= 0)
         {
-            SG_OGL_LOG_INFO("x: {}, z: {}", m_mapPoint.x, m_mapPoint.z);
-
             if (m_currentTileType == sg::city::map::Map::TileType::TRAFFIC_NETWORK)
             {
-                //m_city->GetRoadNetwork().StoreRoadOnPosition(m_mapPoint);
-            }
-            else if (m_currentTileType == sg::city::map::Map::TileType::RESIDENTIAL)
-            {
-               // m_city->GetBuildingGenerator().StoreBuildingOnPosition(m_mapPoint);
+                m_city->GetRoadNetwork().StoreRoadOnMapPosition(m_mapPoint.x, m_mapPoint.z);
             }
             else
             {
-                //m_city->GetMap().ChangeTileTypeOnPosition(m_mapPoint, m_currentTileType);
+                m_city->GetMap().ChangeTileTypeOnMapPosition(m_mapPoint.x, m_mapPoint.z, m_currentTileType);
             }
-
-            m_city->GetMap().ChangeTileTypeOnMapPosition(m_mapPoint.x, m_mapPoint.z, m_currentTileType);
 
             //m_city->GetMap().FindConnectedRegions();
 
@@ -147,12 +139,11 @@ bool GameState::Update(const double t_dt)
 void GameState::Render()
 {
     m_city->RenderMap();
+    m_city->RenderRoadNetwork();
 
     RenderDebug();
 
-    //m_city->RenderRoadNetwork();
     //m_city->RenderBuildings();
-
     //m_forwardRenderer->Render();
 
     m_textRenderer->RenderText("SgCityBuilder", 10.0f, 10.0f, 0.25f, glm::vec3(0.1f));
@@ -194,21 +185,21 @@ void GameState::Init()
 void GameState::CreateExampleRoads() const
 {
     auto& roadNetwork{ m_city->GetRoadNetwork() };
-    roadNetwork.StoreRoadOnPosition(1, 1);
-    roadNetwork.StoreRoadOnPosition(1, 2);
-    roadNetwork.StoreRoadOnPosition(1, 3);
-    roadNetwork.StoreRoadOnPosition(1, 4);
-    roadNetwork.StoreRoadOnPosition(2, 4);
-    roadNetwork.StoreRoadOnPosition(3, 4);
-    roadNetwork.StoreRoadOnPosition(4, 4);
-    roadNetwork.StoreRoadOnPosition(4, 3);
-    roadNetwork.StoreRoadOnPosition(4, 2);
-    roadNetwork.StoreRoadOnPosition(4, 1);
-    roadNetwork.StoreRoadOnPosition(2, 1);
-    roadNetwork.StoreRoadOnPosition(3, 1);
+    roadNetwork.StoreRoadOnMapPosition(1, 1);
+    roadNetwork.StoreRoadOnMapPosition(1, 2);
+    roadNetwork.StoreRoadOnMapPosition(1, 3);
+    roadNetwork.StoreRoadOnMapPosition(1, 4);
+    roadNetwork.StoreRoadOnMapPosition(2, 4);
+    roadNetwork.StoreRoadOnMapPosition(3, 4);
+    roadNetwork.StoreRoadOnMapPosition(4, 4);
+    roadNetwork.StoreRoadOnMapPosition(4, 3);
+    roadNetwork.StoreRoadOnMapPosition(4, 2);
+    roadNetwork.StoreRoadOnMapPosition(4, 1);
+    roadNetwork.StoreRoadOnMapPosition(2, 1);
+    roadNetwork.StoreRoadOnMapPosition(3, 1);
 }
 
-void GameState::RenderDebug()
+void GameState::RenderDebug() const
 {
     //m_city->GetMap().RenderTileNavigationNodes(1, 1);
     for (auto& tile : m_city->GetMap().GetTiles())

@@ -9,13 +9,6 @@
 
 #pragma once
 
-#include <memory>
-
-namespace sg::ogl::resource
-{
-    class Mesh;
-}
-
 namespace sg::city::city
 {
     class City;
@@ -29,7 +22,13 @@ namespace sg::city::map
     {
     public:
         static constexpr auto TEXTURE_ATLAS_ROWS{ 4.0f };
+        static constexpr auto NO_ROAD{ -1 };
+        static constexpr auto ROAD_VERTICES_HEIGHT{ 0.001f };
 
+        /**
+         * @brief Possible Road Neighbours.
+         *        Each flag can set by using the OR operator.
+         */
         enum RoadNeighbours : uint8_t
         {
             NORTH = 1,
@@ -60,8 +59,6 @@ namespace sg::city::map
         using TileIndexContainer = std::vector<int>;
         using MeshUniquePtr = std::unique_ptr<ogl::resource::Mesh>;
 
-        static constexpr auto NO_ROAD{ -1 };
-
         //-------------------------------------------------
         // Ctors. / Dtor.
         //-------------------------------------------------
@@ -75,7 +72,7 @@ namespace sg::city::map
         RoadNetwork& operator=(const RoadNetwork& t_other) = delete;
         RoadNetwork& operator=(RoadNetwork&& t_other) noexcept = delete;
 
-        ~RoadNetwork() noexcept = default;
+        ~RoadNetwork() noexcept;
 
         //-------------------------------------------------
         // Getter
@@ -90,15 +87,15 @@ namespace sg::city::map
         // Add Road
         //-------------------------------------------------
 
-        void StoreRoadOnPosition(const glm::vec3& t_mapPoint);
-        void StoreRoadOnPosition(int t_mapX, int t_mapZ);
-
-        //-------------------------------------------------
-        // Update
-        //-------------------------------------------------
-
-        void Update();
-        void UpdateAutoTracks();
+        /**
+         * @brief Sets the Tile type to Traffic at a given position.
+         *        In addition, vertices for a road are created for this Tile
+         *        and these are inserted into a large mesh for all roads.
+         *        So all roads can be drawn with a single draw call.
+         * @param t_mapX The Map-x position of the Tile in Object Space.
+         * @param t_mapZ The Map-z position of the Tile in Object Space.
+         */
+        void StoreRoadOnMapPosition(int t_mapX, int t_mapZ);
 
     protected:
 
@@ -114,6 +111,11 @@ namespace sg::city::map
         MeshUniquePtr m_roadNetworkMesh;
 
         /**
+         * @brief The texture Id of the road texture atlas.
+         */
+        uint32_t m_roadTextureAtlasId{ 0 };
+
+        /**
          * @brief The Id of Vbo holding the vertices.
          */
         uint32_t m_vboId{ 0 };
@@ -122,11 +124,6 @@ namespace sg::city::map
          * @brief Vertices of all Roads.
          */
         VertexContainer m_vertices;
-
-        /**
-         * @brief The texture Id of the road texture atlas.
-         */
-        uint32_t m_roadTextureAtlasId{ 0 };
 
         /**
          * @brief Stores the position of the Road Tile in the Vbo.
@@ -149,9 +146,20 @@ namespace sg::city::map
          * @param t_tile The tile for which the type is to be determined.
          * @return A RoadType.
          */
-        static RoadType GetRoadType(const Tile& t_tile);
+        static RoadType DetermineRoadType(const Tile& t_tile);
 
+        /**
+         * @brief Write the new vertex data in the Vbo.
+         */
         void UpdateVbo();
+
+        void UpdateAutoTracks();
+
+        /**
+         * @brief Update road Tiles that are already in the Vbo.
+         *        In particular, the textures are updated depending on the neighbors.
+         */
+        void UpdateStoredRoads();
 
         //-------------------------------------------------
         // Helper

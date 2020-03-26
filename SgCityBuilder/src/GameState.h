@@ -25,7 +25,7 @@ namespace sg::city::input
 class GameState : public sg::ogl::state::State
 {
 public:
-    static constexpr auto MAP_SIZE{ 2 };
+    static constexpr auto MAP_SIZE{ 8 };
 
     using SceneUniquePtr = std::unique_ptr<sg::ogl::scene::Scene>;
     using FirstPersonCameraSharedPtr = std::shared_ptr<sg::ogl::camera::FirstPersonCamera>;
@@ -76,7 +76,7 @@ private:
 
     void Init();
     void CreateExampleRoads() const;
-    void RenderDebug();
+    void RenderDebug() const;
 
     //-------------------------------------------------
     // ImGui
