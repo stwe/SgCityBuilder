@@ -153,7 +153,7 @@ namespace sg::city::map
          */
         void UpdateVbo();
 
-        void UpdateAutoTracks();
+        void UpdateAutoTracks(Tile& t_tile, RoadType t_roadType) const;
 
         /**
          * @brief Update road Tiles that are already in the Vbo.

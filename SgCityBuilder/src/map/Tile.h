@@ -194,7 +194,7 @@ namespace sg::city::map
         //-------------------------------------------------
 
         float population{ 0.0 };
-        AutoTrackSharedPtr safeCarAutoTrack;
+        AutoTrackSharedPtr safeCarAutoTrack; // todo create RoadTile
 
         //-------------------------------------------------
         // Ctors. / Dtor.
@@ -373,7 +373,7 @@ namespace sg::city::map
         NavigationNodeContainer m_navigationNodes;
 
         /**
-         * @brief Each Tile can have a number of auto tracks.
+         * @brief Each Tile can have multiple auto tracks.
          */
         AutoTrackContainer m_autoTracks;
 

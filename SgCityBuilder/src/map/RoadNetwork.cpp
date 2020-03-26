@@ -274,120 +274,102 @@ void sg::city::map::RoadNetwork::UpdateVbo()
     }
 }
 
-void sg::city::map::RoadNetwork::UpdateAutoTracks()
+void sg::city::map::RoadNetwork::UpdateAutoTracks(Tile& t_tile, const RoadType t_roadType) const
 {
-    // get Map
-    auto& map{ m_city->GetMap() };
+    // clear the existing list of AutoTracks
+    t_tile.GetAutoTracks().clear();
 
-    auto tileIndex{ 0 };
-    for (auto positionInVbo : m_lookupTable)
+    // add auto tracks
+    switch (t_roadType)
     {
-        if (positionInVbo == NO_ROAD)
-        {
-            tileIndex++;
-            continue; // skip entry
-        }
+    case RoadType::ROAD_H: AddAutoTrack(t_tile, 28, 34);
+                           AddAutoTrack(t_tile, 14, 20, true);
+                           break;
+    case RoadType::ROAD_V: AddAutoTrack(t_tile, 44, 2, true);
+                           AddAutoTrack(t_tile, 46, 4);
+                           break;
 
-        // get the Tile
-        auto& tile{ map.GetTileByIndex(tileIndex) };
+    case RoadType::ROAD_C1: AddAutoTrack(t_tile, 2, 30);
+                            AddAutoTrack(t_tile, 30, 34);
+                            AddAutoTrack(t_tile, 4, 18);
+                            AddAutoTrack(t_tile, 18, 20);
+                            break;
+    case RoadType::ROAD_C2: AddAutoTrack(t_tile, 28, 32);
+                            AddAutoTrack(t_tile, 32, 4);
+                            AddAutoTrack(t_tile, 14, 16);
+                            AddAutoTrack(t_tile, 16, 2);
+                            break;
+    case RoadType::ROAD_C3: AddAutoTrack(t_tile, 44, 16);
+                            AddAutoTrack(t_tile, 16, 20);
+                            AddAutoTrack(t_tile, 46, 32);
+                            AddAutoTrack(t_tile, 32, 34);
+                            break;
+    case RoadType::ROAD_C4: AddAutoTrack(t_tile, 44, 30);
+                            AddAutoTrack(t_tile, 30, 28);
+                            AddAutoTrack(t_tile, 46, 18);
+                            AddAutoTrack(t_tile, 18, 14);
+                            break;
 
-        // clear the list of AutoTracks
-        tile.GetAutoTracks().clear();
+    case RoadType::ROAD_T1: AddAutoTrack(t_tile, 28, 30);
+                            AddAutoTrack(t_tile, 30, 32);
+                            AddAutoTrack(t_tile, 32, 34);
+                            AddAutoTrack(t_tile, 14, 16);
+                            AddAutoTrack(t_tile, 16, 18);
+                            AddAutoTrack(t_tile, 18, 20);
+                            AddAutoTrack(t_tile, 30, 16);
+                            AddAutoTrack(t_tile, 16, 2);
+                            AddAutoTrack(t_tile, 32, 18);
+                            AddAutoTrack(t_tile, 18, 4);
+                            break;
+    case RoadType::ROAD_T4: AddAutoTrack(t_tile, 28, 30);
+                            AddAutoTrack(t_tile, 30, 32);
+                            AddAutoTrack(t_tile, 32, 34);
+                            AddAutoTrack(t_tile, 14, 16);
+                            AddAutoTrack(t_tile, 16, 18);
+                            AddAutoTrack(t_tile, 18, 20);
+                            AddAutoTrack(t_tile, 30, 16);
+                            AddAutoTrack(t_tile, 30, 44);
+                            AddAutoTrack(t_tile, 32, 18);
+                            AddAutoTrack(t_tile, 32, 46);
+                            break;
+    case RoadType::ROAD_T2: AddAutoTrack(t_tile, 44, 30);
+                            AddAutoTrack(t_tile, 30, 16);
+                            AddAutoTrack(t_tile, 16, 2);
+                            AddAutoTrack(t_tile, 46, 32);
+                            AddAutoTrack(t_tile, 32, 18);
+                            AddAutoTrack(t_tile, 18, 4);
+                            AddAutoTrack(t_tile, 30, 32);
+                            AddAutoTrack(t_tile, 32, 34);
+                            AddAutoTrack(t_tile, 16, 18);
+                            AddAutoTrack(t_tile, 18, 20);
+                            break;
+    case RoadType::ROAD_T3: AddAutoTrack(t_tile, 44, 30);
+                            AddAutoTrack(t_tile, 30, 16);
+                            AddAutoTrack(t_tile, 16, 2);
+                            AddAutoTrack(t_tile, 46, 32);
+                            AddAutoTrack(t_tile, 32, 18);
+                            AddAutoTrack(t_tile, 18, 4);
+                            AddAutoTrack(t_tile, 28, 30);
+                            AddAutoTrack(t_tile, 30, 32);
+                            AddAutoTrack(t_tile, 14, 16);
+                            AddAutoTrack(t_tile, 16, 18);
+                            break;
 
-        // add traffic auto tracks
-        switch (DetermineRoadType(tile))
-        {
-        case RoadType::ROAD_H: AddAutoTrack(tile, 28, 34);
-            AddAutoTrack(tile, 14, 20, true);
-            break;
-        case RoadType::ROAD_V: AddAutoTrack(tile, 44, 2, true);
-            AddAutoTrack(tile, 46, 4);
-            break;
+    case RoadType::ROAD_X: AddAutoTrack(t_tile, 44, 30);
+                           AddAutoTrack(t_tile, 30, 16);
+                           AddAutoTrack(t_tile, 16, 2);
+                           AddAutoTrack(t_tile, 46, 32);
+                           AddAutoTrack(t_tile, 32, 18);
+                           AddAutoTrack(t_tile, 18, 4);
+                           AddAutoTrack(t_tile, 28, 30);
+                           AddAutoTrack(t_tile, 30, 32);
+                           AddAutoTrack(t_tile, 32, 34);
+                           AddAutoTrack(t_tile, 14, 16);
+                           AddAutoTrack(t_tile, 16, 18);
+                           AddAutoTrack(t_tile, 18, 20);
+                           break;
 
-        case RoadType::ROAD_C1: AddAutoTrack(tile, 2, 30);
-            AddAutoTrack(tile, 30, 34);
-            AddAutoTrack(tile, 4, 18);
-            AddAutoTrack(tile, 18, 20);
-            break;
-        case RoadType::ROAD_C2: AddAutoTrack(tile, 28, 32);
-            AddAutoTrack(tile, 32, 4);
-            AddAutoTrack(tile, 14, 16);
-            AddAutoTrack(tile, 16, 2);
-            break;
-        case RoadType::ROAD_C3: AddAutoTrack(tile, 44, 16);
-            AddAutoTrack(tile, 16, 20);
-            AddAutoTrack(tile, 46, 32);
-            AddAutoTrack(tile, 32, 34);
-            break;
-        case RoadType::ROAD_C4: AddAutoTrack(tile, 44, 30);
-            AddAutoTrack(tile, 30, 28);
-            AddAutoTrack(tile, 46, 18);
-            AddAutoTrack(tile, 18, 14);
-            break;
-
-        case RoadType::ROAD_T1: AddAutoTrack(tile, 28, 30);
-            AddAutoTrack(tile, 30, 32);
-            AddAutoTrack(tile, 32, 34);
-            AddAutoTrack(tile, 14, 16);
-            AddAutoTrack(tile, 16, 18);
-            AddAutoTrack(tile, 18, 20);
-            AddAutoTrack(tile, 30, 16);
-            AddAutoTrack(tile, 16, 2);
-            AddAutoTrack(tile, 32, 18);
-            AddAutoTrack(tile, 18, 4);
-            break;
-        case RoadType::ROAD_T4: AddAutoTrack(tile, 28, 30);
-            AddAutoTrack(tile, 30, 32);
-            AddAutoTrack(tile, 32, 34);
-            AddAutoTrack(tile, 14, 16);
-            AddAutoTrack(tile, 16, 18);
-            AddAutoTrack(tile, 18, 20);
-            AddAutoTrack(tile, 30, 16);
-            AddAutoTrack(tile, 30, 44);
-            AddAutoTrack(tile, 32, 18);
-            AddAutoTrack(tile, 32, 46);
-            break;
-        case RoadType::ROAD_T2: AddAutoTrack(tile, 44, 30);
-            AddAutoTrack(tile, 30, 16);
-            AddAutoTrack(tile, 16, 2);
-            AddAutoTrack(tile, 46, 32);
-            AddAutoTrack(tile, 32, 18);
-            AddAutoTrack(tile, 18, 4);
-            AddAutoTrack(tile, 30, 32);
-            AddAutoTrack(tile, 32, 34);
-            AddAutoTrack(tile, 16, 18);
-            AddAutoTrack(tile, 18, 20);
-            break;
-        case RoadType::ROAD_T3: AddAutoTrack(tile, 44, 30);
-            AddAutoTrack(tile, 30, 16);
-            AddAutoTrack(tile, 16, 2);
-            AddAutoTrack(tile, 46, 32);
-            AddAutoTrack(tile, 32, 18);
-            AddAutoTrack(tile, 18, 4);
-            AddAutoTrack(tile, 28, 30);
-            AddAutoTrack(tile, 30, 32);
-            AddAutoTrack(tile, 14, 16);
-            AddAutoTrack(tile, 16, 18);
-            break;
-
-        case RoadType::ROAD_X: AddAutoTrack(tile, 44, 30);
-            AddAutoTrack(tile, 30, 16);
-            AddAutoTrack(tile, 16, 2);
-            AddAutoTrack(tile, 46, 32);
-            AddAutoTrack(tile, 32, 18);
-            AddAutoTrack(tile, 18, 4);
-            AddAutoTrack(tile, 28, 30);
-            AddAutoTrack(tile, 30, 32);
-            AddAutoTrack(tile, 32, 34);
-            AddAutoTrack(tile, 14, 16);
-            AddAutoTrack(tile, 16, 18);
-            AddAutoTrack(tile, 18, 20);
-            break;
-
-        default:;
-        }
-
-        tileIndex++;
+    default:;
     }
 }
 
@@ -396,7 +378,7 @@ void sg::city::map::RoadNetwork::UpdateStoredRoads()
     // get Map
     auto& map{ m_city->GetMap() };
 
-    // update textures
+    // update textures && auto tracks
 
     auto tileIndex{ 0 };
     for (auto positionInVbo : m_lookupTable)
@@ -412,7 +394,8 @@ void sg::city::map::RoadNetwork::UpdateStoredRoads()
         auto& tile{ map.GetTileByIndex(tileIndex) };
 
         // determine the RoadType depending on the road direction and the neighbors
-        const auto roadType{ static_cast<int>(DetermineRoadType(tile)) };
+        const auto roadTypeEnum{ DetermineRoadType(tile) };
+        const auto roadType{ static_cast<int>(roadTypeEnum) };
 
         // update uv values
 
@@ -448,13 +431,17 @@ void sg::city::map::RoadNetwork::UpdateStoredRoads()
         m_vertices[offset + Tile::TOP_RIGHT_TEXTURE_X_T2] = (1.0f / TEXTURE_ATLAS_ROWS) + xOffset;
         m_vertices[offset + Tile::TOP_RIGHT_TEXTURE_Y_T2] = (1.0f / TEXTURE_ATLAS_ROWS) + yOffset;
 
+        // update auto tracks
+
+        UpdateAutoTracks(tile, roadTypeEnum);
+
+        // next
+
         tileIndex++;
     }
 
     // write the new vertex data in the Vbo
     UpdateVbo();
-
-    UpdateAutoTracks();
 }
 
 //-------------------------------------------------
@@ -463,18 +450,21 @@ void sg::city::map::RoadNetwork::UpdateStoredRoads()
 
 void sg::city::map::RoadNetwork::AddAutoTrack(Tile& t_tile, const int t_fromNodeIndex, const int t_toNodeIndex, const bool t_safeCarAutoTrack) const
 {
+    SG_OGL_CORE_ASSERT(t_fromNodeIndex >= 0 && t_fromNodeIndex <= 48, "[RoadNetwork::AddAutoTrack()] Invalid from index.")
+    SG_OGL_CORE_ASSERT(t_toNodeIndex >= 0 && t_toNodeIndex <= 48, "[RoadNetwork::AddAutoTrack()] Invalid to index.")
+
     if (t_tile.GetNavigationNodes()[t_fromNodeIndex] && t_tile.GetNavigationNodes()[t_toNodeIndex])
     {
         auto track{ std::make_shared<automata::AutoTrack>() };
         track->startNode = t_tile.GetNavigationNodes()[t_fromNodeIndex];
         track->endNode = t_tile.GetNavigationNodes()[t_toNodeIndex];
-        track->tile = &t_tile;
+        track->tile = &t_tile; // todo
 
         t_tile.GetAutoTracks().push_back(track);
 
         if (t_safeCarAutoTrack)
         {
-            t_tile.safeCarAutoTrack = track;
+            t_tile.safeCarAutoTrack = track; // todo RoadTile
         }
 
         t_tile.GetNavigationNodes()[t_fromNodeIndex]->autoTracks.push_back(track);
