@@ -153,7 +153,7 @@ namespace sg::city::map
          */
         void UpdateVbo();
 
-        void UpdateAutoTracks(Tile& t_tile, RoadType t_roadType) const;
+        void UpdateAutoTracks(int t_tileIndex, RoadType t_roadType) const;
 
         /**
          * @brief Update road Tiles that are already in the Vbo.
@@ -165,6 +165,6 @@ namespace sg::city::map
         // Helper
         //-------------------------------------------------
 
-        void AddAutoTrack(Tile& t_tile, int t_fromNodeIndex, int t_toNodeIndex, bool t_safeCarAutoTrack = false) const;
+        void AddAutoTrack(int t_tileIndex, int t_fromNodeIndex, int t_toNodeIndex, bool t_safeCarAutoTrack = false) const;
     };
 }

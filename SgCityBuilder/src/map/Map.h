@@ -145,6 +145,8 @@ namespace sg::city::map
         [[nodiscard]] const Tile& GetTileByIndex(int t_tileIndex) const noexcept;
         [[nodiscard]] Tile& GetTileByIndex(int t_tileIndex) noexcept;
 
+        [[nodiscard]] TileSharedPtr GetTilePtrByIndex(int t_tileIndex);
+
         [[nodiscard]] const Tile& GetTileByMapPosition(int t_mapX, int t_mapZ) const noexcept;
         [[nodiscard]] Tile& GetTileByMapPosition(int t_mapX, int t_mapZ) noexcept;
 

@@ -27,6 +27,9 @@ namespace sg::city::automata
     {
     public:
         using AutoNodeSharedPtr = std::shared_ptr<AutoNode>;
+
+        using TileSharedPtr = std::shared_ptr<map::Tile>;
+
         using AutomataSharedPtr = std::shared_ptr<Automata>;
         using AutomataContainer = std::list<AutomataSharedPtr>;
 
@@ -37,7 +40,7 @@ namespace sg::city::automata
         AutoNodeSharedPtr startNode;
         AutoNodeSharedPtr endNode;
 
-        map::Tile* tile{ nullptr };
+        TileSharedPtr tile;
 
         float trackLength{ 1.0f };
 

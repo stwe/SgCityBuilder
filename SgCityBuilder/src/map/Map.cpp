@@ -110,6 +110,11 @@ sg::city::map::Tile& sg::city::map::Map::GetTileByIndex(const int t_tileIndex) n
     return *m_tiles[t_tileIndex];
 }
 
+sg::city::map::Map::TileSharedPtr sg::city::map::Map::GetTilePtrByIndex(const int t_tileIndex)
+{
+    return m_tiles[t_tileIndex];
+}
+
 const sg::city::map::Tile& sg::city::map::Map::GetTileByMapPosition(const int t_mapX, const int t_mapZ) const noexcept
 {
     return *m_tiles[GetTileMapIndexByMapPosition(t_mapX, t_mapZ)];
