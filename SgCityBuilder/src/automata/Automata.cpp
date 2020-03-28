@@ -6,7 +6,7 @@ void sg::city::automata::Automata::Update(const float t_dt)
 {
     // get the target AutoNode
     auto exitNode{ currentTrack->startNode };
-    if (exitNode == originNode)
+    if (exitNode == rootNode)
     {
         exitNode = currentTrack->endNode;
     }
@@ -15,14 +15,14 @@ void sg::city::automata::Automata::Update(const float t_dt)
 
     if (automataCanMove)
     {
-        autoPos += t_dt * 0.25f;
+        autoPosition += t_dt * 0.25f;
     }
 
-    if (autoPos >= currentTrack->trackLength)
+    if (autoPosition >= currentTrack->trackLength)
     {
         if (!exitNode->block)
         {
-            autoPos -= currentTrack->trackLength;
+            autoPosition -= currentTrack->trackLength;
 
             std::shared_ptr<AutoTrack> newAutoTrack;
 
@@ -57,19 +57,19 @@ void sg::city::automata::Automata::Update(const float t_dt)
                 }
             }
 
-            originNode = exitNode;
+            rootNode = exitNode;
             currentTrack->automatas.pop_front();
             currentTrack = newAutoTrack;
             currentTrack->automatas.push_back(GetShared());
         }
         else
         {
-            autoPos = currentTrack->trackLength;
+            autoPosition = currentTrack->trackLength;
         }
 
     }
     else
     {
-        pos = currentTrack->GetPosition(autoPos, originNode);
+        position = currentTrack->GetPosition(autoPosition, rootNode);
     }
 }

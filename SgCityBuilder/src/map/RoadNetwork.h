@@ -57,6 +57,7 @@ namespace sg::city::map
 
         using VertexContainer = std::vector<float>;
         using TileIndexContainer = std::vector<int>;
+        using TileRoadTypeContainer = std::vector<int>;
         using MeshUniquePtr = std::unique_ptr<ogl::resource::Mesh>;
 
         //-------------------------------------------------
@@ -130,6 +131,12 @@ namespace sg::city::map
          */
         TileIndexContainer m_lookupTable;
 
+        /**
+         * @brief Stores the RoadType of the Tile.
+         * @todo There are certainly better solutions for this, e.g. a special RoadTile.
+         */
+        TileRoadTypeContainer m_tileRoadTypes;
+
         //-------------------------------------------------
         // Init
         //-------------------------------------------------
@@ -156,10 +163,14 @@ namespace sg::city::map
         void UpdateAutoTracks(int t_tileIndex, RoadType t_roadType) const;
 
         /**
-         * @brief Update road Tiles that are already in the Vbo.
-         *        In particular, the textures are updated depending on the neighbors.
+         * @brief Update the uv values for texturing.
          */
-        void UpdateStoredRoads();
+        void UpdateRoadsTextures();
+
+        /**
+         * @brief Update navigation nodes and auto tracks.
+         */
+        void UpdateNavigation();
 
         //-------------------------------------------------
         // Helper

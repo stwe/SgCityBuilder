@@ -11,18 +11,21 @@ namespace sg::city::automata
     class Automata : public std::enable_shared_from_this<Automata>
     {
     public:
+        using AutoNodeSharedPtr = std::shared_ptr<AutoNode>;
+        using AutoTrackSharedPtr = std::shared_ptr<AutoTrack>;
+
         std::shared_ptr<Automata> GetShared()
         {
             return shared_from_this();
         }
 
-        glm::vec3 pos{ glm::vec3(0.0f) };
+        glm::vec3 position{ glm::vec3(0.0f) };
 
-        float autoPos{ 0.0f };
+        float autoPosition{ 0.0f };
         float autoLength{ 0.0f };
 
-        std::shared_ptr<AutoNode> originNode;
-        std::shared_ptr<AutoTrack> currentTrack;
+        AutoNodeSharedPtr rootNode;
+        AutoTrackSharedPtr currentTrack;
 
         void Update(float t_dt);
 

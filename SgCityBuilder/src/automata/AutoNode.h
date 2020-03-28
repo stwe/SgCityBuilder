@@ -10,8 +10,8 @@
 #pragma once
 
 #include <glm/vec3.hpp>
-#include <list>
 #include <memory>
+#include <list>
 
 namespace sg::city::automata
 {

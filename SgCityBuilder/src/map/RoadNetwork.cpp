@@ -132,8 +132,9 @@ void sg::city::map::RoadNetwork::StoreRoadOnMapPosition(const int t_mapX, const 
     // update draw count
     m_roadNetworkMesh->GetVao().SetDrawCount(nrTiles * Tile::VERTICES_PER_TILE);
 
-    // update all stored roads
-    UpdateStoredRoads();
+    // todo: the next two methods can later be combined into one
+    UpdateRoadsTextures();
+    UpdateNavigation();
 }
 
 //-------------------------------------------------
@@ -177,6 +178,9 @@ void sg::city::map::RoadNetwork::Init()
     // The default value -1 (NO_ROAD) means that the Tile is currently not a Road and is therefore not in the Vbo.
     const auto lookupTableSize(map.GetMapSize() * map.GetMapSize());
     m_lookupTable.resize(lookupTableSize, NO_ROAD);
+
+    // Almost the same as above, if the value is not NO_ROAD, the value is the current RoadType.
+    m_tileRoadTypes.resize(lookupTableSize, NO_ROAD);
 }
 
 //-------------------------------------------------
@@ -276,10 +280,6 @@ void sg::city::map::RoadNetwork::UpdateVbo()
 
 void sg::city::map::RoadNetwork::UpdateAutoTracks(const int t_tileIndex, const RoadType t_roadType) const
 {
-    // clear the existing list of AutoTracks
-    m_city->GetMap().GetTileByIndex(t_tileIndex).GetAutoTracks().clear();
-
-    // add auto tracks
     switch (t_roadType)
     {
     case RoadType::ROAD_H: AddAutoTrack(t_tileIndex, 34, 28);
@@ -442,13 +442,12 @@ void sg::city::map::RoadNetwork::UpdateAutoTracks(const int t_tileIndex, const R
     }
 }
 
-void sg::city::map::RoadNetwork::UpdateStoredRoads()
+void sg::city::map::RoadNetwork::UpdateRoadsTextures()
 {
     // get Map
     auto& map{ m_city->GetMap() };
 
-    // update textures && auto tracks
-
+    // update RoadType and the uv values for texturing
     auto tileIndex{ 0 };
     for (auto positionInVbo : m_lookupTable)
     {
@@ -465,6 +464,9 @@ void sg::city::map::RoadNetwork::UpdateStoredRoads()
         // determine the RoadType depending on the road direction and the neighbors
         const auto roadTypeEnum{ DetermineRoadType(tile) };
         const auto roadType{ static_cast<int>(roadTypeEnum) };
+
+        // store the RoadType
+        m_tileRoadTypes[tileIndex] = roadType;
 
         // update uv values
 
@@ -500,18 +502,46 @@ void sg::city::map::RoadNetwork::UpdateStoredRoads()
         m_vertices[offset + Tile::TOP_RIGHT_TEXTURE_X_T2] = (1.0f / TEXTURE_ATLAS_ROWS) + xOffset;
         m_vertices[offset + Tile::TOP_RIGHT_TEXTURE_Y_T2] = (1.0f / TEXTURE_ATLAS_ROWS) + yOffset;
 
-        // update auto tracks
-
-        UpdateAutoTracks(tileIndex, roadTypeEnum);
-        tile.CreateAutoTracksMesh(); // for debug only
-
         // next
-
         tileIndex++;
     }
 
     // write the new vertex data in the Vbo
     UpdateVbo();
+}
+
+void sg::city::map::RoadNetwork::UpdateNavigation()
+{
+    // clear all auto tracks from the Tile and Navigation Nodes
+    for (auto& tile : m_city->GetMap().GetTiles())
+    {
+        tile->GetAutoTracks().clear();
+
+        for (auto& node : tile->GetNavigationNodes())
+        {
+            if (node)
+            {
+                node->autoTracks.clear();
+            }
+        }
+    }
+
+    auto tileIndex{ 0 };
+    for (auto positionInVbo : m_lookupTable)
+    {
+        // only update road Tiles that are already in the Vbo
+        if (positionInVbo == NO_ROAD)
+        {
+            tileIndex++;
+            continue; // skip entry
+        }
+
+        UpdateAutoTracks(tileIndex, static_cast<RoadType>(m_tileRoadTypes[tileIndex]));
+        m_city->GetMap().GetTiles()[tileIndex]->CreateAutoTracksMesh(); // for debug only
+
+        // next
+        tileIndex++;
+    }
 }
 
 //-------------------------------------------------
@@ -533,8 +563,9 @@ void sg::city::map::RoadNetwork::AddAutoTrack(const int t_tileIndex, const int t
         track->startNode = tile->GetNavigationNodes()[t_fromNodeIndex];
         track->endNode = tile->GetNavigationNodes()[t_toNodeIndex];
         track->tile = tile;
+        track->trackLength = length(track->startNode->position - track->endNode->position);
 
-        // store the auto track in the Tile
+        // inserting at end of Tile track list
         tile->GetAutoTracks().push_back(track);
 
         if (t_safeCarAutoTrack)
@@ -542,8 +573,55 @@ void sg::city::map::RoadNetwork::AddAutoTrack(const int t_tileIndex, const int t
             tile->safeCarAutoTrack = track; // todo RoadTile
         }
 
+        SG_OGL_LOG_INFO("---------------------");
+        SG_OGL_LOG_INFO("| New Track created |");
+        SG_OGL_LOG_INFO("---------------------");
+        SG_OGL_LOG_INFO("Tileindex: {}", t_tileIndex);
+        SG_OGL_LOG_INFO("Track address: {}", (void*)track.get());
+        SG_OGL_LOG_INFO("Track is safe: {}", t_safeCarAutoTrack);
+        SG_OGL_LOG_INFO("Track from {} --> to {}", t_fromNodeIndex, t_toNodeIndex);
+        SG_OGL_LOG_INFO("Track length: {}", track->trackLength);
+        SG_OGL_LOG_INFO("New number of Tracks in the Tile: {}", tile->GetAutoTracks().size());
+
         // store the auto track in the nodes
-        tile->GetNavigationNodes()[t_fromNodeIndex]->autoTracks.push_back(track);
-        tile->GetNavigationNodes()[t_toNodeIndex]->autoTracks.push_back(track);
+        auto& from{ tile->GetNavigationNodes()[t_fromNodeIndex] };
+        auto& to{ tile->GetNavigationNodes()[t_toNodeIndex] };
+
+        from->autoTracks.push_back(tile->GetAutoTracks().back());
+        to->autoTracks.push_back(tile->GetAutoTracks().back());
+
+        SG_OGL_LOG_INFO("");
+
+        for (auto& trackf : from->autoTracks)
+        {
+            SG_OGL_LOG_INFO("Track address: {} is added to node: {}", (void*)trackf.get(), t_fromNodeIndex);
+
+            SG_OGL_LOG_INFO("node From {}  - the track start at x: {}", t_fromNodeIndex, trackf->startNode->position.x);
+            SG_OGL_LOG_INFO("node From {}  - the track start at z: {}", t_fromNodeIndex, trackf->startNode->position.z);
+
+            SG_OGL_LOG_INFO("node From {}  - the track end at x: {}", t_fromNodeIndex, trackf->endNode->position.x);
+            SG_OGL_LOG_INFO("node From {}  - the track end at z: {}", t_fromNodeIndex, trackf->endNode->position.z);
+
+            SG_OGL_LOG_INFO("");
+        }
+
+        for (auto& trackt : to->autoTracks)
+        {
+            SG_OGL_LOG_INFO("Track address: {} is added to node: {}", (void*)trackt.get(), t_toNodeIndex);
+
+            SG_OGL_LOG_INFO("node To {}  - track start x: {}", t_toNodeIndex, trackt->startNode->position.x);
+            SG_OGL_LOG_INFO("node To {}  - track start z: {}", t_toNodeIndex, trackt->startNode->position.z);
+
+            SG_OGL_LOG_INFO("node To {}  - track end x: {}", t_toNodeIndex, trackt->endNode->position.x);
+            SG_OGL_LOG_INFO("node To {}  - track end z: {}", t_toNodeIndex, trackt->endNode->position.z);
+
+            SG_OGL_LOG_INFO("");
+        }
+
+        SG_OGL_LOG_INFO("node From {} count tracks: {} ", t_fromNodeIndex, from->autoTracks.size());
+        SG_OGL_LOG_INFO("node To {} count tracks: {} ", t_toNodeIndex, to->autoTracks.size());
+
+        SG_OGL_LOG_INFO("");
+        SG_OGL_LOG_INFO("");
     }
 }
