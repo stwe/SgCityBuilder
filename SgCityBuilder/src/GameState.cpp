@@ -65,27 +65,9 @@ bool GameState::Input()
             if (m_currentTileType == sg::city::map::Map::TileType::TRAFFIC_NETWORK)
             {
                 m_city->GetRoadNetwork().StoreRoadOnMapPosition(m_mapPoint.x, m_mapPoint.z);
-
                 if (!m_spawn)
                 {
-                    m_city->SpawnCarAtSafeTrack(m_mapPoint.x, m_mapPoint.z);
-
-                    for (auto& automata : m_city->automatas)
-                    {
-                        auto e{ GetApplicationContext()->GetEntityFactory().CreateModelEntity(
-                            "res/model/Plane1/plane1.obj",
-                            glm::vec3(automata->position.x, 0.015f, automata->position.z),
-                            glm::vec3(0.0f),
-                            glm::vec3(0.125f / 4.0f),
-                            false
-                        ) };
-
-                        GetApplicationContext()->registry.assign<sg::city::ecs::AutomataComponent>(
-                            e,
-                            automata
-                        );
-                    }
-
+                    CreateExampleCar(m_mapPoint.x, m_mapPoint.z);
                     m_spawn = true;
                 }
             }
@@ -178,10 +160,11 @@ void GameState::Init()
     m_textRenderer = std::make_unique<sg::ogl::ecs::system::TextRenderSystem>(m_scene.get(), "res/font/bitter/Bitter-Italic.otf");
     m_forwardRenderer = std::make_unique<sg::ogl::ecs::system::ForwardRenderSystem>(m_scene.get());
 
-    //CreateExampleRoads();
+    //CreateExampleRoadNetwork();
+    //CreateExampleCar(1, 4);
 }
 
-void GameState::CreateExampleRoads() const
+void GameState::CreateExampleRoadNetwork() const
 {
     auto& roadNetwork{ m_city->GetRoadNetwork() };
     roadNetwork.StoreRoadOnMapPosition(1, 1);
@@ -198,14 +181,38 @@ void GameState::CreateExampleRoads() const
     roadNetwork.StoreRoadOnMapPosition(3, 1);
 }
 
+void GameState::CreateExampleCar(const int t_mapX, const int t_mapZ) const
+{
+    m_city->SpawnCarAtSafeTrack(t_mapX, t_mapZ);
+
+    for (auto& automata : m_city->automatas)
+    {
+        auto e{ GetApplicationContext()->GetEntityFactory().CreateModelEntity(
+            "res/model/Plane1/plane1.obj",
+            glm::vec3(automata->position.x, 0.015f, automata->position.z),
+            glm::vec3(0.0f),
+            glm::vec3(0.125f / 4.0f),
+            false
+        ) };
+
+        GetApplicationContext()->registry.assign<sg::city::ecs::AutomataComponent>(
+            e,
+            automata
+        );
+    }
+}
+
 void GameState::RenderDebug() const
 {
     //m_city->GetMap().RenderTileNavigationNodes(1, 1);
 
     for (auto& tile : m_city->GetMap().GetTiles())
     {
-        tile->RenderNavigationNodes(m_scene.get(), &m_city->GetMap());
-        tile->RenderAutoTracks(m_scene.get(), &m_city->GetMap());
+        if (tile->GetType() == sg::city::map::Map::TileType::TRAFFIC_NETWORK)
+        {
+            tile->RenderNavigationNodes(m_scene.get(), &m_city->GetMap());
+            tile->RenderAutoTracks(m_scene.get(), &m_city->GetMap());
+        }
     }
 }
 

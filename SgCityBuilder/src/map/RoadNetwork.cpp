@@ -573,6 +573,7 @@ void sg::city::map::RoadNetwork::AddAutoTrack(const int t_tileIndex, const int t
             tile->safeCarAutoTrack = track; // todo RoadTile
         }
 
+        /*
         SG_OGL_LOG_INFO("---------------------");
         SG_OGL_LOG_INFO("| New Track created |");
         SG_OGL_LOG_INFO("---------------------");
@@ -582,6 +583,7 @@ void sg::city::map::RoadNetwork::AddAutoTrack(const int t_tileIndex, const int t
         SG_OGL_LOG_INFO("Track from {} --> to {}", t_fromNodeIndex, t_toNodeIndex);
         SG_OGL_LOG_INFO("Track length: {}", track->trackLength);
         SG_OGL_LOG_INFO("New number of Tracks in the Tile: {}", tile->GetAutoTracks().size());
+        */
 
         // store the auto track in the nodes
         auto& from{ tile->GetNavigationNodes()[t_fromNodeIndex] };
@@ -590,6 +592,7 @@ void sg::city::map::RoadNetwork::AddAutoTrack(const int t_tileIndex, const int t
         from->autoTracks.push_back(tile->GetAutoTracks().back());
         to->autoTracks.push_back(tile->GetAutoTracks().back());
 
+        /*
         SG_OGL_LOG_INFO("");
 
         for (auto& trackf : from->autoTracks)
@@ -623,5 +626,6 @@ void sg::city::map::RoadNetwork::AddAutoTrack(const int t_tileIndex, const int t
 
         SG_OGL_LOG_INFO("");
         SG_OGL_LOG_INFO("");
+        */
     }
 }

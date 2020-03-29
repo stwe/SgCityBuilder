@@ -77,7 +77,8 @@ private:
     //-------------------------------------------------
 
     void Init();
-    void CreateExampleRoads() const;
+    void CreateExampleRoadNetwork() const;
+    void CreateExampleCar(int t_mapX, int t_mapZ) const;
     void RenderDebug() const;
 
     //-------------------------------------------------
