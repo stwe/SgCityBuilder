@@ -13,7 +13,6 @@
 #include <string>
 #include <stack>
 #include <glm/vec2.hpp>
-#include <glm/vec3.hpp>
 
 namespace sg::ogl::scene
 {
@@ -123,7 +122,7 @@ namespace sg::city::city
         // Spawn
         //-------------------------------------------------
 
-        //void SpawnCar(const glm::vec3& t_mapPoint);
+        void SpawnCarAtSafeTrack(int t_mapX, int t_mapZ);
 
     protected:
 

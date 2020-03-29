@@ -65,6 +65,29 @@ bool GameState::Input()
             if (m_currentTileType == sg::city::map::Map::TileType::TRAFFIC_NETWORK)
             {
                 m_city->GetRoadNetwork().StoreRoadOnMapPosition(m_mapPoint.x, m_mapPoint.z);
+
+                if (!m_spawn)
+                {
+                    m_city->SpawnCarAtSafeTrack(m_mapPoint.x, m_mapPoint.z);
+
+                    for (auto& automata : m_city->automatas)
+                    {
+                        auto e{ GetApplicationContext()->GetEntityFactory().CreateModelEntity(
+                            "res/model/Plane1/plane1.obj",
+                            glm::vec3(automata->position.x, 0.015f, automata->position.z),
+                            glm::vec3(0.0f),
+                            glm::vec3(0.125f / 4.0f),
+                            false
+                        ) };
+
+                        GetApplicationContext()->registry.assign<sg::city::ecs::AutomataComponent>(
+                            e,
+                            automata
+                        );
+                    }
+
+                    m_spawn = true;
+                }
             }
             else
             {
@@ -76,32 +99,6 @@ bool GameState::Input()
             // delete mouse state
             sg::ogl::input::MouseInput::ClearMouseStates();
         }
-
-        // spwan a single car
-        /*
-        if (!m_changed)
-        {
-            m_city->SpawnCar(m_mapPoint);
-
-            for (auto& automata : m_city->automatas)
-            {
-                auto e{ GetApplicationContext()->GetEntityFactory().CreateModelEntity(
-                    "res/model/Plane1/plane1.obj",
-                    glm::vec3(automata->pos.x, 0.015f, automata->pos.z),
-                    glm::vec3(0.0f),
-                    glm::vec3(0.125f / 4.0f),
-                    false
-                ) };
-
-                GetApplicationContext()->registry.assign<sg::city::ecs::AutomataComponent>(
-                    e,
-                    automata
-                );
-            }
-
-            m_changed = true;
-        }
-        */
     }
 
     return true;
@@ -112,7 +109,8 @@ bool GameState::Update(const double t_dt)
     m_scene->GetCurrentCamera().Update(t_dt);
     m_city->Update(t_dt);
 
-    /*
+    /////////////////////
+
     for (auto& automata : m_city->automatas)
     {
         automata->Update(t_dt);
@@ -129,9 +127,10 @@ bool GameState::Update(const double t_dt)
         auto& automataComponent{ view.get<sg::city::ecs::AutomataComponent>(entity) };
         auto& transformComponent{ view.get<sg::ogl::ecs::component::TransformComponent>(entity) };
 
-        transformComponent.position = glm::vec3(automataComponent.automata->pos.x, 0.015f, automataComponent.automata->pos.z);
+        transformComponent.position = glm::vec3(automataComponent.automata->position.x, 0.015f, automataComponent.automata->position.z);
     }
-    */
+
+    /////////////////////
 
     return true;
 }
@@ -144,7 +143,7 @@ void GameState::Render()
     RenderDebug();
 
     //m_city->RenderBuildings();
-    //m_forwardRenderer->Render();
+    m_forwardRenderer->Render();
 
     m_textRenderer->RenderText("SgCityBuilder", 10.0f, 10.0f, 0.25f, glm::vec3(0.1f));
 

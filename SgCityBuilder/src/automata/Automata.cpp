@@ -2,9 +2,10 @@
 #include "AutoTrack.h"
 #include "AutoNode.h"
 
+#include <Log.h>
+
 void sg::city::automata::Automata::Update(const float t_dt)
 {
-    // get the target AutoNode
     auto exitNode{ currentTrack->startNode };
     if (exitNode == rootNode)
     {
@@ -20,53 +21,30 @@ void sg::city::automata::Automata::Update(const float t_dt)
 
     if (autoPosition >= currentTrack->trackLength)
     {
-        if (!exitNode->block)
+        autoPosition -= currentTrack->trackLength;
+
+        std::shared_ptr<AutoTrack> newAutoTrack;
+
+        if (exitNode->autoTracks.size() == 1)
         {
-            autoPosition -= currentTrack->trackLength;
+            return;
+        }
 
-            std::shared_ptr<AutoTrack> newAutoTrack;
+        if (exitNode->autoTracks.size() == 2)
+        {
+            newAutoTrack = *exitNode->autoTracks.begin();
 
-            if (exitNode->autoTracks.size() == 2)
-            {
-                
-            }
-            else
-            {
-                while (!newAutoTrack)
-                {
-                    int i{ (int)(rand() % exitNode->autoTracks.size()) };
-                    int j{ 0 };
-                    for (auto it{exitNode->autoTracks.begin()}; it != exitNode->autoTracks.end(); ++it)
-                    {
-                        auto autoTrack{ *it };
-
-                        auto newExitNode{ autoTrack->startNode };
-                        if (newExitNode == exitNode)
-                        {
-                            newExitNode = autoTrack->endNode;
-                        }
-
-                        if (j == i && autoTrack != currentTrack && !newExitNode->block)
-                        {
-                            newAutoTrack = autoTrack;
-                            break;
-                        }
-
-                        j++;
-                    }
-                }
-            }
-
-            rootNode = exitNode;
-            currentTrack->automatas.pop_front();
-            currentTrack = newAutoTrack;
-            currentTrack->automatas.push_back(GetShared());
+            //SG_OGL_LOG_INFO("");
         }
         else
         {
-            autoPosition = currentTrack->trackLength;
+
         }
 
+        rootNode = exitNode;
+        currentTrack->automatas.pop_front();
+        currentTrack = newAutoTrack;
+        currentTrack->automatas.push_back(GetShared());
     }
     else
     {

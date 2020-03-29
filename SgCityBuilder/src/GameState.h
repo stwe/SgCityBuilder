@@ -70,6 +70,8 @@ private:
     MousePickerUniquePtr m_mousePicker;
     sg::city::map::Map::TileType m_currentTileType{ sg::city::map::Map::TileType::TRAFFIC_NETWORK };
 
+    bool m_spawn{ false };
+
     //-------------------------------------------------
     // Helper
     //-------------------------------------------------

@@ -17,7 +17,6 @@
 #include "renderer/MapRenderer.h"
 #include "renderer/RoadNetworkRenderer.h"
 #include "renderer/BuildingsRenderer.h"
-#include "automata/AutoNode.h"
 #include "automata/AutoTrack.h"
 #include "automata/Automata.h"
 
@@ -188,13 +187,12 @@ sg::city::city::City::PathPositionContainer sg::city::city::City::Path(const int
 // Spawn
 //-------------------------------------------------
 
-/*
-void sg::city::city::City::SpawnCar(const glm::vec3& t_mapPoint)
+void sg::city::city::City::SpawnCarAtSafeTrack(const int t_mapX, const int t_mapZ)
 {
     // get Tile at position
-    auto& tile{ m_map->GetTileByPosition(t_mapPoint) };
+    auto& tile{ m_map->GetTileByMapPosition(t_mapX, t_mapZ) };
 
-    // get a safe AutoTrack
+    // try to get a safe AutoTrack
     auto& safeAutoTrack{ tile.safeCarAutoTrack };
     if (!safeAutoTrack)
     {
@@ -208,12 +206,11 @@ void sg::city::city::City::SpawnCar(const glm::vec3& t_mapPoint)
     automata->autoLength = 0.2f;
     automata->currentTrack = safeAutoTrack;
     automata->currentTrack->automatas.push_back(automata);
-    automata->originNode = safeAutoTrack->startNode;
+    automata->rootNode = safeAutoTrack->startNode;
     automata->Update(0.0f);
 
     automatas.push_back(automata);
 }
-*/
 
 //-------------------------------------------------
 // Init
