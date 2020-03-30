@@ -9,6 +9,8 @@
 
 #pragma once
 
+#include "Tile.h"
+
 namespace sg::city::city
 {
     class City;
@@ -16,14 +18,14 @@ namespace sg::city::city
 
 namespace sg::city::map
 {
-    class Tile;
-
     class RoadNetwork
     {
     public:
         static constexpr auto TEXTURE_ATLAS_ROWS{ 4.0f };
         static constexpr auto NO_ROAD{ -1 };
         static constexpr auto ROAD_VERTICES_HEIGHT{ 0.001f };
+        static constexpr auto STOP{ 'X' };
+        static constexpr auto NODES_PER_TILE{ 49 };
 
         /**
          * @brief Possible Road Neighbours.
@@ -177,5 +179,7 @@ namespace sg::city::map
         //-------------------------------------------------
 
         void AddAutoTrack(int t_tileIndex, int t_fromNodeIndex, int t_toNodeIndex, bool t_safeCarAutoTrack = false) const;
+
+        [[nodiscard]] Tile::StopPattern CreateStopPattern(std::string t_s) const;
     };
 }

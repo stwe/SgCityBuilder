@@ -67,7 +67,7 @@ bool GameState::Input()
                 m_city->GetRoadNetwork().StoreRoadOnMapPosition(m_mapPoint.x, m_mapPoint.z);
                 if (!m_spawn)
                 {
-                    CreateExampleCar(m_mapPoint.x, m_mapPoint.z);
+                    //CreateExampleCar(m_mapPoint.x, m_mapPoint.z);
                     m_spawn = true;
                 }
             }
@@ -93,9 +93,24 @@ bool GameState::Update(const double t_dt)
 
     /////////////////////
 
+    auto del{ false };
+
     for (auto& automata : m_city->automatas)
     {
-        automata->Update(t_dt);
+        if (automata)
+        {
+            automata->Update(static_cast<float>(t_dt));
+            if (automata->deleteAutomata)
+            {
+                automata.reset();
+                del = true;
+            }
+        }
+    }
+
+    if (del)
+    {
+        m_city->automatas.erase(std::remove(m_city->automatas.begin(), m_city->automatas.end(), nullptr), m_city->automatas.end());
     }
 
     auto view{ m_scene->GetApplicationContext()->registry.view<
@@ -160,25 +175,45 @@ void GameState::Init()
     m_textRenderer = std::make_unique<sg::ogl::ecs::system::TextRenderSystem>(m_scene.get(), "res/font/bitter/Bitter-Italic.otf");
     m_forwardRenderer = std::make_unique<sg::ogl::ecs::system::ForwardRenderSystem>(m_scene.get());
 
-    //CreateExampleRoadNetwork();
-    //CreateExampleCar(1, 4);
+    CreateExampleRoadNetwork();
+    CreateExampleCar(1, 5);
 }
 
 void GameState::CreateExampleRoadNetwork() const
 {
     auto& roadNetwork{ m_city->GetRoadNetwork() };
     roadNetwork.StoreRoadOnMapPosition(1, 1);
-    roadNetwork.StoreRoadOnMapPosition(1, 2);
-    roadNetwork.StoreRoadOnMapPosition(1, 3);
-    roadNetwork.StoreRoadOnMapPosition(1, 4);
-    roadNetwork.StoreRoadOnMapPosition(2, 4);
-    roadNetwork.StoreRoadOnMapPosition(3, 4);
-    roadNetwork.StoreRoadOnMapPosition(4, 4);
-    roadNetwork.StoreRoadOnMapPosition(4, 3);
-    roadNetwork.StoreRoadOnMapPosition(4, 2);
-    roadNetwork.StoreRoadOnMapPosition(4, 1);
     roadNetwork.StoreRoadOnMapPosition(2, 1);
     roadNetwork.StoreRoadOnMapPosition(3, 1);
+    roadNetwork.StoreRoadOnMapPosition(4, 1);
+    roadNetwork.StoreRoadOnMapPosition(5, 1);
+    roadNetwork.StoreRoadOnMapPosition(6, 1);
+
+    roadNetwork.StoreRoadOnMapPosition(6, 2);
+    roadNetwork.StoreRoadOnMapPosition(6, 3);
+    roadNetwork.StoreRoadOnMapPosition(6, 4);
+    roadNetwork.StoreRoadOnMapPosition(6, 5);
+    roadNetwork.StoreRoadOnMapPosition(6, 6);
+
+    roadNetwork.StoreRoadOnMapPosition(5, 6);
+    roadNetwork.StoreRoadOnMapPosition(4, 6);
+    roadNetwork.StoreRoadOnMapPosition(3, 6);
+    roadNetwork.StoreRoadOnMapPosition(2, 6);
+    roadNetwork.StoreRoadOnMapPosition(1, 6);
+
+    roadNetwork.StoreRoadOnMapPosition(1, 5);
+    roadNetwork.StoreRoadOnMapPosition(1, 4);
+    roadNetwork.StoreRoadOnMapPosition(1, 3);
+    roadNetwork.StoreRoadOnMapPosition(1, 2);
+
+
+    roadNetwork.StoreRoadOnMapPosition(3, 5);
+    roadNetwork.StoreRoadOnMapPosition(3, 4);
+    roadNetwork.StoreRoadOnMapPosition(3, 3);
+    roadNetwork.StoreRoadOnMapPosition(2, 3);
+    roadNetwork.StoreRoadOnMapPosition(4, 4);
+    roadNetwork.StoreRoadOnMapPosition(5, 4);
+    roadNetwork.StoreRoadOnMapPosition(3, 2);
 }
 
 void GameState::CreateExampleCar(const int t_mapX, const int t_mapZ) const
@@ -211,7 +246,7 @@ void GameState::RenderDebug() const
         if (tile->GetType() == sg::city::map::Map::TileType::TRAFFIC_NETWORK)
         {
             tile->RenderNavigationNodes(m_scene.get(), &m_city->GetMap());
-            tile->RenderAutoTracks(m_scene.get(), &m_city->GetMap());
+            //tile->RenderAutoTracks(m_scene.get(), &m_city->GetMap());
         }
     }
 }

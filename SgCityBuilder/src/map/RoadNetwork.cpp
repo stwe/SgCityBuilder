@@ -7,13 +7,14 @@
 // 
 // 2020 (c) stwe <https://github.com/stwe/SgCityBuilder>
 
+#include <algorithm>
+#include <string>
+#include <Core.h>
 #include <Application.h>
 #include <scene/Scene.h>
 #include <resource/Mesh.h>
 #include <resource/TextureManager.h>
-#include <Core.h>
 #include "RoadNetwork.h"
-#include "Tile.h"
 #include "city/City.h"
 #include "automata/AutoNode.h"
 #include "automata/AutoTrack.h"
@@ -440,6 +441,415 @@ void sg::city::map::RoadNetwork::UpdateAutoTracks(const int t_tileIndex, const R
 
     default:;
     }
+
+    auto& tile{ m_city->GetMap().GetTileByIndex(t_tileIndex) };
+
+    switch (t_roadType)
+    {
+    case RoadType::ROAD_H:
+    case RoadType::ROAD_V:
+    case RoadType::ROAD_C1:
+    case RoadType::ROAD_C2:
+    case RoadType::ROAD_C3:
+    case RoadType::ROAD_C4:
+        break; // Allow all
+
+/*
+        tile.GetStopPatterns().push_back(
+            CreateStopPattern(
+                   ". . X . X . ."
+                   ". . . X . . ."
+                   "X . X . X . X"
+                   ". X . . . X ."
+                   "X . X . X . X"
+                   ". . . X . . ."
+                   ". . X . X . ."));
+*/
+
+    case RoadType::ROAD_X:
+        // Allow West Traffic
+        tile.GetStopPatterns().push_back(
+            CreateStopPattern(
+                ". . X . O . ."
+                   ". . . X . . ."
+                   "X . X . O . X"
+                   ". X . . . X ."
+                   "O . O . O . O"
+                   ". . . X . . ."
+                   ". . O . X . ."));
+
+        // Stop West Traffic
+        tile.GetStopPatterns().push_back(
+            CreateStopPattern(
+                ". . X . O . ."
+                   ". . . X . . ."
+                   "X . X . O . X"
+                   ". X . . . X ."
+                   "X . O . O . O"
+                   ". . . X . . ."
+                   ". . O . X . ."));
+
+        // Stop North Traffic
+        tile.GetStopPatterns().push_back(
+            CreateStopPattern(
+                ". . O . X . ."
+                   ". . . X . . ."
+                   "O . O . X . X"
+                   ". X . . . X ."
+                   "X . O . O . O"
+                   ". . . X . . ."
+                   ". . O . X . ."));
+
+        // Stop North Traffic
+        tile.GetStopPatterns().push_back(
+            CreateStopPattern(
+                ". . X . X . ."
+                   ". . . X . . ."
+                   "O . O . X . X"
+                   ". X . . . X ."
+                   "X . O . O . O"
+                   ". . . X . . ."
+                   ". . O . X . ."));
+
+        // Allow East Traffic
+        tile.GetStopPatterns().push_back(
+            CreateStopPattern(
+                ". . X . O . ."
+                   ". . . X . . ."
+                   "O . O . O . O"
+                   ". X . . . X ."
+                   "X . O . X . X"
+                   ". . . X . . ."
+                   ". . O . X . ."));
+
+        // Stop East Traffic
+        tile.GetStopPatterns().push_back(
+            CreateStopPattern(
+                ". . X . O . ."
+                   ". . . X . . ."
+                   "O . O . O . X"
+                   ". X . . . X ."
+                   "X . O . X . X"
+                   ". . . X . . ."
+                   ". . O . X . ."));
+
+        // Allow South Traffic
+        tile.GetStopPatterns().push_back(
+            CreateStopPattern(
+                ". . X . O . ."
+                   ". . . X . . ."
+                   "O . O . O . X"
+                   ". X . . . X ."
+                   "X . X . O . O"
+                   ". . . X . . ."
+                   ". . X . O . ."));
+
+        // Allow South Traffic
+        tile.GetStopPatterns().push_back(
+            CreateStopPattern(
+                ". . X . O . ."
+                   ". . . X . . ."
+                   "O . O . O . X"
+                   ". X . . . X ."
+                   "X . X . O . O"
+                   ". . . X . . ."
+                   ". . X . X . ."));
+
+        break;
+
+    case RoadType::ROAD_T1:
+        // Allow West Traffic
+        tile.GetStopPatterns().push_back(
+            CreateStopPattern(
+                ". . X . X . ."
+                   ". . . X . . ."
+                   "X . X . X . X"
+                   ". X . . . X ."
+                   "O . O . O . O"
+                   ". . . X . . ."
+                   ". . O . X . ."));
+
+        // Stop West Traffic
+        tile.GetStopPatterns().push_back(
+            CreateStopPattern(
+                ". . X . X . ."
+                   ". . . X . . ."
+                   "X . X . X . X"
+                   ". X . . . X ."
+                   "X . O . O . O"
+                   ". . . X . . ."
+                   ". . O . X . ."));
+
+        // Allow East Traffic
+        tile.GetStopPatterns().push_back(
+            CreateStopPattern(
+                ". . X . X . ."
+                   ". . . X . . ."
+                   "O . O . O . O"
+                   ". X . . . X ."
+                   "X . O . X . X"
+                   ". . . X . . ."
+                   ". . O . X . ."));
+
+        // Stop East Traffic
+        tile.GetStopPatterns().push_back(
+            CreateStopPattern(
+                ". . X . X . ."
+                   ". . . X . . ."
+                   "O . O . O . X"
+                   ". X . . . X ."
+                   "X . O . X . X"
+                   ". . . X . . ."
+                   ". . O . X . ."));
+
+        // Allow South Traffic
+        tile.GetStopPatterns().push_back(
+            CreateStopPattern(
+                ". . X . X . ."
+                   ". . . X . . ."
+                   "O . O . O . X"
+                   ". X . . . X ."
+                   "X . X . O . O"
+                   ". . . X . . ."
+                   ". . X . O . ."));
+
+        // Stop South Traffic
+        tile.GetStopPatterns().push_back(
+            CreateStopPattern(
+                ". . X . X . ."
+                   ". . . X . . ."
+                   "O . O . O . X"
+                   ". X . . . X ."
+                   "X . X . O . O"
+                   ". . . X . . ."
+                   ". . X . X . ."));
+
+        break;
+
+    case RoadType::ROAD_T2:
+        // Allow North Traffic
+        tile.GetStopPatterns().push_back(
+            CreateStopPattern(
+                ". . O . X . ."
+                   ". . . X . . ."
+                   "X . O . X . X"
+                   ". . . . . X ."
+                   "X . O . O . O"
+                   ". . . X . . ."
+                   ". . O . X . ."));
+
+        // Stop North Traffic
+        tile.GetStopPatterns().push_back(
+            CreateStopPattern(
+                ". . X . X . ."
+                   ". . . X . . ."
+                   "X . O . X . X"
+                   ". . . . . X ."
+                   "X . O . O . O"
+                   ". . . X . . ."
+                   ". . O . X . ."));
+
+        // Allow East Traffic
+        tile.GetStopPatterns().push_back(
+            CreateStopPattern(
+                ". . X . O . ."
+                   ". . . X . . ."
+                   "X . O . O . O"
+                   ". . . . . X ."
+                   "X . O . X . X"
+                   ". . . X . . ."
+                   ". . O . X . ."));
+
+        // Stop East Traffic
+        tile.GetStopPatterns().push_back(
+            CreateStopPattern(
+                ". . X . O . ."
+                   ". . . X . . ."
+                   "X . O . O . X"
+                   ". . . . . X ."
+                   "X . O . X . X"
+                   ". . . X . . ."
+                   ". . O . X . ."));
+
+        // Allow South Traffic
+        tile.GetStopPatterns().push_back(
+            CreateStopPattern(
+                ". . X . O . ."
+                   ". . . X . . ."
+                   "X . X . O . X"
+                   ". . . . . X ."
+                   "X . X . O . O"
+                   ". . . X . . ."
+                   ". . X . O . ."));
+
+        // Stop South Traffic
+        tile.GetStopPatterns().push_back(
+            CreateStopPattern(
+                ". . X . O . ."
+                   ". . . X . . ."
+                   "X . X . O . X"
+                   ". . . . . X ."
+                   "X . X . O . O"
+                   ". . . X . . ."
+                   ". . X . X . ."));
+
+        break;
+
+    case RoadType::ROAD_T3:
+        // Allow West Traffic
+        tile.GetStopPatterns().push_back(
+            CreateStopPattern(
+                ". . X . O . ."
+                   ". . . X . . ."
+                   "X . X . O . X"
+                   ". X . . . X ."
+                   "O . O . O . X"
+                   ". . . X . . ."
+                   ". . O . X . ."));
+
+        // Stop West Traffic
+        tile.GetStopPatterns().push_back(
+            CreateStopPattern(
+                ". . X . O . ."
+                   ". . . X . . ."
+                   "X . X . O . X"
+                   ". X . . . X ."
+                   "X . O . O . X"
+                   ". . . X . . ."
+                   ". . O . X . ."));
+
+        // Allow North Traffic
+        tile.GetStopPatterns().push_back(
+            CreateStopPattern(
+                ". . O . X . ."
+                   ". . . X . . ."
+                   "O . O . X . X"
+                   ". X . . . X ."
+                   "X . O . X . X"
+                   ". . . X . . ."
+                   ". . O . X . ."));
+
+        // Stop North Traffic
+        tile.GetStopPatterns().push_back(
+            CreateStopPattern(
+                ". . X . X . ."
+                   ". . . X . . ."
+                   "O . O . X . X"
+                   ". X . . . X ."
+                   "X . O . X . X"
+                   ". . . X . . ."
+                   ". . O . X . ."));
+
+        // Allow South Traffic
+        tile.GetStopPatterns().push_back(
+            CreateStopPattern(
+                ". . X . O . ."
+                   ". . . X . . ."
+                   "O . O . O . X"
+                   ". X . . . X ."
+                   "X . X . O . X"
+                   ". . . X . . ."
+                   ". . X . O . ."));
+
+        // Stop South Traffic
+        tile.GetStopPatterns().push_back(
+            CreateStopPattern(
+                ". . X . O . ."
+                   ". . . X . . ."
+                   "O . O . O . X"
+                   ". X . . . X ."
+                   "X . X . O . X"
+                   ". . . X . . ."
+                   ". . X . X . ."));
+
+        break;
+
+    case RoadType::ROAD_T4: // w n e
+        // Allow West Traffic
+        tile.GetStopPatterns().push_back(
+            CreateStopPattern(
+                ". . X . O . ."
+                   ". . . X . . ."
+                   "X . X . O . X"
+                   ". X . . . X ."
+                   "O . O . O . O"
+                   ". . . X . . ."
+                   ". . X . X . ."));
+
+        // Stop West Traffic
+        tile.GetStopPatterns().push_back(
+            CreateStopPattern(
+                ". . X . O . ."
+                   ". . . X . . ."
+                   "X . X . O . X"
+                   ". X . . . X ."
+                   "X . O . O . O"
+                   ". . . X . . ."
+                   ". . X . X . ."));
+
+        // Allow North Traffic
+        tile.GetStopPatterns().push_back(
+            CreateStopPattern(
+                ". . O . X . ."
+                   ". . . X . . ."
+                   "O . O . X . X"
+                   ". X . . . X ."
+                   "X . O . O . O"
+                   ". . . X . . ."
+                   ". . X . X . ."));
+
+        // Stop North Traffic
+        tile.GetStopPatterns().push_back(
+            CreateStopPattern(
+                ". . X . X . ."
+                   ". . . X . . ."
+                   "O . O . X . X"
+                   ". X . . . X ."
+                   "X . O . O . O"
+                   ". . . X . . ."
+                   ". . X . X . ."));
+
+        // Allow East Traffic
+        tile.GetStopPatterns().push_back(
+            CreateStopPattern(
+                ". . X . O . ."
+                   ". . . X . . ."
+                   "O . O . O . O"
+                   ". X . . . X ."
+                   "X . X . X . X"
+                   ". . . X . . ."
+                   ". . X . X . ."));
+
+        // Stop East Traffic
+        tile.GetStopPatterns().push_back(
+            CreateStopPattern(
+                ". . X . O . ."
+                   ". . . X . . ."
+                   "O . O . O . X"
+                   ". X . . . X ."
+                   "X . X . X . X"
+                   ". . . X . . ."
+                   ". . X . X . ."));
+
+        break;
+
+    default:;
+    }
+
+    if (!tile.GetStopPatterns().empty())
+    {
+        auto i{ 0 };
+        for (auto& node : tile.GetNavigationNodes())
+        {
+            if (node)
+            {
+                node->block = tile.GetStopPatterns()[0][i];
+            }
+            i++;
+        }
+    }
+
+    tile.CreateNavigationNodesMesh();
 }
 
 void sg::city::map::RoadNetwork::UpdateRoadsTextures()
@@ -537,7 +947,7 @@ void sg::city::map::RoadNetwork::UpdateNavigation()
         }
 
         UpdateAutoTracks(tileIndex, static_cast<RoadType>(m_tileRoadTypes[tileIndex]));
-        m_city->GetMap().GetTiles()[tileIndex]->CreateAutoTracksMesh(); // for debug only
+        //m_city->GetMap().GetTiles()[tileIndex]->CreateAutoTracksMesh(); // for debug only
 
         // next
         tileIndex++;
@@ -628,4 +1038,26 @@ void sg::city::map::RoadNetwork::AddAutoTrack(const int t_tileIndex, const int t
         SG_OGL_LOG_INFO("");
         */
     }
+}
+
+sg::city::map::Tile::StopPattern sg::city::map::RoadNetwork::CreateStopPattern(std::string t_s) const
+{
+    t_s.erase(std::remove(t_s.begin(), t_s.end(), ' '), t_s.end());
+
+    SG_OGL_ASSERT(t_s.size() == NODES_PER_TILE, "[RoadNetwork::CreateStopPattern()] Invalid string size.");
+
+    Tile::StopPattern p;
+    p.resize(NODES_PER_TILE, false);
+
+    auto i{ 0 };
+    for (auto z{ 6 }; z >= 0; --z)
+    {
+        for (auto x{ 0 }; x < 7; ++x)
+        {
+            p[i] = t_s[z * 7 + x] == STOP;
+            i++;
+        }
+    }
+
+    return p;
 }

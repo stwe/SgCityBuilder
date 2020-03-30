@@ -9,11 +9,6 @@
 
 #pragma once
 
-#include <unordered_map>
-#include <list>
-#include <glm/vec2.hpp>
-#include <glm/vec3.hpp>
-#include <memory>
 #include "Map.h"
 
 namespace sg::city::automata
@@ -189,6 +184,9 @@ namespace sg::city::map
 
         using MeshUniquePtr = std::unique_ptr<ogl::resource::Mesh>;
 
+        using StopPattern = std::vector<bool>;
+        using StopPatternContainer = std::vector<StopPattern>;
+
         //-------------------------------------------------
         // Public member
         //-------------------------------------------------
@@ -266,6 +264,8 @@ namespace sg::city::map
 
         [[nodiscard]] const AutoTrackContainer& GetAutoTracks() const noexcept;
         [[nodiscard]] AutoTrackContainer& GetAutoTracks() noexcept;
+
+        [[nodiscard]] StopPatternContainer& GetStopPatterns() noexcept;
 
         //-------------------------------------------------
         // Setter
@@ -399,6 +399,8 @@ namespace sg::city::map
          * @brief Mesh holding the whole auto tracks for debug.
          */
         MeshUniquePtr m_autoTracksMesh;
+
+        StopPatternContainer m_stopPatterns;
 
         //-------------------------------------------------
         // Init

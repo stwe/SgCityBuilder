@@ -124,6 +124,11 @@ sg::city::map::Tile::AutoTrackContainer& sg::city::map::Tile::GetAutoTracks() no
     return m_autoTracks;
 }
 
+sg::city::map::Tile::StopPatternContainer& sg::city::map::Tile::GetStopPatterns() noexcept
+{
+    return m_stopPatterns;
+}
+
 //-------------------------------------------------
 // Setter
 //-------------------------------------------------
