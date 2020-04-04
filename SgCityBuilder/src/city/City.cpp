@@ -17,6 +17,8 @@
 #include "map/Map.h"
 #include "map/tile/RoadTile.h"
 #include "renderer/MapRenderer.h"
+#include "automata/Automata.h"
+#include "automata/AutoTrack.h"
 
 //-------------------------------------------------
 // Ctors. / Dtor.
@@ -144,6 +146,44 @@ int sg::city::city::City::ReplaceTile(const int t_mapX, const int t_mapZ, map::t
     tiles[index]->GetNeighbours() = neighbours;
 
     return index;
+}
+
+//-------------------------------------------------
+// Spawn
+//-------------------------------------------------
+
+bool sg::city::city::City::SpawnCarAtSafeTrack(const int t_mapX, const int t_mapZ)
+{
+    // get RoadTile at position
+    auto* tile{ dynamic_cast<map::tile::RoadTile*>(&m_map->GetTileByMapPosition(t_mapX, t_mapZ)) };
+    if (!tile)
+    {
+        SG_OGL_LOG_INFO("[City::SpawnCarAtSafeTrack()] No Road Tile available at position x: {}, z: {}.", t_mapX, t_mapZ);
+
+        return false;
+    }
+
+    // check if there is a Safe Auto Track
+    if (!tile->safeAutoTrack)
+    {
+        SG_OGL_LOG_INFO("[City::SpawnCarAtSafeTrack()] No Safe Auto Track found.");
+
+        return false;
+    }
+
+    SG_OGL_LOG_INFO("[City::SpawnCarAtSafeTrack()] Spawn a new Car at map x: {}, map z: {}", tile->GetMapX(), tile->GetMapZ());
+
+    // create an Automata
+    auto automata{ std::make_shared<automata::Automata>() };
+    automata->autoLength = 0.2f;
+    automata->currentTrack = tile->safeAutoTrack;
+    automata->currentTrack->automatas.push_back(automata);
+    automata->rootNode = tile->safeAutoTrack->startNode;
+    automata->Update(0.0f);
+
+    automatas.push_back(automata);
+
+    return true;
 }
 
 //-------------------------------------------------

@@ -66,6 +66,11 @@ sg::city::map::Map::TileTypeTextureContainer& sg::city::map::Map::GetTileTypeTex
     return m_tileTypeTextures;
 }
 
+uint32_t sg::city::map::Map::GetRoadTextureAtlasId() const
+{
+    return m_roadTextureAtlasId;
+}
+
 const sg::city::map::Map::TileContainer& sg::city::map::Map::GetTiles() const noexcept
 {
     return m_tiles;
@@ -175,6 +180,10 @@ void sg::city::map::Map::StoreTileTypeTextures()
     m_tileTypeTextures.emplace(tile::TileType::COMMERCIAL, c);
     m_tileTypeTextures.emplace(tile::TileType::INDUSTRIAL, i);
     m_tileTypeTextures.emplace(tile::TileType::TRAFFIC, t);
+
+    SG_OGL_LOG_DEBUG("[Map::LoadAndStoreTileTypeTextures()] Load road texture atlas.");
+
+    m_roadTextureAtlasId = m_scene->GetApplicationContext()->GetTextureManager().GetTextureIdFromPath("res/texture/road/roads.png");
 }
 
 void sg::city::map::Map::CreateTiles()

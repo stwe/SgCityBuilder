@@ -35,6 +35,8 @@ public:
 
     using TileIndexContainer = std::vector<int>;
 
+    using ForwardRendererUniquePtr = std::unique_ptr<sg::ogl::ecs::system::ForwardRenderSystem>;
+
     //-------------------------------------------------
     // Ctors. / Dtor.
     //-------------------------------------------------
@@ -73,11 +75,15 @@ private:
 
     TileIndexContainer m_changedTiles;
 
+    ForwardRendererUniquePtr m_forwardRenderer;
+
     //-------------------------------------------------
     // Helper
     //-------------------------------------------------
 
     void Init();
+    void CreateCar(int t_mapX, int t_mapZ) const;
+    void UpdateCars(double t_dt);
 
     //-------------------------------------------------
     // ImGui

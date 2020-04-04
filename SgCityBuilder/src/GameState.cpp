@@ -13,6 +13,7 @@
 #include "ecs/Components.h"
 #include "map/Map.h"
 #include "map/tile/RoadTile.h"
+#include "automata/Automata.h"
 
 //-------------------------------------------------
 // Ctors. / Dtor.
@@ -69,7 +70,10 @@ bool GameState::Input()
 bool GameState::Update(const double t_dt)
 {
     m_scene->GetCurrentCamera().Update(t_dt);
+
     m_city->Update(t_dt, m_changedTiles);
+
+    UpdateCars(t_dt);
 
     return true;
 }
@@ -94,6 +98,8 @@ void GameState::Render()
             }
         }
     }
+
+    m_forwardRenderer->Render();
 
     RenderImGui();
 }
@@ -123,6 +129,53 @@ void GameState::Init()
     m_city = std::make_unique<sg::city::city::City>("SgCity", m_scene.get(), MAP_SIZE);
 
     m_mousePicker = std::make_unique<sg::city::input::MousePicker>(m_scene.get(), m_city->GetMapSharedPtr());
+
+    m_forwardRenderer = std::make_unique<sg::ogl::ecs::system::ForwardRenderSystem>(m_scene.get());
+}
+
+void GameState::CreateCar(const int t_mapX, const int t_mapZ) const
+{
+    // create an Automata
+    if (m_city->SpawnCarAtSafeTrack(t_mapX, t_mapZ))
+    {
+        // create Entity from the Automata
+        auto& automata{ m_city->automatas.back() };
+
+        auto entity{ GetApplicationContext()->GetEntityFactory().CreateModelEntity(
+            "res/model/Plane1/plane1.obj",
+            glm::vec3(automata->position.x, 0.015f, automata->position.z),
+            glm::vec3(0.0f),
+            glm::vec3(0.125f / 4.0f),
+            false
+        ) };
+
+        GetApplicationContext()->registry.assign<sg::city::ecs::AutomataComponent>(
+            entity,
+            automata
+        );
+    }
+}
+
+void GameState::UpdateCars(const double t_dt)
+{
+    for (auto& automata : m_city->automatas)
+    {
+        automata->Update(static_cast<float>(t_dt));
+    }
+
+    auto view{ m_scene->GetApplicationContext()->registry.view<
+        sg::ogl::ecs::component::ModelComponent,
+        sg::ogl::ecs::component::TransformComponent,
+        sg::city::ecs::AutomataComponent>()
+    };
+
+    for (auto entity : view)
+    {
+        auto& automataComponent{ view.get<sg::city::ecs::AutomataComponent>(entity) };
+        auto& transformComponent{ view.get<sg::ogl::ecs::component::TransformComponent>(entity) };
+
+        transformComponent.position = glm::vec3(automataComponent.automata->position.x, 0.015f, automataComponent.automata->position.z);
+    }
 }
 
 //-------------------------------------------------
@@ -213,6 +266,13 @@ void GameState::RenderImGui()
         const auto& tile{ m_city->GetMap().GetTileByMapPosition(m_mapPoint.x, m_mapPoint.z) };
         ImGui::Text("Current Tile x: %i", tile.GetMapX());
         ImGui::Text("Current Tile z: %i", tile.GetMapZ());
+    }
+
+    ImGui::Text("City Automatas: %i", m_city->automatas.size());
+
+    if (ImGui::Button("Spawn Car"))
+    {
+        CreateCar(m_mapPoint.x, m_mapPoint.z);
     }
 
     ImGui::Spacing();

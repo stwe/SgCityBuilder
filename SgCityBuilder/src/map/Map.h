@@ -81,6 +81,8 @@ namespace sg::city::map
         [[nodiscard]] const TileTypeTextureContainer& GetTileTypeTextures() const noexcept;
         [[nodiscard]] TileTypeTextureContainer& GetTileTypeTextures() noexcept;
 
+        [[nodiscard]] uint32_t GetRoadTextureAtlasId() const;
+
         [[nodiscard]] const TileContainer& GetTiles() const noexcept;
         [[nodiscard]] TileContainer& GetTiles() noexcept;
 
@@ -134,6 +136,11 @@ namespace sg::city::map
          * @brief A container that stores a texture Id for each TileType.
          */
         TileTypeTextureContainer m_tileTypeTextures;
+
+        /**
+         * @brief The Id of the road texture Atlas.
+         */
+        uint32_t m_roadTextureAtlasId{ 0 };
 
         /**
          * @brief A container holding the Tile instances.

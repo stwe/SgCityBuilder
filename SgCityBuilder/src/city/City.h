@@ -18,6 +18,11 @@ namespace sg::ogl::scene
     class Scene;
 }
 
+namespace sg::city::automata
+{
+    class Automata;
+}
+
 namespace sg::city::map
 {
     class Map;
@@ -38,6 +43,9 @@ namespace sg::city::city
 
         using TileIndexContainer = std::vector<int>;
 
+        using AutomataSharedPtr = std::shared_ptr<automata::Automata>;
+        using AutomataContainer = std::list<AutomataSharedPtr>;
+
         //-------------------------------------------------
         // Const
         //-------------------------------------------------
@@ -48,7 +56,7 @@ namespace sg::city::city
         // Public member
         //-------------------------------------------------
 
-
+        AutomataContainer automatas;
 
         //-------------------------------------------------
         // Ctors. / Dtor.
@@ -85,6 +93,12 @@ namespace sg::city::city
         //-------------------------------------------------
 
         [[nodiscard]] int ReplaceTile(int t_mapX, int t_mapZ, map::tile::TileType t_tileType) const;
+
+        //-------------------------------------------------
+        // Spawn
+        //-------------------------------------------------
+
+        bool SpawnCarAtSafeTrack(int t_mapX, int t_mapZ);
 
     protected:
 
