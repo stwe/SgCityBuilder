@@ -130,9 +130,6 @@ void sg::city::map::Map::CreateMap(const int t_mapSize)
     CreateNavigationNodes();
     LinkTileNavigationNodes();
 
-    // for debug only
-    CreateNavigationNodesMeshes();
-
     // create an bind a new Vao
     m_mapMesh = std::make_unique<ogl::resource::Mesh>();
     m_mapMesh->GetVao().BindVao();
@@ -196,7 +193,6 @@ void sg::city::map::Map::CreateTiles()
                 )
             };
 
-            // converting unique_ptr to shared_ptr
             m_tiles.push_back(std::move(tile));
         }
     }
@@ -216,22 +212,22 @@ void sg::city::map::Map::StoreTileNeighbours()
 
             if (z < m_mapSize - 1)
             {
-                m_tiles[tileIndex]->GetNeighbours().emplace(tile::Direction::NORTH, m_tiles[GetTileMapIndexByMapPosition(x, z + 1)]);
+                m_tiles[tileIndex]->GetNeighbours().emplace(tile::Direction::NORTH, GetTileMapIndexByMapPosition(x, z + 1));
             }
 
             if (x < m_mapSize - 1)
             {
-                m_tiles[tileIndex]->GetNeighbours().emplace(tile::Direction::EAST, m_tiles[GetTileMapIndexByMapPosition(x + 1, z)]);
+                m_tiles[tileIndex]->GetNeighbours().emplace(tile::Direction::EAST, GetTileMapIndexByMapPosition(x + 1, z));
             }
 
             if (z > 0)
             {
-                m_tiles[tileIndex]->GetNeighbours().emplace(tile::Direction::SOUTH, m_tiles[GetTileMapIndexByMapPosition(x, z - 1)]);
+                m_tiles[tileIndex]->GetNeighbours().emplace(tile::Direction::SOUTH, GetTileMapIndexByMapPosition(x, z - 1));
             }
 
             if (x > 0)
             {
-                m_tiles[tileIndex]->GetNeighbours().emplace(tile::Direction::WEST, m_tiles[GetTileMapIndexByMapPosition(x - 1, z)]);
+                m_tiles[tileIndex]->GetNeighbours().emplace(tile::Direction::WEST, GetTileMapIndexByMapPosition(x - 1, z));
             }
         }
     }
@@ -317,28 +313,28 @@ void sg::city::map::Map::LinkTileNavigationNodes()
 
             if (z < m_mapSize - 1)
             {
-                auto& north{ currentTile->GetNeighbours().at(tile::Direction::NORTH) };
+                const auto northIndex{ currentTile->GetNeighbours().at(tile::Direction::NORTH) };
 
-                currentTile->GetNavigationNodes()[42] = north->GetNavigationNodes()[0];
-                currentTile->GetNavigationNodes()[43] = north->GetNavigationNodes()[1];
-                currentTile->GetNavigationNodes()[44] = north->GetNavigationNodes()[2];
-                currentTile->GetNavigationNodes()[45] = north->GetNavigationNodes()[3];
-                currentTile->GetNavigationNodes()[46] = north->GetNavigationNodes()[4];
-                currentTile->GetNavigationNodes()[47] = north->GetNavigationNodes()[5];
-                currentTile->GetNavigationNodes()[48] = north->GetNavigationNodes()[6];
+                currentTile->GetNavigationNodes()[42] = m_tiles[northIndex]->GetNavigationNodes()[0];
+                currentTile->GetNavigationNodes()[43] = m_tiles[northIndex]->GetNavigationNodes()[1];
+                currentTile->GetNavigationNodes()[44] = m_tiles[northIndex]->GetNavigationNodes()[2];
+                currentTile->GetNavigationNodes()[45] = m_tiles[northIndex]->GetNavigationNodes()[3];
+                currentTile->GetNavigationNodes()[46] = m_tiles[northIndex]->GetNavigationNodes()[4];
+                currentTile->GetNavigationNodes()[47] = m_tiles[northIndex]->GetNavigationNodes()[5];
+                currentTile->GetNavigationNodes()[48] = m_tiles[northIndex]->GetNavigationNodes()[6];
             }
 
             if (x < m_mapSize - 1)
             {
-                auto& east{ currentTile->GetNeighbours().at(tile::Direction::EAST) };
+                const auto eastIndex{ currentTile->GetNeighbours().at(tile::Direction::EAST) };
 
-                currentTile->GetNavigationNodes()[48] = east->GetNavigationNodes()[42];
-                currentTile->GetNavigationNodes()[41] = east->GetNavigationNodes()[35];
-                currentTile->GetNavigationNodes()[34] = east->GetNavigationNodes()[28];
-                currentTile->GetNavigationNodes()[27] = east->GetNavigationNodes()[21];
-                currentTile->GetNavigationNodes()[20] = east->GetNavigationNodes()[14];
-                currentTile->GetNavigationNodes()[13] = east->GetNavigationNodes()[7];
-                currentTile->GetNavigationNodes()[6] = east->GetNavigationNodes()[0];
+                currentTile->GetNavigationNodes()[48] = m_tiles[eastIndex]->GetNavigationNodes()[42];
+                currentTile->GetNavigationNodes()[41] = m_tiles[eastIndex]->GetNavigationNodes()[35];
+                currentTile->GetNavigationNodes()[34] = m_tiles[eastIndex]->GetNavigationNodes()[28];
+                currentTile->GetNavigationNodes()[27] = m_tiles[eastIndex]->GetNavigationNodes()[21];
+                currentTile->GetNavigationNodes()[20] = m_tiles[eastIndex]->GetNavigationNodes()[14];
+                currentTile->GetNavigationNodes()[13] = m_tiles[eastIndex]->GetNavigationNodes()[7];
+                currentTile->GetNavigationNodes()[6] = m_tiles[eastIndex]->GetNavigationNodes()[0];
             }
         }
     }

@@ -66,11 +66,24 @@ sg::city::city::City::MapSharedPtr sg::city::city::City::GetMapSharedPtr() const
 // Logic
 //-------------------------------------------------
 
-void sg::city::city::City::Update(const double t_dt, std::vector<int>& t_changedTiles)
+void sg::city::city::City::Update(const double t_dt, TileIndexContainer& t_changedTiles) const
 {
-    for (auto changedTile : t_changedTiles)
+    for (auto changedTileIndex : t_changedTiles)
     {
-        m_map->GetTiles()[changedTile]->Update();
+        auto& tile{ m_map->GetTiles()[changedTileIndex] };
+
+        // Tile update
+        tile->Update();
+
+        // Tile neighbours update
+        for (auto& neighbour : tile->GetNeighbours())
+        {
+            if (m_map->GetTiles()[neighbour.second]->type == map::tile::TileType::TRAFFIC)
+            {
+                m_map->GetTiles()[neighbour.second]->Update();
+            }
+
+        }
     }
 
     t_changedTiles.clear();
@@ -90,11 +103,11 @@ int sg::city::city::City::ReplaceTile(const int t_mapX, const int t_mapZ, map::t
     auto& tiles{ m_map->GetTiles() };
     const auto index{ m_map->GetTileMapIndexByMapPosition(t_mapX, t_mapZ) };
 
-    // store nodes && neighbours
+    // store nodes and neighbours
     const auto nodes{ tiles[index]->GetNavigationNodes() };
     const auto neighbours{ tiles[index]->GetNeighbours() };
 
-    // delete the shared pointer
+    // delete the unique pointer
     tiles[index].reset();
 
     SG_OGL_ASSERT(tiles[index] == nullptr, "[City::ReplaceTile()] The pointer should be nullptr.");
@@ -129,8 +142,6 @@ int sg::city::city::City::ReplaceTile(const int t_mapX, const int t_mapZ, map::t
     // copy nodes && neighbours
     tiles[index]->GetNavigationNodes() = nodes;
     tiles[index]->GetNeighbours() = neighbours;
-
-    SG_OGL_ASSERT(tiles[index], "[City::ReplaceTile()] The pointer should not be nullptr.");
 
     return index;
 }

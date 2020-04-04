@@ -177,8 +177,17 @@ namespace sg::city::map::tile
          */
         void AddAutoTrack(int t_fromNodeIndex, int t_toNodeIndex, bool t_safeCarAutoTrack = false);
 
-        StopPattern CreateStopPattern(std::string t_s);
+        /**
+         * @brief Creates a single Stop Pattern.
+         * @param t_s The string from which the Pattern is created.
+         * @return A StopPattern.
+         */
+        StopPattern CreateStopPattern(std::string t_s) const;
 
+        /**
+         * @brief Apply a Stop Pattern to Nodes.
+         * @param t_index The index of the Stop Pattern.
+         */
         void ApplyStopPattern(int t_index);
     };
 }

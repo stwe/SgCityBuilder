@@ -356,15 +356,15 @@ void sg::city::map::tile::RoadTile::CreateStopPatterns()
         break; // Allow all
 
 /*
-        tile.GetStopPatterns().push_back(
-            CreateStopPattern(
-                   ". . X . X . ."
-                   ". . . X . . ."
-                   "X . X . X . X"
-                   ". X . . . X ."
-                   "X . X . X . X"
-                   ". . . X . . ."
-                   ". . X . X . ."));
+    m_stopPatterns.push_back(
+        CreateStopPattern(
+               ". . X . X . ."
+               ". . . X . . ."
+               "X . X . X . X"
+               ". X . . . X ."
+               "X . X . X . X"
+               ". . . X . . ."
+               ". . X . X . ."));
 */
 
     case RoadType::ROAD_X:
@@ -748,7 +748,8 @@ void sg::city::map::tile::RoadTile::DetermineRoadType()
 
     if (m_neighbours.count(Direction::NORTH))
     {
-        if (m_neighbours.at(Direction::NORTH)->type == TileType::TRAFFIC)
+        auto& tile{ m_map->GetTiles()[m_neighbours.at(Direction::NORTH)] };
+        if (tile->type == TileType::TRAFFIC)
         {
             roadNeighbours = NORTH;
         }
@@ -756,7 +757,8 @@ void sg::city::map::tile::RoadTile::DetermineRoadType()
 
     if (m_neighbours.count(Direction::EAST))
     {
-        if (m_neighbours.at(Direction::EAST)->type == TileType::TRAFFIC)
+        auto& tile{ m_map->GetTiles()[m_neighbours.at(Direction::EAST)] };
+        if (tile->type == TileType::TRAFFIC)
         {
             roadNeighbours |= EAST;
         }
@@ -764,7 +766,8 @@ void sg::city::map::tile::RoadTile::DetermineRoadType()
 
     if (m_neighbours.count(Direction::SOUTH))
     {
-        if (m_neighbours.at(Direction::SOUTH)->type == TileType::TRAFFIC)
+        auto& tile{ m_map->GetTiles()[m_neighbours.at(Direction::SOUTH)] };
+        if (tile->type == TileType::TRAFFIC)
         {
             roadNeighbours |= SOUTH;
         }
@@ -772,7 +775,8 @@ void sg::city::map::tile::RoadTile::DetermineRoadType()
 
     if (m_neighbours.count(Direction::WEST))
     {
-        if (m_neighbours.at(Direction::WEST)->type == TileType::TRAFFIC)
+        auto& tile{ m_map->GetTiles()[m_neighbours.at(Direction::WEST)] };
+        if (tile->type == TileType::TRAFFIC)
         {
             roadNeighbours |= WEST;
         }
@@ -912,8 +916,9 @@ void sg::city::map::tile::RoadTile::AddAutoTrack(const int t_fromNodeIndex, cons
     */
 }
 
-sg::city::map::tile::RoadTile::StopPattern sg::city::map::tile::RoadTile::CreateStopPattern(std::string t_s)
+sg::city::map::tile::RoadTile::StopPattern sg::city::map::tile::RoadTile::CreateStopPattern(std::string t_s) const
 {
+    // spaces have been added for readability
     t_s.erase(std::remove(t_s.begin(), t_s.end(), ' '), t_s.end());
 
     SG_OGL_ASSERT(t_s.size() == NODES_PER_TILE, "[RoadTile::CreateStopPattern()] Invalid string size.");
@@ -926,7 +931,8 @@ sg::city::map::tile::RoadTile::StopPattern sg::city::map::tile::RoadTile::Create
     {
         for (auto x{ 0 }; x < 7; ++x)
         {
-            pattern[i] = t_s[z * 7 + x] == STOP;
+            const auto index{ z * 7 + x };
+            pattern[i] = t_s[index] == STOP;
             i++;
         }
     }
@@ -938,6 +944,8 @@ void sg::city::map::tile::RoadTile::ApplyStopPattern(const int t_index)
 {
     if (!m_stopPatterns.empty())
     {
+        SG_OGL_ASSERT(t_index >= 0 && t_index < static_cast<int>(m_stopPatterns.size()), "[RoadTile::ApplyStopPattern()] Invalid index.");
+
         auto i{ 0 };
         for (auto& node : m_navigationNodes)
         {

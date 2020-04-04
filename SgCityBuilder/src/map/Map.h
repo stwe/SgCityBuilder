@@ -28,8 +28,8 @@ namespace sg::city::map
     public:
         using TileTypeTextureContainer = std::unordered_map<tile::TileType, uint32_t, tile::TileTypeHash>;
 
-        using TileSharedPtr = std::shared_ptr<tile::Tile>;
-        using TileContainer = std::vector<TileSharedPtr>;
+        using TileUniquePtr = std::unique_ptr<tile::Tile>;
+        using TileContainer = std::vector<TileUniquePtr>;
 
         using RandomColorContainer = std::unordered_map<int, ogl::Color>;
 

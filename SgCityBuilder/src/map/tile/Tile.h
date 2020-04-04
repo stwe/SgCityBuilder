@@ -76,9 +76,7 @@ namespace sg::city::map::tile
     public:
         using VertexContainer = std::vector<float>;
 
-        using NeighbourDirection = Direction;
-        using TileSharedPtr = std::shared_ptr<Tile>;
-        using NeighbourContainer = std::unordered_map<NeighbourDirection, TileSharedPtr, DirectionHash>;
+        using NeighbourContainer = std::unordered_map<Direction, int, DirectionHash>;
 
         using NavigationNodeSharedPtr = std::shared_ptr<automata::AutoNode>;
         using NavigationNodeContainer = std::vector<NavigationNodeSharedPtr>;
