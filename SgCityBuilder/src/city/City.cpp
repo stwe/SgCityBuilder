@@ -7,18 +7,16 @@
 // 
 // 2020 (c) stwe <https://github.com/stwe/SgCityBuilder>
 
+#include <Core.h>
+#include <Log.h>
 #include <Application.h>
+#include <glm/vec3.hpp>
+#include <ecs/component/Components.h>
+#include <scene/Scene.h>
 #include "City.h"
 #include "map/Map.h"
-#include "map/Tile.h"
-#include "map/RoadNetwork.h"
-#include "map/BuildingGenerator.h"
-#include "map/Astar.h"
+#include "map/tile/RoadTile.h"
 #include "renderer/MapRenderer.h"
-#include "renderer/RoadNetworkRenderer.h"
-#include "renderer/BuildingsRenderer.h"
-#include "automata/AutoTrack.h"
-#include "automata/Automata.h"
 
 //-------------------------------------------------
 // Ctors. / Dtor.
@@ -37,7 +35,7 @@ sg::city::city::City::City(std::string t_name, ogl::scene::Scene* t_scene, const
 
 sg::city::city::City::~City() noexcept
 {
-    SG_OGL_LOG_DEBUG("[City::City()] Destruct City.");
+    SG_OGL_LOG_DEBUG("[City::~City()] Destruct City.");
 }
 
 //-------------------------------------------------
@@ -59,157 +57,82 @@ sg::city::map::Map& sg::city::city::City::GetMap() noexcept
     return *m_map;
 }
 
-sg::city::city::City::MapSharedPtr sg::city::city::City::GetMapPtr() const
+sg::city::city::City::MapSharedPtr sg::city::city::City::GetMapSharedPtr() const
 {
     return m_map;
-}
-
-const sg::city::map::RoadNetwork& sg::city::city::City::GetRoadNetwork() const noexcept
-{
-    return *m_roadNetwork;
-}
-
-sg::city::map::RoadNetwork& sg::city::city::City::GetRoadNetwork() noexcept
-{
-    return *m_roadNetwork;
-}
-
-sg::city::city::City::RoadNetworkSharedPtr sg::city::city::City::GetRoadNetworkPtr() const
-{
-    return m_roadNetwork;
-}
-
-const sg::city::map::BuildingGenerator& sg::city::city::City::GetBuildingGenerator() const noexcept
-{
-    return *m_buildingGenerator;
-}
-
-sg::city::map::BuildingGenerator& sg::city::city::City::GetBuildingGenerator() noexcept
-{
-    return *m_buildingGenerator;
-}
-
-sg::city::city::City::BuildingGeneratorSharedPtr sg::city::city::City::GetBuildingGeneratorPtr() const
-{
-    return m_buildingGenerator;
-}
-
-sg::city::map::Astar& sg::city::city::City::GetAstar() const noexcept
-{
-    return *m_astar;
-}
-
-float& sg::city::city::City::GetTimePerDay()
-{
-    return m_timePerDay;
-}
-
-int sg::city::city::City::GetDay() const
-{
-    return m_day;
-}
-
-float sg::city::city::City::GetPopulationPool() const
-{
-    return m_populationPool;
-}
-
-float sg::city::city::City::GetPopulation() const
-{
-    return m_population;
 }
 
 //-------------------------------------------------
 // Logic
 //-------------------------------------------------
 
-void sg::city::city::City::Update(const double t_dt)
+void sg::city::city::City::Update(const double t_dt, std::vector<int>& t_changedTiles)
 {
-    m_currentTime += static_cast<float>(t_dt);
-
-    if (m_currentTime < m_timePerDay)
+    for (auto changedTile : t_changedTiles)
     {
-        return;
+        m_map->GetTiles()[changedTile]->Update();
     }
 
-    m_day++;
-    m_currentTime = 0.0f;
-
-    auto popTotal{ 0.0f };
-
-    for (auto& tile : m_map->GetTiles())
-    {
-        if (tile->GetType() == map::Map::TileType::RESIDENTIAL)
-        {
-            DistributePool(m_populationPool, *tile, BIRTH_RATE - DEATH_RATE);
-            popTotal += tile->population;
-        }
-
-        tile->Update();
-    }
-
-    m_populationPool += m_populationPool * (BIRTH_RATE - DEATH_RATE);
-    popTotal += m_populationPool;
-
-    m_population = popTotal;
+    t_changedTiles.clear();
 }
 
-void sg::city::city::City::RenderMap() const
+void sg::city::city::City::Render() const
 {
     m_mapRenderer->Render();
 }
 
-void sg::city::city::City::RenderRoadNetwork() const
-{
-    m_roadNetworkRenderer->Render();
-}
-
-void sg::city::city::City::RenderBuildings() const
-{
-    m_buildingsRenderer->Render();
-}
-
 //-------------------------------------------------
-// Path
+// Edit
 //-------------------------------------------------
 
-/*
-sg::city::city::City::PathPositionContainer sg::city::city::City::Path(const int t_fromMapX, const int t_fromMapZ, const int t_toMapX, const int t_toMapZ) const
+int sg::city::city::City::ReplaceTile(const int t_mapX, const int t_mapZ, map::tile::TileType t_tileType) const
 {
-    const auto fromTileIndex{ m_map->GetTileIndexByPosition(t_fromMapX, t_fromMapZ) };
-    const auto toTileIndex{ m_map->GetTileIndexByPosition(t_toMapX, t_toMapZ) };
+    auto& tiles{ m_map->GetTiles() };
+    const auto index{ m_map->GetTileMapIndexByMapPosition(t_mapX, t_mapZ) };
 
-    return m_astar->FindPath(fromTileIndex, toTileIndex);
-}
-*/
+    // store nodes && neighbours
+    const auto nodes{ tiles[index]->GetNavigationNodes() };
+    const auto neighbours{ tiles[index]->GetNeighbours() };
 
-//-------------------------------------------------
-// Spawn
-//-------------------------------------------------
+    // delete the shared pointer
+    tiles[index].reset();
 
-void sg::city::city::City::SpawnCarAtSafeTrack(const int t_mapX, const int t_mapZ)
-{
-    // get Tile at position
-    auto& tile{ m_map->GetTileByMapPosition(t_mapX, t_mapZ) };
+    SG_OGL_ASSERT(tiles[index] == nullptr, "[City::ReplaceTile()] The pointer should be nullptr.");
 
-    // try to get a safe AutoTrack
-    auto& safeAutoTrack{ tile.safeCarAutoTrack };
-    if (!safeAutoTrack)
+    if (t_tileType == map::tile::TileType::TRAFFIC)
     {
-        return;
+        // create a RoadTile
+        auto newTile{ std::make_unique<map::tile::RoadTile>(
+                static_cast<float>(t_mapX),
+                static_cast<float>(t_mapZ),
+                t_tileType,
+                m_map.get()
+            )
+        };
+
+        tiles[index] = std::move(newTile);
+    }
+    else
+    {
+        // create a new Tile with the new type
+        auto newTile{ std::make_unique<map::tile::Tile>(
+                static_cast<float>(t_mapX),
+                static_cast<float>(t_mapZ),
+                t_tileType,
+                m_map.get()
+            )
+        };
+
+        tiles[index] = std::move(newTile);
     }
 
-    SG_OGL_LOG_INFO("Spawn new Car at map x: {}, map z: {}", tile.GetMapX(), tile.GetMapZ());
+    // copy nodes && neighbours
+    tiles[index]->GetNavigationNodes() = nodes;
+    tiles[index]->GetNeighbours() = neighbours;
 
-    // create an Automata
-    auto automata{ std::make_shared<automata::Automata>() };
-    automata->autoLength = 0.2f;
-    automata->currentTrack = safeAutoTrack;
-    automata->currentTrack->automatas.push_back(automata);
-    automata->rootNode = safeAutoTrack->startNode;
-    automata->Update(0.0f);
+    SG_OGL_ASSERT(tiles[index], "[City::ReplaceTile()] The pointer should not be nullptr.");
 
-    automatas.push_back(automata);
+    return index;
 }
 
 //-------------------------------------------------
@@ -225,111 +148,28 @@ void sg::city::city::City::Init(ogl::scene::Scene* t_scene, const int t_mapSize)
     m_map->rotation = glm::vec3(0.0f);
     m_map->scale = glm::vec3(1.0f);
 
-    // create RoadNetwork
-    m_roadNetwork = std::make_shared<map::RoadNetwork>(this);
-
-    // create BuildingGenerator
-    m_buildingGenerator = std::make_shared<map::BuildingGenerator>(m_map.get());
-
     // create Renderer
     m_mapRenderer = std::make_unique<renderer::MapRenderer>(t_scene);
-    m_roadNetworkRenderer = std::make_unique<renderer::RoadNetworkRenderer>(t_scene);
-    m_buildingsRenderer = std::make_unique<renderer::BuildingsRenderer>(t_scene);
 
-    // cretae an Astar instance
-    m_astar = std::make_unique<map::Astar>(m_map.get());
-
-    // create entities
+    // create Map Entity
     CreateMapEntity();
-    CreateRoadNetworkEntity();
-    CreateBuildingsEntity();
 }
 
 void sg::city::city::City::CreateMapEntity()
 {
     const auto entity{ m_scene->GetApplicationContext()->registry.create() };
 
+    // add MapComponent
     m_scene->GetApplicationContext()->registry.assign<ecs::MapComponent>(
         entity,
         m_map
     );
 
+    // add TransformComponent
     m_scene->GetApplicationContext()->registry.assign<ogl::ecs::component::TransformComponent>(
         entity,
         m_map->position,
         m_map->rotation,
         m_map->scale
     );
-}
-
-void sg::city::city::City::CreateRoadNetworkEntity()
-{
-    const auto entity{ m_scene->GetApplicationContext()->registry.create() };
-
-    m_scene->GetApplicationContext()->registry.assign<ecs::RoadNetworkComponent>(
-        entity,
-        m_roadNetwork
-    );
-
-    m_scene->GetApplicationContext()->registry.assign<ogl::ecs::component::TransformComponent>(
-        entity,
-        m_map->position,
-        m_map->rotation,
-        m_map->scale
-    );
-}
-
-void sg::city::city::City::CreateBuildingsEntity()
-{
-    const auto entity{ m_scene->GetApplicationContext()->registry.create() };
-
-    m_scene->GetApplicationContext()->registry.assign<ecs::BuildingsComponent>(
-        entity,
-        m_buildingGenerator
-    );
-
-    m_scene->GetApplicationContext()->registry.assign<ogl::ecs::component::TransformComponent>(
-        entity,
-        m_map->position,
-        m_map->rotation,
-        m_map->scale
-    );
-}
-
-//-------------------------------------------------
-// Distribute
-//-------------------------------------------------
-
-void sg::city::city::City::DistributePool(float& t_pool, map::Tile& t_tile, const float t_rate)
-{
-    const auto maxTilePopulation{ map::Tile::MAX_POPULATION };
-
-    if (t_pool > 0)
-    {
-        auto moving{ maxTilePopulation - static_cast<int>(t_tile.population) };
-
-        if (moving > MOVE_POPULATION_RATE)
-        {
-            moving = MOVE_POPULATION_RATE;
-        }
-
-        t_pool -= moving;
-
-        if (t_pool < 0.0f)
-        {
-            t_pool = 0.0f;
-        }
-
-        t_tile.population += moving;
-    }
-
-    // adjust the tile population for births and deaths
-    t_tile.population += t_tile.population * t_rate;
-
-    // move population that cannot be sustained by the tile into the pool
-    if (t_tile.population > maxTilePopulation)
-    {
-        t_pool += t_tile.population - maxTilePopulation;
-        t_tile.population = maxTilePopulation;
-    }
 }

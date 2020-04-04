@@ -13,7 +13,7 @@
 #include <glm/vec3.hpp>
 #include <list>
 
-namespace sg::city::map
+namespace sg::city::map::tile
 {
     class Tile;
 }
@@ -28,8 +28,6 @@ namespace sg::city::automata
     public:
         using AutoNodeSharedPtr = std::shared_ptr<AutoNode>;
 
-        using TileSharedPtr = std::shared_ptr<map::Tile>;
-
         using AutomataSharedPtr = std::shared_ptr<Automata>;
         using AutomataContainer = std::list<AutomataSharedPtr>;
 
@@ -40,7 +38,7 @@ namespace sg::city::automata
         AutoNodeSharedPtr startNode;
         AutoNodeSharedPtr endNode;
 
-        TileSharedPtr tile;
+        map::tile::Tile* tile{ nullptr };
 
         float trackLength{ 1.0f };
 

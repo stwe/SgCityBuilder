@@ -9,35 +9,23 @@
 
 #pragma once
 
-#include <memory>
 #include <string>
-#include <stack>
-#include <glm/vec2.hpp>
+#include <memory>
+#include "map/tile/Tile.h"
 
 namespace sg::ogl::scene
 {
     class Scene;
 }
 
-namespace sg::city::automata
-{
-    class Automata;
-}
-
 namespace sg::city::map
 {
     class Map;
-    class RoadNetwork;
-    class Astar;
-    class Tile;
-    class BuildingGenerator;
 }
 
 namespace sg::city::renderer
 {
     class MapRenderer;
-    class RoadNetworkRenderer;
-    class BuildingsRenderer;
 }
 
 namespace sg::city::city
@@ -46,24 +34,19 @@ namespace sg::city::city
     {
     public:
         using MapSharedPtr = std::shared_ptr<map::Map>;
-        using RoadNetworkSharedPtr = std::shared_ptr<map::RoadNetwork>;
-        using BuildingGeneratorSharedPtr = std::shared_ptr<map::BuildingGenerator>;
-        using AstarUniquePtr = std::unique_ptr<map::Astar>;
-
         using MapRendererUniquePtr = std::unique_ptr<renderer::MapRenderer>;
-        using RoadNetworkRendererUniquePtr = std::unique_ptr<renderer::RoadNetworkRenderer>;
-        using BuildingsRendererUniquePtr = std::unique_ptr<renderer::BuildingsRenderer>;
 
-        using PathPositionContainer = std::stack<glm::vec2>;
+        //-------------------------------------------------
+        // Const
+        //-------------------------------------------------
 
-        using AutomataSharedPtr = std::shared_ptr<automata::Automata>;
-        using AutomataContainer = std::list<AutomataSharedPtr>;
 
-        static constexpr auto BIRTH_RATE{ 0.00055f };
-        static constexpr auto DEATH_RATE{ 0.00023f };
-        static constexpr auto MOVE_POPULATION_RATE{ 4 };
 
-        AutomataContainer automatas;
+        //-------------------------------------------------
+        // Public member
+        //-------------------------------------------------
+
+
 
         //-------------------------------------------------
         // Ctors. / Dtor.
@@ -86,43 +69,20 @@ namespace sg::city::city
 
         [[nodiscard]] const map::Map& GetMap() const noexcept;
         [[nodiscard]] map::Map& GetMap() noexcept;
-        [[nodiscard]] MapSharedPtr GetMapPtr() const;
-
-        [[nodiscard]] const map::RoadNetwork& GetRoadNetwork() const noexcept;
-        [[nodiscard]] map::RoadNetwork& GetRoadNetwork() noexcept;
-        [[nodiscard]] RoadNetworkSharedPtr GetRoadNetworkPtr() const;
-
-        [[nodiscard]] const map::BuildingGenerator& GetBuildingGenerator() const noexcept;
-        [[nodiscard]] map::BuildingGenerator& GetBuildingGenerator() noexcept;
-        [[nodiscard]] BuildingGeneratorSharedPtr GetBuildingGeneratorPtr() const;
-
-        [[nodiscard]] map::Astar& GetAstar() const noexcept;
-
-        [[nodiscard]] float& GetTimePerDay();
-        [[nodiscard]] int GetDay() const;
-        [[nodiscard]] float GetPopulationPool() const;
-        [[nodiscard]] float GetPopulation() const;
+        [[nodiscard]] MapSharedPtr GetMapSharedPtr() const;
 
         //-------------------------------------------------
         // Logic
         //-------------------------------------------------
 
-        void Update(double t_dt);
-        void RenderMap() const;
-        void RenderRoadNetwork() const;
-        void RenderBuildings() const;
+        void Update(double t_dt, std::vector<int>& t_changedTiles);
+        void Render() const;
 
         //-------------------------------------------------
-        // Path
+        // Edit
         //-------------------------------------------------
 
-        //[[nodiscard]] PathPositionContainer Path(int t_fromMapX, int t_fromMapZ, int t_toMapX, int t_toMapZ) const;
-
-        //-------------------------------------------------
-        // Spawn
-        //-------------------------------------------------
-
-        void SpawnCarAtSafeTrack(int t_mapX, int t_mapZ);
+        [[nodiscard]] int ReplaceTile(int t_mapX, int t_mapZ, map::tile::TileType t_tileType) const;
 
     protected:
 
@@ -143,61 +103,9 @@ namespace sg::city::city
         MapSharedPtr m_map;
 
         /**
-         * @brief The Road Network of the City.
-         */
-        RoadNetworkSharedPtr m_roadNetwork;
-
-        /**
-         * @brief Contains all buildings of the City.
-         */
-        BuildingGeneratorSharedPtr m_buildingGenerator;
-
-        /**
          * @brief Renders the Map.
          */
         MapRendererUniquePtr m_mapRenderer;
-
-        /**
-         * @brief Renders the RoadNetwork.
-         */
-        RoadNetworkRendererUniquePtr m_roadNetworkRenderer;
-
-        /**
-         * @brief Renders all buildings.
-         */
-        BuildingsRendererUniquePtr m_buildingsRenderer;
-
-        /**
-         * @brief An Astar instance.
-         */
-        AstarUniquePtr m_astar;
-
-        /**
-         * @brief The real world time (in seconds) since the day updated.
-         */
-        float m_currentTime{ 0.0f };
-
-        /**
-         * @brief The amount of real world time each day should last.
-         */
-        float m_timePerDay{ 1.0f };
-
-        /**
-         * @brief Number of days.
-         */
-        int m_day{ 0 };
-
-        /**
-         * @brief Stores the number of people who do not have a home.
-         *        We start with a small number of 50 people.
-         */
-        float m_populationPool{ 50.0f };
-
-        /**
-         * @brief The total population of the City.
-         *        The sum of all the Tiles populations and the populationPool.
-         */
-        float m_population{ 0.0f };
 
         //-------------------------------------------------
         // Init
@@ -205,13 +113,5 @@ namespace sg::city::city
 
         void Init(ogl::scene::Scene* t_scene, int t_mapSize);
         void CreateMapEntity();
-        void CreateRoadNetworkEntity();
-        void CreateBuildingsEntity();
-
-        //-------------------------------------------------
-        // Distribute
-        //-------------------------------------------------
-
-        static void DistributePool(float& t_pool, map::Tile& t_tile, float t_rate = 0.0f);
     };
 }

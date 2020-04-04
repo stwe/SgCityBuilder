@@ -8,19 +8,11 @@
 // 2020 (c) stwe <https://github.com/stwe/SgCityBuilder>
 
 #include "GameState.h"
-#include "map/RoadNetwork.h"
-#include "map/BuildingGenerator.h"
-#include "map/Tile.h"
 #include "input/MousePicker.h"
 #include "city/City.h"
-#include "automata/Automata.h"
 #include "ecs/Components.h"
-
-// todo: remove roads
-// todo: remove buildings
-// todo: buildings of different heights
-// todo: load map
-// todo: select/unselect tiles
+#include "map/Map.h"
+#include "map/tile/RoadTile.h"
 
 //-------------------------------------------------
 // Ctors. / Dtor.
@@ -62,21 +54,9 @@ bool GameState::Input()
 
         if (m_mapPoint.x >= 0)
         {
-            if (m_currentTileType == sg::city::map::Map::TileType::TRAFFIC_NETWORK)
-            {
-                m_city->GetRoadNetwork().StoreRoadOnMapPosition(m_mapPoint.x, m_mapPoint.z);
-                if (!m_spawn)
-                {
-                    //CreateExampleCar(m_mapPoint.x, m_mapPoint.z);
-                    m_spawn = true;
-                }
-            }
-            else
-            {
-                m_city->GetMap().ChangeTileTypeOnMapPosition(m_mapPoint.x, m_mapPoint.z, m_currentTileType);
-            }
-
-            //m_city->GetMap().FindConnectedRegions();
+            SG_OGL_LOG_INFO("[GameState::Input()] Replace Tile on x: {}, z: {}.", m_mapPoint.x, m_mapPoint.z);
+            const auto changedTileIndex{ m_city->ReplaceTile(m_mapPoint.x, m_mapPoint.z, m_currentEditTileType) };
+            m_changedTiles.push_back(changedTileIndex);
 
             // delete mouse state
             sg::ogl::input::MouseInput::ClearMouseStates();
@@ -89,60 +69,31 @@ bool GameState::Input()
 bool GameState::Update(const double t_dt)
 {
     m_scene->GetCurrentCamera().Update(t_dt);
-    m_city->Update(t_dt);
-
-    /////////////////////
-
-    auto del{ false };
-
-    for (auto& automata : m_city->automatas)
-    {
-        if (automata)
-        {
-            automata->Update(static_cast<float>(t_dt));
-            if (automata->deleteAutomata)
-            {
-                automata.reset();
-                del = true;
-            }
-        }
-    }
-
-    if (del)
-    {
-        m_city->automatas.erase(std::remove(m_city->automatas.begin(), m_city->automatas.end(), nullptr), m_city->automatas.end());
-    }
-
-    auto view{ m_scene->GetApplicationContext()->registry.view<
-            sg::ogl::ecs::component::ModelComponent,
-            sg::ogl::ecs::component::TransformComponent,
-            sg::city::ecs::AutomataComponent>()
-    };
-
-    for (auto entity : view)
-    {
-        auto& automataComponent{ view.get<sg::city::ecs::AutomataComponent>(entity) };
-        auto& transformComponent{ view.get<sg::ogl::ecs::component::TransformComponent>(entity) };
-
-        transformComponent.position = glm::vec3(automataComponent.automata->position.x, 0.015f, automataComponent.automata->position.z);
-    }
-
-    /////////////////////
+    m_city->Update(t_dt, m_changedTiles);
 
     return true;
 }
 
 void GameState::Render()
 {
-    m_city->RenderMap();
-    m_city->RenderRoadNetwork();
+    m_city->Render();
 
-    RenderDebug();
+    // only render after update of changed Tiles is complete
+    if (m_changedTiles.empty())
+    {
+        for (auto& tile : m_city->GetMap().GetTiles())
+        {
+            if (tile->type == sg::city::map::tile::TileType::TRAFFIC)
+            {
+                auto* roadTile{ dynamic_cast<sg::city::map::tile::RoadTile*>(tile.get()) };
 
-    //m_city->RenderBuildings();
-    m_forwardRenderer->Render();
+                SG_OGL_ASSERT(roadTile, "[GameState::Render()] Null pointer.");
 
-    m_textRenderer->RenderText("SgCityBuilder", 10.0f, 10.0f, 0.25f, glm::vec3(0.1f));
+                roadTile->RenderNavigationNodes();
+                roadTile->RenderAutoTracks();
+            }
+        }
+    }
 
     RenderImGui();
 }
@@ -171,84 +122,7 @@ void GameState::Init()
 
     m_city = std::make_unique<sg::city::city::City>("SgCity", m_scene.get(), MAP_SIZE);
 
-    m_mousePicker = std::make_unique<sg::city::input::MousePicker>(m_scene.get(), m_city->GetMapPtr());
-    m_textRenderer = std::make_unique<sg::ogl::ecs::system::TextRenderSystem>(m_scene.get(), "res/font/bitter/Bitter-Italic.otf");
-    m_forwardRenderer = std::make_unique<sg::ogl::ecs::system::ForwardRenderSystem>(m_scene.get());
-
-    CreateExampleRoadNetwork();
-    CreateExampleCar(1, 5);
-}
-
-void GameState::CreateExampleRoadNetwork() const
-{
-    auto& roadNetwork{ m_city->GetRoadNetwork() };
-    roadNetwork.StoreRoadOnMapPosition(1, 1);
-    roadNetwork.StoreRoadOnMapPosition(2, 1);
-    roadNetwork.StoreRoadOnMapPosition(3, 1);
-    roadNetwork.StoreRoadOnMapPosition(4, 1);
-    roadNetwork.StoreRoadOnMapPosition(5, 1);
-    roadNetwork.StoreRoadOnMapPosition(6, 1);
-
-    roadNetwork.StoreRoadOnMapPosition(6, 2);
-    roadNetwork.StoreRoadOnMapPosition(6, 3);
-    roadNetwork.StoreRoadOnMapPosition(6, 4);
-    roadNetwork.StoreRoadOnMapPosition(6, 5);
-    roadNetwork.StoreRoadOnMapPosition(6, 6);
-
-    roadNetwork.StoreRoadOnMapPosition(5, 6);
-    roadNetwork.StoreRoadOnMapPosition(4, 6);
-    roadNetwork.StoreRoadOnMapPosition(3, 6);
-    roadNetwork.StoreRoadOnMapPosition(2, 6);
-    roadNetwork.StoreRoadOnMapPosition(1, 6);
-
-    roadNetwork.StoreRoadOnMapPosition(1, 5);
-    roadNetwork.StoreRoadOnMapPosition(1, 4);
-    roadNetwork.StoreRoadOnMapPosition(1, 3);
-    roadNetwork.StoreRoadOnMapPosition(1, 2);
-
-
-    roadNetwork.StoreRoadOnMapPosition(3, 5);
-    roadNetwork.StoreRoadOnMapPosition(3, 4);
-    roadNetwork.StoreRoadOnMapPosition(3, 3);
-    roadNetwork.StoreRoadOnMapPosition(2, 3);
-    roadNetwork.StoreRoadOnMapPosition(4, 4);
-    roadNetwork.StoreRoadOnMapPosition(5, 4);
-    roadNetwork.StoreRoadOnMapPosition(3, 2);
-}
-
-void GameState::CreateExampleCar(const int t_mapX, const int t_mapZ) const
-{
-    m_city->SpawnCarAtSafeTrack(t_mapX, t_mapZ);
-
-    for (auto& automata : m_city->automatas)
-    {
-        auto e{ GetApplicationContext()->GetEntityFactory().CreateModelEntity(
-            "res/model/Plane1/plane1.obj",
-            glm::vec3(automata->position.x, 0.015f, automata->position.z),
-            glm::vec3(0.0f),
-            glm::vec3(0.125f / 4.0f),
-            false
-        ) };
-
-        GetApplicationContext()->registry.assign<sg::city::ecs::AutomataComponent>(
-            e,
-            automata
-        );
-    }
-}
-
-void GameState::RenderDebug() const
-{
-    //m_city->GetMap().RenderTileNavigationNodes(1, 1);
-
-    for (auto& tile : m_city->GetMap().GetTiles())
-    {
-        if (tile->GetType() == sg::city::map::Map::TileType::TRAFFIC_NETWORK)
-        {
-            tile->RenderNavigationNodes(m_scene.get(), &m_city->GetMap());
-            //tile->RenderAutoTracks(m_scene.get(), &m_city->GetMap());
-        }
-    }
+    m_mousePicker = std::make_unique<sg::city::input::MousePicker>(m_scene.get(), m_city->GetMapSharedPtr());
 }
 
 //-------------------------------------------------
@@ -276,58 +150,58 @@ void GameState::RenderImGui()
 
     ImGui::Begin("Map Edit");
 
-    if (m_currentTileType == sg::city::map::Map::TileType::NONE)
+    if (m_currentEditTileType == sg::city::map::tile::TileType::NONE)
     {
-        ImGui::Text(sg::city::map::Tile::TileTypeToString(sg::city::map::Map::TileType::NONE).c_str());
+        ImGui::Text(sg::city::map::tile::Tile::TileTypeToString(sg::city::map::tile::TileType::NONE).c_str());
     }
 
-    if (m_currentTileType == sg::city::map::Map::TileType::RESIDENTIAL)
+    if (m_currentEditTileType == sg::city::map::tile::TileType::RESIDENTIAL)
     {
-        ImGui::Text(sg::city::map::Tile::TileTypeToString(sg::city::map::Map::TileType::RESIDENTIAL).c_str());
+        ImGui::Text(sg::city::map::tile::Tile::TileTypeToString(sg::city::map::tile::TileType::RESIDENTIAL).c_str());
     }
 
-    if (m_currentTileType == sg::city::map::Map::TileType::COMMERCIAL)
+    if (m_currentEditTileType == sg::city::map::tile::TileType::COMMERCIAL)
     {
-        ImGui::Text(sg::city::map::Tile::TileTypeToString(sg::city::map::Map::TileType::COMMERCIAL).c_str());
+        ImGui::Text(sg::city::map::tile::Tile::TileTypeToString(sg::city::map::tile::TileType::COMMERCIAL).c_str());
     }
 
-    if (m_currentTileType == sg::city::map::Map::TileType::INDUSTRIAL)
+    if (m_currentEditTileType == sg::city::map::tile::TileType::INDUSTRIAL)
     {
-        ImGui::Text(sg::city::map::Tile::TileTypeToString(sg::city::map::Map::TileType::INDUSTRIAL).c_str());
+        ImGui::Text(sg::city::map::tile::Tile::TileTypeToString(sg::city::map::tile::TileType::INDUSTRIAL).c_str());
     }
 
-    if (m_currentTileType == sg::city::map::Map::TileType::TRAFFIC_NETWORK)
+    if (m_currentEditTileType == sg::city::map::tile::TileType::TRAFFIC)
     {
-        ImGui::Text(sg::city::map::Tile::TileTypeToString(sg::city::map::Map::TileType::TRAFFIC_NETWORK).c_str());
+        ImGui::Text(sg::city::map::tile::Tile::TileTypeToString(sg::city::map::tile::TileType::TRAFFIC).c_str());
     }
 
     ImGui::Spacing();
     ImGui::Separator();
     ImGui::Spacing();
 
-    if (ImGui::Button(sg::city::map::Tile::TileTypeToString(sg::city::map::Map::TileType::NONE).c_str()))
+    if (ImGui::Button(sg::city::map::tile::Tile::TileTypeToString(sg::city::map::tile::TileType::NONE).c_str()))
     {
-        m_currentTileType = sg::city::map::Map::TileType::NONE;
+        m_currentEditTileType = sg::city::map::tile::TileType::NONE;
     }
 
-    if (ImGui::Button(sg::city::map::Tile::TileTypeToString(sg::city::map::Map::TileType::RESIDENTIAL).c_str()))
+    if (ImGui::Button(sg::city::map::tile::Tile::TileTypeToString(sg::city::map::tile::TileType::RESIDENTIAL).c_str()))
     {
-        m_currentTileType = sg::city::map::Map::TileType::RESIDENTIAL;
+        m_currentEditTileType = sg::city::map::tile::TileType::RESIDENTIAL;
     }
 
-    if (ImGui::Button(sg::city::map::Tile::TileTypeToString(sg::city::map::Map::TileType::COMMERCIAL).c_str()))
+    if (ImGui::Button(sg::city::map::tile::Tile::TileTypeToString(sg::city::map::tile::TileType::COMMERCIAL).c_str()))
     {
-        m_currentTileType = sg::city::map::Map::TileType::COMMERCIAL;
+        m_currentEditTileType = sg::city::map::tile::TileType::COMMERCIAL;
     }
 
-    if (ImGui::Button(sg::city::map::Tile::TileTypeToString(sg::city::map::Map::TileType::INDUSTRIAL).c_str()))
+    if (ImGui::Button(sg::city::map::tile::Tile::TileTypeToString(sg::city::map::tile::TileType::INDUSTRIAL).c_str()))
     {
-        m_currentTileType = sg::city::map::Map::TileType::INDUSTRIAL;
+        m_currentEditTileType = sg::city::map::tile::TileType::INDUSTRIAL;
     }
 
-    if (ImGui::Button(sg::city::map::Tile::TileTypeToString(sg::city::map::Map::TileType::TRAFFIC_NETWORK).c_str()))
+    if (ImGui::Button(sg::city::map::tile::Tile::TileTypeToString(sg::city::map::tile::TileType::TRAFFIC).c_str()))
     {
-        m_currentTileType = sg::city::map::Map::TileType::TRAFFIC_NETWORK;
+        m_currentEditTileType = sg::city::map::tile::TileType::TRAFFIC;
     }
 
     ImGui::Spacing();
@@ -341,30 +215,14 @@ void GameState::RenderImGui()
         ImGui::Text("Current Tile z: %i", tile.GetMapZ());
     }
 
-    ImGui::Text("Current number of regions: %i", m_city->GetMap().GetNumRegions());
-
     ImGui::Spacing();
     ImGui::Separator();
     ImGui::Spacing();
-
-    if (ImGui::Button("Show contiguous regions"))
-    {
-        m_city->GetMap().showRegions = !m_city->GetMap().showRegions;
-    }
 
     if (ImGui::Button("Wireframe mode"))
     {
         m_city->GetMap().wireframeMode = !m_city->GetMap().wireframeMode;
     }
-
-    ImGui::Spacing();
-    ImGui::Separator();
-    ImGui::Spacing();
-
-    ImGui::Text("Day: %i", m_city->GetDay());
-    ImGui::SliderFloat("Time per day: ", &m_city->GetTimePerDay(), 0.0f, 1.0f, "ratio = %.2f");
-    ImGui::Text("Homeless people: %f", m_city->GetPopulationPool());
-    ImGui::Text("Population: %f", m_city->GetPopulation());
 
     ImGui::End();
 

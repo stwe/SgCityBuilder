@@ -7,19 +7,19 @@
 // 
 // 2020 (c) stwe <https://github.com/stwe/SgCityBuilder>
 
-#include <Application.h>
+#include <random>
 #include <Color.h>
+#include <Log.h>
 #include <Core.h>
+#include <Application.h>
 #include <scene/Scene.h>
 #include <resource/Mesh.h>
-#include <resource/TextureManager.h>
 #include <resource/ShaderManager.h>
-#include <random>
+#include <resource/TextureManager.h>
 #include "Map.h"
-#include "Tile.h"
-#include "automata/AutoNode.h"
-#include "shader/NodeShader.h"
 #include "shader/LineShader.h"
+#include "shader/NodeShader.h"
+#include "automata/AutoNode.h"
 
 //-------------------------------------------------
 // Ctors. / Dtor.
@@ -39,7 +39,7 @@ sg::city::map::Map::Map(ogl::scene::Scene* t_scene)
 
 sg::city::map::Map::~Map() noexcept
 {
-    SG_OGL_LOG_DEBUG("[Map::Map()] Destruct Map.");
+    SG_OGL_LOG_DEBUG("[Map::~Map()] Destruct Map.");
 }
 
 //-------------------------------------------------
@@ -86,41 +86,21 @@ sg::ogl::resource::Mesh& sg::city::map::Map::GetMapMesh() noexcept
     return *m_mapMesh;
 }
 
-int sg::city::map::Map::GetNumRegions() const
-{
-    return m_numRegions;
-}
-
 uint32_t sg::city::map::Map::GetFloatCountOfMap() const
 {
-    return static_cast<uint32_t>(m_tiles.size()) * Tile::FLOATS_PER_TILE;
+    return static_cast<uint32_t>(m_tiles.size()) * tile::Tile::FLOATS_PER_TILE;
 }
 
 //-------------------------------------------------
 // Get Tile
 //-------------------------------------------------
 
-const sg::city::map::Tile& sg::city::map::Map::GetTileByIndex(const int t_tileIndex) const noexcept
-{
-    return *m_tiles[t_tileIndex];
-}
-
-sg::city::map::Tile& sg::city::map::Map::GetTileByIndex(const int t_tileIndex) noexcept
-{
-    return *m_tiles[t_tileIndex];
-}
-
-sg::city::map::Map::TileSharedPtr sg::city::map::Map::GetTilePtrByIndex(const int t_tileIndex)
-{
-    return m_tiles[t_tileIndex];
-}
-
-const sg::city::map::Tile& sg::city::map::Map::GetTileByMapPosition(const int t_mapX, const int t_mapZ) const noexcept
+const sg::city::map::tile::Tile& sg::city::map::Map::GetTileByMapPosition(const int t_mapX, const int t_mapZ) const noexcept
 {
     return *m_tiles[GetTileMapIndexByMapPosition(t_mapX, t_mapZ)];
 }
 
-sg::city::map::Tile& sg::city::map::Map::GetTileByMapPosition(const int t_mapX, const int t_mapZ) noexcept
+sg::city::map::tile::Tile& sg::city::map::Map::GetTileByMapPosition(const int t_mapX, const int t_mapZ) noexcept
 {
     return *m_tiles[GetTileMapIndexByMapPosition(t_mapX, t_mapZ)];
 }
@@ -134,11 +114,13 @@ int sg::city::map::Map::GetTileMapIndexByMapPosition(const int t_mapX, const int
 }
 
 //-------------------------------------------------
-// Create Map
+// Create
 //-------------------------------------------------
 
 void sg::city::map::Map::CreateMap(const int t_mapSize)
 {
+    SG_OGL_CORE_ASSERT(t_mapSize, "[Map::CreateMap()] Invalid Map size.")
+
     m_mapSize = t_mapSize;
 
     StoreTileTypeTextures();
@@ -148,8 +130,8 @@ void sg::city::map::Map::CreateMap(const int t_mapSize)
     CreateNavigationNodes();
     LinkTileNavigationNodes();
 
-    // for Debug only
-    CreateTileNavigationNodesMeshes();
+    // for debug only
+    CreateNavigationNodesMeshes();
 
     // create an bind a new Vao
     m_mapMesh = std::make_unique<ogl::resource::Mesh>();
@@ -170,72 +152,12 @@ void sg::city::map::Map::CreateMap(const int t_mapSize)
 // Update
 //-------------------------------------------------
 
-void sg::city::map::Map::ChangeTileTypeOnMapPosition(const int t_mapX, const int t_mapZ, const TileType t_tileType)
+void sg::city::map::Map::UpdateMapVboByTileIndex(const int t_tileIndex) const
 {
-    const auto tileIndex{ GetTileMapIndexByMapPosition(t_mapX, t_mapZ) };
-    auto& tile{ *m_tiles[tileIndex] };
-
-    if (tile.GetType() != t_tileType)
-    {
-        tile.SetType(t_tileType);
-        UpdateMapVboByTileIndex(tileIndex);
-    }
+    ogl::buffer::Vbo::BindVbo(m_vboId);
+    glBufferSubData(GL_ARRAY_BUFFER, t_tileIndex * tile::Tile::SIZE_IN_BYTES_PER_TILE, tile::Tile::SIZE_IN_BYTES_PER_TILE, m_tiles[t_tileIndex]->GetVertices().data());
+    ogl::buffer::Vbo::UnbindVbo();
 }
-
-//-------------------------------------------------
-// Debug
-//-------------------------------------------------
-
-void sg::city::map::Map::RenderTileNavigationNodes(const int t_mapX, const int t_mapZ)
-{
-    SG_OGL_CORE_ASSERT(t_mapX < m_mapSize, "[Map::RenderTileNavigationNodes()] Invalid x position.")
-    SG_OGL_CORE_ASSERT(t_mapZ < m_mapSize, "[Map::RenderTileNavigationNodes()] Invalid z position.")
-
-    m_tiles[GetTileMapIndexByMapPosition(t_mapX, t_mapZ)]->RenderNavigationNodes(m_scene, this);
-}
-
-//-------------------------------------------------
-// Regions
-//-------------------------------------------------
-
-/*
-void sg::city::map::Map::FindConnectedRegions()
-{
-    auto regions{ 0 };
-
-    // delete the regions Id from all Tiles
-    for (auto& tile : m_tiles)
-    {
-        tile->SetRegion(NO_REGION);
-    }
-
-    for (auto z{ 0 }; z < m_mapSize; ++z)
-    {
-        for (auto x{ 0 }; x < m_mapSize; ++x)
-        {
-            auto found{ false };
-            const auto tileIndex{ GetTileIndexByPosition(x, z) };
-
-            for (auto tileType : m_tileTypes)
-            {
-                if (tileType == m_tiles[tileIndex]->GetType())
-                {
-                    found = true;
-                    break;
-                }
-            }
-
-            if (m_tiles[tileIndex]->GetRegion() == NO_REGION && found)
-            {
-                regions++;
-                DepthSearch(*m_tiles[tileIndex], regions);
-            }
-        }
-    }
-
-    m_numRegions = regions;
-}
-*/
 
 //-------------------------------------------------
 // Init
@@ -251,11 +173,11 @@ void sg::city::map::Map::StoreTileTypeTextures()
     const auto i{ m_scene->GetApplicationContext()->GetTextureManager().GetTextureIdFromPath("res/texture/tileTypes/i.png") };
     const auto t{ m_scene->GetApplicationContext()->GetTextureManager().GetTextureIdFromPath("res/texture/tileTypes/traffic.jpg") };
 
-    m_tileTypeTextures.emplace(TileType::NONE, n);
-    m_tileTypeTextures.emplace(TileType::RESIDENTIAL, r);
-    m_tileTypeTextures.emplace(TileType::COMMERCIAL, c);
-    m_tileTypeTextures.emplace(TileType::INDUSTRIAL, i);
-    m_tileTypeTextures.emplace(TileType::TRAFFIC_NETWORK, t);
+    m_tileTypeTextures.emplace(tile::TileType::NONE, n);
+    m_tileTypeTextures.emplace(tile::TileType::RESIDENTIAL, r);
+    m_tileTypeTextures.emplace(tile::TileType::COMMERCIAL, c);
+    m_tileTypeTextures.emplace(tile::TileType::INDUSTRIAL, i);
+    m_tileTypeTextures.emplace(tile::TileType::TRAFFIC, t);
 }
 
 void sg::city::map::Map::CreateTiles()
@@ -266,10 +188,11 @@ void sg::city::map::Map::CreateTiles()
     {
         for (auto x{ 0 }; x < m_mapSize; ++x)
         {
-            auto tile{ std::make_unique<Tile>(
-                static_cast<float>(x),
-                static_cast<float>(z),
-                TileType::NONE
+            auto tile{ std::make_unique<tile::Tile>(
+                    static_cast<float>(x),
+                    static_cast<float>(z),
+                    tile::TileType::NONE,
+                    this
                 )
             };
 
@@ -283,7 +206,7 @@ void sg::city::map::Map::StoreTileNeighbours()
 {
     SG_OGL_CORE_ASSERT(!m_tiles.empty(), "[Map::StoreTileNeighbours()] No Tiles available.")
 
-    SG_OGL_LOG_DEBUG("[Map::StoreTileNeighbours()] Store the neighbors to each Tile.");
+    SG_OGL_LOG_DEBUG("[Map::StoreTileNeighbours()] Store Tile neighbors.");
 
     for (auto z{ 0 }; z < m_mapSize; ++z)
     {
@@ -293,22 +216,22 @@ void sg::city::map::Map::StoreTileNeighbours()
 
             if (z < m_mapSize - 1)
             {
-                m_tiles[tileIndex]->GetNeighbours().emplace(Tile::Direction::NORTH, m_tiles[GetTileMapIndexByMapPosition(x, z + 1)]);
+                m_tiles[tileIndex]->GetNeighbours().emplace(tile::Direction::NORTH, m_tiles[GetTileMapIndexByMapPosition(x, z + 1)]);
             }
 
             if (x < m_mapSize - 1)
             {
-                m_tiles[tileIndex]->GetNeighbours().emplace(Tile::Direction::EAST, m_tiles[GetTileMapIndexByMapPosition(x + 1, z)]);
+                m_tiles[tileIndex]->GetNeighbours().emplace(tile::Direction::EAST, m_tiles[GetTileMapIndexByMapPosition(x + 1, z)]);
             }
 
             if (z > 0)
             {
-                m_tiles[tileIndex]->GetNeighbours().emplace(Tile::Direction::SOUTH, m_tiles[GetTileMapIndexByMapPosition(x, z - 1)]);
+                m_tiles[tileIndex]->GetNeighbours().emplace(tile::Direction::SOUTH, m_tiles[GetTileMapIndexByMapPosition(x, z - 1)]);
             }
 
             if (x > 0)
             {
-                m_tiles[tileIndex]->GetNeighbours().emplace(Tile::Direction::WEST, m_tiles[GetTileMapIndexByMapPosition(x - 1, z)]);
+                m_tiles[tileIndex]->GetNeighbours().emplace(tile::Direction::WEST, m_tiles[GetTileMapIndexByMapPosition(x - 1, z)]);
             }
         }
     }
@@ -372,7 +295,11 @@ void sg::city::map::Map::CreateNavigationNodes()
                 }
 
                 // converting unique_ptr to shared_ptr
-                tile->GetNavigationNodes().push_back(std::make_unique<automata::AutoNode>(glm::vec3(tile->GetWorldX() + xOffset, 0.0f, tile->GetWorldZ() + zOffset)));
+                tile->GetNavigationNodes().push_back(std::make_unique<automata::AutoNode>(glm::vec3(
+                    tile->GetWorldX() + xOffset,
+                    0.0f,
+                    tile->GetWorldZ() + zOffset))
+                );
             }
         }
     }
@@ -390,7 +317,7 @@ void sg::city::map::Map::LinkTileNavigationNodes()
 
             if (z < m_mapSize - 1)
             {
-                auto& north{ currentTile->GetNeighbours().at(Tile::Direction::NORTH) };
+                auto& north{ currentTile->GetNeighbours().at(tile::Direction::NORTH) };
 
                 currentTile->GetNavigationNodes()[42] = north->GetNavigationNodes()[0];
                 currentTile->GetNavigationNodes()[43] = north->GetNavigationNodes()[1];
@@ -403,7 +330,7 @@ void sg::city::map::Map::LinkTileNavigationNodes()
 
             if (x < m_mapSize - 1)
             {
-                auto& east{ currentTile->GetNeighbours().at(Tile::Direction::EAST) };
+                auto& east{ currentTile->GetNeighbours().at(tile::Direction::EAST) };
 
                 currentTile->GetNavigationNodes()[48] = east->GetNavigationNodes()[42];
                 currentTile->GetNavigationNodes()[41] = east->GetNavigationNodes()[35];
@@ -437,13 +364,23 @@ void sg::city::map::Map::LinkTileNavigationNodes()
     }
 }
 
+void sg::city::map::Map::CreateNavigationNodesMeshes()
+{
+    SG_OGL_LOG_DEBUG("[Map::CreateNavigationNodesMeshes()] Create navigation nodes meshes.");
+
+    for (auto& tile : m_tiles)
+    {
+        tile->CreateNavigationNodesMesh();
+    }
+}
+
 //-------------------------------------------------
 // Helper
 //-------------------------------------------------
 
 int32_t sg::city::map::Map::GetVerticesCountOfMap() const
 {
-    return static_cast<int32_t>(m_tiles.size()) * Tile::VERTICES_PER_TILE;
+    return static_cast<int32_t>(m_tiles.size()) * tile::Tile::VERTICES_PER_TILE;
 }
 
 //-------------------------------------------------
@@ -456,11 +393,11 @@ void sg::city::map::Map::CreateVbo()
 
     ogl::buffer::Vbo::InitEmpty(m_vboId, GetFloatCountOfMap(), GL_DYNAMIC_DRAW);
 
-    ogl::buffer::Vbo::AddAttribute(m_vboId, 0, 3, Tile::FLOATS_PER_VERTEX, 0);  // 3x position
-    ogl::buffer::Vbo::AddAttribute(m_vboId, 1, 3, Tile::FLOATS_PER_VERTEX, 3);  // 3x normal
-    ogl::buffer::Vbo::AddAttribute(m_vboId, 2, 3, Tile::FLOATS_PER_VERTEX, 6);  // 3x color
-    ogl::buffer::Vbo::AddAttribute(m_vboId, 3, 1, Tile::FLOATS_PER_VERTEX, 9);  // 1x texture
-    ogl::buffer::Vbo::AddAttribute(m_vboId, 4, 2, Tile::FLOATS_PER_VERTEX, 10); // 2x uv
+    ogl::buffer::Vbo::AddAttribute(m_vboId, 0, 3, tile::Tile::FLOATS_PER_VERTEX, 0);  // 3x position
+    ogl::buffer::Vbo::AddAttribute(m_vboId, 1, 3, tile::Tile::FLOATS_PER_VERTEX, 3);  // 3x normal
+    ogl::buffer::Vbo::AddAttribute(m_vboId, 2, 3, tile::Tile::FLOATS_PER_VERTEX, 6);  // 3x color
+    ogl::buffer::Vbo::AddAttribute(m_vboId, 3, 1, tile::Tile::FLOATS_PER_VERTEX, 9);  // 1x texture
+    ogl::buffer::Vbo::AddAttribute(m_vboId, 4, 2, tile::Tile::FLOATS_PER_VERTEX, 10); // 2x uv
 }
 
 void sg::city::map::Map::StoreTilesInVbo()
@@ -470,78 +407,9 @@ void sg::city::map::Map::StoreTilesInVbo()
     auto offset{ 0 };
     for (const auto& tile : m_tiles)
     {
-        glBufferSubData(GL_ARRAY_BUFFER, offset * Tile::SIZE_IN_BYTES_PER_TILE, Tile::SIZE_IN_BYTES_PER_TILE, tile->GetVerticesContainer().data());
+        glBufferSubData(GL_ARRAY_BUFFER, offset * tile::Tile::SIZE_IN_BYTES_PER_TILE, tile::Tile::SIZE_IN_BYTES_PER_TILE, tile->GetVertices().data());
         offset++;
     }
 
     ogl::buffer::Vbo::UnbindVbo();
-}
-
-void sg::city::map::Map::UpdateMapVboByTileIndex(const int t_tileIndex) const
-{
-    ogl::buffer::Vbo::BindVbo(m_vboId);
-    glBufferSubData(GL_ARRAY_BUFFER, t_tileIndex * Tile::SIZE_IN_BYTES_PER_TILE, Tile::SIZE_IN_BYTES_PER_TILE, m_tiles[t_tileIndex]->GetVerticesContainer().data());
-    ogl::buffer::Vbo::UnbindVbo();
-}
-
-//-------------------------------------------------
-// Regions
-//-------------------------------------------------
-
-/*
-void sg::city::map::Map::DepthSearch(Tile& t_startTile, const int t_region)
-{
-    if (t_startTile.GetRegion() != NO_REGION)
-    {
-        return;
-    }
-
-    auto found{ false };
-
-    for (auto tileType : REGION_TILE_TYPES)
-    {
-        if (tileType == t_startTile.GetType())
-        {
-            found = true;
-            break;
-        }
-    }
-
-    if (!found)
-    {
-        return;
-    }
-
-    t_startTile.SetRegion(t_region);
-
-    // changing the color needs also a Vbo update
-    // todo: use Bottom left instead map coords ???????
-    t_startTile.SetColor(static_cast<glm::vec3>(m_randomColors[t_region - 1]));
-    UpdateMapVboByTileIndex(GetTileIndexByPosition(static_cast<int>(t_startTile.GetMapX()), static_cast<int>(t_startTile.GetMapZ())));
-
-
-    for (auto* neighbour : t_startTile.GetNeighbours())
-    {
-        if (neighbour)
-        {
-            DepthSearch(*neighbour, t_region);
-        }
-    }
-}
-*/
-
-//-------------------------------------------------
-// Debug
-//-------------------------------------------------
-
-void sg::city::map::Map::CreateTileNavigationNodesMeshes()
-{
-    SG_OGL_CORE_ASSERT(!m_tiles.empty(), "[Map::CreateTileNavigationNodesMeshes()] No Tiles available.")
-
-    SG_OGL_LOG_DEBUG("[Map::CreateTileNavigationNodesMeshes()] Create a mesh with all navigation nodes.");
-
-    for (auto& tile : m_tiles)
-    {
-        tile->CreateNavigationNodesMesh();
-    }
 }

@@ -9,7 +9,7 @@
 
 #pragma once
 
-#include "Tile.h"
+#include "tile/RoadTile.h"
 
 namespace sg::city::city
 {
@@ -155,7 +155,7 @@ namespace sg::city::map
          * @param t_tile The tile for which the type is to be determined.
          * @return A RoadType.
          */
-        static RoadType DetermineRoadType(const Tile& t_tile);
+        static RoadType DetermineRoadType(const tile::RoadTile& t_tile);
 
         /**
          * @brief Write the new vertex data in the Vbo.
@@ -180,6 +180,6 @@ namespace sg::city::map
 
         void AddAutoTrack(int t_tileIndex, int t_fromNodeIndex, int t_toNodeIndex, bool t_safeCarAutoTrack = false) const;
 
-        [[nodiscard]] Tile::StopPattern CreateStopPattern(std::string t_s) const;
+        [[nodiscard]] tile::RoadTile::StopPattern CreateStopPattern(std::string t_s) const;
     };
 }

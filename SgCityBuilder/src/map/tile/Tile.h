@@ -9,34 +9,85 @@
 
 #pragma once
 
-#include "Map.h"
+#include <string>
+#include <vector>
+#include <unordered_map>
+#include <glm/vec3.hpp>
+#include <glm/vec2.hpp>
+#include <memory>
+
+namespace sg::ogl::scene
+{
+    class Scene;
+}
+
+namespace sg::ogl::resource
+{
+    class Mesh;
+}
 
 namespace sg::city::automata
 {
     class AutoNode;
-    class AutoTrack;
 }
 
 namespace sg::city::map
 {
+    class Map;
+}
+
+namespace sg::city::map::tile
+{
+    enum class TileType
+    {
+        NONE,
+        RESIDENTIAL,
+        COMMERCIAL,
+        INDUSTRIAL,
+        TRAFFIC
+    };
+
+    struct TileTypeHash
+    {
+        std::size_t operator()(TileType t_tileType) const
+        {
+            return static_cast<std::size_t>(t_tileType);
+        }
+    };
+
+    enum class Direction
+    {
+        NORTH,
+        EAST,
+        SOUTH,
+        WEST
+    };
+
+    struct DirectionHash
+    {
+        std::size_t operator()(Direction t_direction) const
+        {
+            return static_cast<std::size_t>(t_direction);
+        }
+    };
+
     class Tile
     {
     public:
-        enum class Direction
-        {
-            NORTH,
-            EAST,
-            SOUTH,
-            WEST
-        };
+        using VertexContainer = std::vector<float>;
 
-        struct DirectionHash
-        {
-            std::size_t operator()(Direction t_direction) const
-            {
-                return static_cast<std::size_t>(t_direction);
-            }
-        };
+        using NeighbourDirection = Direction;
+        using TileSharedPtr = std::shared_ptr<Tile>;
+        using NeighbourContainer = std::unordered_map<NeighbourDirection, TileSharedPtr, DirectionHash>;
+
+        using NavigationNodeSharedPtr = std::shared_ptr<automata::AutoNode>;
+        using NavigationNodeContainer = std::vector<NavigationNodeSharedPtr>;
+
+        using MeshUniquePtr = std::unique_ptr<ogl::resource::Mesh>;
+
+        //-------------------------------------------------
+        // Const
+        //-------------------------------------------------
 
         static constexpr auto DEFAULT_HEIGHT{ 0.0f };
         static constexpr auto DEFAULT_NORMAL{ glm::vec3(0.0f, 1.0f, 0.0f) };
@@ -45,17 +96,10 @@ namespace sg::city::map
         static constexpr auto FLOATS_PER_TILE{ FLOATS_PER_VERTEX * VERTICES_PER_TILE };         // = 72 floats
         static constexpr auto SIZE_IN_BYTES_PER_TILE{ FLOATS_PER_TILE * sizeof(float) }; // = 288 bytes
 
-        // Each Tile has a default max population value.
-
+        /**
+         * @brief The default max population value.
+         */
         static constexpr auto MAX_POPULATION{ 50 };
-
-        // The default height for debug stuff.
-
-        static constexpr auto VERTEX_HEIGHT{ 0.015 };
-
-        // GL_POINTS size
-
-        static constexpr auto POINT_SIZE{ 4.0f };
 
         // Bottom left T1
 
@@ -171,28 +215,52 @@ namespace sg::city::map
         static constexpr auto TOP_RIGHT_TEXTURE_X_T2{ 70 };
         static constexpr auto TOP_RIGHT_TEXTURE_Y_T2{ 71 };
 
-        using VertexContainer = std::vector<float>;
+        /**
+         * @brief Tile color.
+         */
+        inline static const std::unordered_map<TileType, glm::vec3, TileTypeHash> TILE_TYPE_COLOR
+        {
+            { TileType::NONE, glm::vec3(0.0f, 0.5f, 0.0f) },
+            { TileType::RESIDENTIAL, glm::vec3(0.0f, 0.8f, 0.0f) },
+            { TileType::COMMERCIAL, glm::vec3(0.0f, 0.0f, 0.8f) },
+            { TileType::INDUSTRIAL, glm::vec3(0.8f, 0.8f, 0.0f) },
+            { TileType::TRAFFIC, glm::vec3(0.8f, 0.8f, 0.8f) }
+        };
 
-        using NeighbourDirection = Direction;
-        using TileSharedPtr = std::shared_ptr<Tile>;
-        using NeighbourContainer = std::unordered_map<NeighbourDirection, TileSharedPtr, DirectionHash>;
+        /**
+         * @brief Tile types that can build regions.
+         */
+        inline static const std::vector<TileType> REGION_TILE_TYPES
+        {
+            TileType::RESIDENTIAL,
+            TileType::COMMERCIAL,
+            TileType::INDUSTRIAL,
+            TileType::TRAFFIC
+        };
 
-        using NavigationNodeSharedPtr = std::shared_ptr<automata::AutoNode>;
-        using NavigationNodeContainer = std::vector<NavigationNodeSharedPtr>;
-        using AutoTrackSharedPtr = std::shared_ptr<automata::AutoTrack>;
-        using AutoTrackContainer = std::list<AutoTrackSharedPtr>;
+        /**
+         * @brief The default height for debug stuff.
+         */
+        static constexpr auto VERTEX_HEIGHT{ 0.015 };
 
-        using MeshUniquePtr = std::unique_ptr<ogl::resource::Mesh>;
-
-        using StopPattern = std::vector<bool>;
-        using StopPatternContainer = std::vector<StopPattern>;
+        /**
+         * @brief GL_POINTS size for rendering nodes.
+         */
+        static constexpr auto POINT_SIZE{ 4.0f };
 
         //-------------------------------------------------
         // Public member
         //-------------------------------------------------
 
+        /**
+         * @brief The type of the Tile.
+         */
+        TileType type{ TileType::NONE };
+
+        /**
+         * @brief Current residents / employees.
+         */
         float population{ 0.0 };
-        AutoTrackSharedPtr safeCarAutoTrack; // todo create RoadTile
 
         //-------------------------------------------------
         // Ctors. / Dtor.
@@ -200,21 +268,18 @@ namespace sg::city::map
 
         Tile() = delete;
 
-        Tile(float t_mapX, float t_mapZ, Map::TileType t_type);
+        Tile(float t_mapX, float t_mapZ, TileType t_type, Map* t_map);
 
         Tile(const Tile& t_other) = delete;
         Tile(Tile&& t_other) noexcept = delete;
         Tile& operator=(const Tile& t_other) = delete;
         Tile& operator=(Tile&& t_other) noexcept = delete;
 
-        ~Tile() noexcept;
+        virtual ~Tile() noexcept;
 
         //-------------------------------------------------
         // Getter
         //-------------------------------------------------
-
-        [[nodiscard]] const VertexContainer& GetVerticesContainer() const noexcept;
-        [[nodiscard]] VertexContainer& GetVerticesContainer() noexcept;
 
         /**
          * @brief Return the bottom left Map-x position of the Tile in Object Space.
@@ -252,20 +317,14 @@ namespace sg::city::map
          */
         [[nodiscard]] glm::vec3 GetWorldCenter() const;
 
-        [[nodiscard]] Map::TileType GetType() const;
+        [[nodiscard]] const VertexContainer& GetVertices() const noexcept;
+        [[nodiscard]] VertexContainer& GetVertices() noexcept;
 
         [[nodiscard]] const NeighbourContainer& GetNeighbours() const noexcept;
         [[nodiscard]] NeighbourContainer& GetNeighbours() noexcept;
 
-        [[nodiscard]] int GetRegion() const;
-
         [[nodiscard]] const NavigationNodeContainer& GetNavigationNodes() const noexcept;
         [[nodiscard]] NavigationNodeContainer& GetNavigationNodes() noexcept;
-
-        [[nodiscard]] const AutoTrackContainer& GetAutoTracks() const noexcept;
-        [[nodiscard]] AutoTrackContainer& GetAutoTracks() noexcept;
-
-        [[nodiscard]] StopPatternContainer& GetStopPatterns() noexcept;
 
         //-------------------------------------------------
         // Setter
@@ -280,53 +339,51 @@ namespace sg::city::map
             const glm::vec2& t_bR = glm::vec2(1.0f, 0.0f),
             const glm::vec2& t_tL = glm::vec2(0.0f, 1.0f),
             const glm::vec2& t_tR = glm::vec2(1.0f, 1.0f)
-        );
-
-        void SetType(Map::TileType t_type);
-
-        void SetRegion(int t_region);
+            );
 
         //-------------------------------------------------
         // Logic
         //-------------------------------------------------
 
-        void Update() const;
+        virtual void Update();
 
         //-------------------------------------------------
         // To string
         //-------------------------------------------------
 
-        static std::string TileTypeToString(Map::TileType t_type);
+        static std::string TileTypeToString(TileType t_type);
 
         //-------------------------------------------------
         // Debug
         //-------------------------------------------------
 
         /**
-         * @brief Create a Mesh from the Tile navigation nodes.
+         * @brief Create a Mesh from the Navigation Nodes.
          */
         void CreateNavigationNodesMesh();
 
         /**
-         * @brief Create a Mesh from the Tile auto tracks.
-         */
-        void CreateAutoTracksMesh();
-
-        /**
          * @brief Render the navigation nodes.
-         * @param t_scene Raw pointer to the Scene.
-         * @param t_map Raw pointer to the Map.
          */
-        void RenderNavigationNodes(const ogl::scene::Scene* t_scene, const Map* t_map) const;
-
-        /**
-         * @brief Render the auto tracks.
-         * @param t_scene Raw pointer to the Scene.
-         * @param t_map Raw pointer to the Map.
-         */
-        void RenderAutoTracks(const ogl::scene::Scene* t_scene, const Map* t_map) const;
+        void RenderNavigationNodes() const;
 
     protected:
+        /**
+         * @brief Pointer to the parent Map.
+         */
+        Map* m_map{ nullptr };
+
+        /**
+         * @brief The neighbors of this Tile.
+         */
+        NeighbourContainer m_neighbours;
+
+        /**
+         * @brief Each Tile links to multiple Navigation Nodes.
+         *        The Navigation Nodes are already in the base class
+         *        because they never change their position later, just their status.
+         */
+        NavigationNodeContainer m_navigationNodes;
 
     private:
         /**
@@ -360,47 +417,20 @@ namespace sg::city::map
         glm::vec3 m_topRight{ glm::vec3(0.0f) };
 
         /**
-         * @brief The Type of the Tile.
-         */
-        Map::TileType m_type{ Map::TileType::NONE };
-
-        /**
          * @brief Vertices of the Tile.
          */
         VertexContainer m_vertices;
 
         /**
-         * @brief The neighbors of this Tile.
-         */
-        NeighbourContainer m_neighbours;
-
-        /**
-         * @brief The region Id of the Tile. Tiles in the same region are connected.
-         */
-        int m_region{ 0 };
-
-        /**
-         * @brief Each Tile links to multiple navigation nodes.
-         */
-        NavigationNodeContainer m_navigationNodes;
-
-        /**
-         * @brief Each Tile can have multiple auto tracks.
-         */
-        AutoTrackContainer m_autoTracks;
-
-        /**
-         * @brief A Mesh with one Vertex for each navigation node.
+         * @brief A Mesh with one Vertex for each Navigation Node.
          *        Used for debugging purposes.
          */
         MeshUniquePtr m_navigationNodesMesh;
 
         /**
-         * @brief Mesh holding the whole auto tracks for debug.
+         * @brief The region Id of the Tile. Tiles in the same region are connected.
          */
-        MeshUniquePtr m_autoTracksMesh;
-
-        StopPatternContainer m_stopPatterns;
+        int m_region{ 0 };
 
         //-------------------------------------------------
         // Init

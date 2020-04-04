@@ -15,6 +15,7 @@
 #include <resource/Mesh.h>
 #include <resource/TextureManager.h>
 #include "RoadNetwork.h"
+#include "Map.h"
 #include "city/City.h"
 #include "automata/AutoNode.h"
 #include "automata/AutoTrack.h"
@@ -78,60 +79,60 @@ void sg::city::map::RoadNetwork::StoreRoadOnMapPosition(const int t_mapX, const 
     }
 
     // update TileType
-    map.ChangeTileTypeOnMapPosition(t_mapX, t_mapZ, Map::TileType::TRAFFIC_NETWORK);
+    map.ChangeTileTypeOnMapPosition(t_mapX, t_mapZ, tile::TileType::TRAFFIC);
 
     // get the vertices of the Tile and make a !copy!
     auto vertices{ map.GetTileByIndex(tileIndex).GetVerticesContainer() };
 
     // we use the same vertices as for the tile, but just a little bit higher (y = 0.001f)
-    vertices[Tile::BOTTOM_LEFT_POS_Y_T1] = ROAD_VERTICES_HEIGHT;
-    vertices[Tile::BOTTOM_RIGHT_POS_Y_T1] = ROAD_VERTICES_HEIGHT;
-    vertices[Tile::TOP_LEFT_POS_Y_T1] = ROAD_VERTICES_HEIGHT;
+    vertices[tile::Tile::BOTTOM_LEFT_POS_Y_T1] = ROAD_VERTICES_HEIGHT;
+    vertices[tile::Tile::BOTTOM_RIGHT_POS_Y_T1] = ROAD_VERTICES_HEIGHT;
+    vertices[tile::Tile::TOP_LEFT_POS_Y_T1] = ROAD_VERTICES_HEIGHT;
 
-    vertices[Tile::TOP_LEFT_POS_Y_T2] = ROAD_VERTICES_HEIGHT;
-    vertices[Tile::BOTTOM_RIGHT_POS_Y_T2] = ROAD_VERTICES_HEIGHT;
-    vertices[Tile::TOP_RIGHT_POS_Y_T2] = ROAD_VERTICES_HEIGHT;
+    vertices[tile::Tile::TOP_LEFT_POS_Y_T2] = ROAD_VERTICES_HEIGHT;
+    vertices[tile::Tile::BOTTOM_RIGHT_POS_Y_T2] = ROAD_VERTICES_HEIGHT;
+    vertices[tile::Tile::TOP_RIGHT_POS_Y_T2] = ROAD_VERTICES_HEIGHT;
 
     // set a default texture number - the value is unused
     const auto unused{ 0.0f };
-    vertices[Tile::BOTTOM_LEFT_TEXTURE_NR_T1] = unused;
-    vertices[Tile::BOTTOM_RIGHT_TEXTURE_NR_T1] = unused;
-    vertices[Tile::TOP_LEFT_TEXTURE_NR_T1] = unused;
+    vertices[tile::Tile::BOTTOM_LEFT_TEXTURE_NR_T1] = unused;
+    vertices[tile::Tile::BOTTOM_RIGHT_TEXTURE_NR_T1] = unused;
+    vertices[tile::Tile::TOP_LEFT_TEXTURE_NR_T1] = unused;
 
-    vertices[Tile::TOP_LEFT_TEXTURE_NR_T2] = unused;
-    vertices[Tile::BOTTOM_RIGHT_TEXTURE_NR_T2] = unused;
-    vertices[Tile::TOP_RIGHT_TEXTURE_NR_T2] = unused;
+    vertices[tile::Tile::TOP_LEFT_TEXTURE_NR_T2] = unused;
+    vertices[tile::Tile::BOTTOM_RIGHT_TEXTURE_NR_T2] = unused;
+    vertices[tile::Tile::TOP_RIGHT_TEXTURE_NR_T2] = unused;
 
     // set initial uv values
-    vertices[Tile::BOTTOM_LEFT_TEXTURE_X_T1] /= TEXTURE_ATLAS_ROWS;
-    vertices[Tile::BOTTOM_LEFT_TEXTURE_Y_T1] /= TEXTURE_ATLAS_ROWS;
+    vertices[tile::Tile::BOTTOM_LEFT_TEXTURE_X_T1] /= TEXTURE_ATLAS_ROWS;
+    vertices[tile::Tile::BOTTOM_LEFT_TEXTURE_Y_T1] /= TEXTURE_ATLAS_ROWS;
 
-    vertices[Tile::BOTTOM_RIGHT_TEXTURE_X_T1] /= TEXTURE_ATLAS_ROWS;
-    vertices[Tile::BOTTOM_RIGHT_TEXTURE_Y_T1] /= TEXTURE_ATLAS_ROWS;
+    vertices[tile::Tile::BOTTOM_RIGHT_TEXTURE_X_T1] /= TEXTURE_ATLAS_ROWS;
+    vertices[tile::Tile::BOTTOM_RIGHT_TEXTURE_Y_T1] /= TEXTURE_ATLAS_ROWS;
 
-    vertices[Tile::TOP_LEFT_TEXTURE_X_T1] /= TEXTURE_ATLAS_ROWS;
-    vertices[Tile::TOP_LEFT_TEXTURE_Y_T1] /= TEXTURE_ATLAS_ROWS;
+    vertices[tile::Tile::TOP_LEFT_TEXTURE_X_T1] /= TEXTURE_ATLAS_ROWS;
+    vertices[tile::Tile::TOP_LEFT_TEXTURE_Y_T1] /= TEXTURE_ATLAS_ROWS;
 
-    vertices[Tile::TOP_LEFT_TEXTURE_X_T2] /= TEXTURE_ATLAS_ROWS;
-    vertices[Tile::TOP_LEFT_TEXTURE_Y_T2] /= TEXTURE_ATLAS_ROWS;
+    vertices[tile::Tile::TOP_LEFT_TEXTURE_X_T2] /= TEXTURE_ATLAS_ROWS;
+    vertices[tile::Tile::TOP_LEFT_TEXTURE_Y_T2] /= TEXTURE_ATLAS_ROWS;
 
-    vertices[Tile::BOTTOM_RIGHT_TEXTURE_X_T2] /= TEXTURE_ATLAS_ROWS;
-    vertices[Tile::BOTTOM_RIGHT_TEXTURE_Y_T2] /= TEXTURE_ATLAS_ROWS;
+    vertices[tile::Tile::BOTTOM_RIGHT_TEXTURE_X_T2] /= TEXTURE_ATLAS_ROWS;
+    vertices[tile::Tile::BOTTOM_RIGHT_TEXTURE_Y_T2] /= TEXTURE_ATLAS_ROWS;
 
-    vertices[Tile::TOP_RIGHT_TEXTURE_X_T2] /= TEXTURE_ATLAS_ROWS;
-    vertices[Tile::TOP_RIGHT_TEXTURE_Y_T2] /= TEXTURE_ATLAS_ROWS;
+    vertices[tile::Tile::TOP_RIGHT_TEXTURE_X_T2] /= TEXTURE_ATLAS_ROWS;
+    vertices[tile::Tile::TOP_RIGHT_TEXTURE_Y_T2] /= TEXTURE_ATLAS_ROWS;
 
     // insert the Tile vertices at the end of the container with all vertices
     m_vertices.insert(m_vertices.end(), vertices.begin(), vertices.end());
 
     // calculate the number of Tiles in m_vertices
-    const auto nrTiles{ static_cast<int>(m_vertices.size()) / Tile::FLOATS_PER_TILE };
+    const auto nrTiles{ static_cast<int>(m_vertices.size()) / tile::Tile::FLOATS_PER_TILE };
 
     // use the number of Tiles as offset
     m_lookupTable[tileIndex] = nrTiles;
 
     // update draw count
-    m_roadNetworkMesh->GetVao().SetDrawCount(nrTiles * Tile::VERTICES_PER_TILE);
+    m_roadNetworkMesh->GetVao().SetDrawCount(nrTiles * tile::Tile::VERTICES_PER_TILE);
 
     // todo: the next two methods can later be combined into one
     UpdateRoadsTextures();
@@ -148,11 +149,11 @@ void sg::city::map::RoadNetwork::CreateVbo()
 
     ogl::buffer::Vbo::InitEmpty(m_vboId, m_city->GetMap().GetFloatCountOfMap(), GL_DYNAMIC_DRAW);
 
-    ogl::buffer::Vbo::AddAttribute(m_vboId, 0, 3, Tile::FLOATS_PER_VERTEX, 0);  // 3x position
-    ogl::buffer::Vbo::AddAttribute(m_vboId, 1, 3, Tile::FLOATS_PER_VERTEX, 3);  // 3x normal
-    ogl::buffer::Vbo::AddAttribute(m_vboId, 2, 3, Tile::FLOATS_PER_VERTEX, 6);  // 3x color
-    ogl::buffer::Vbo::AddAttribute(m_vboId, 3, 1, Tile::FLOATS_PER_VERTEX, 9);  // 1x texture
-    ogl::buffer::Vbo::AddAttribute(m_vboId, 4, 2, Tile::FLOATS_PER_VERTEX, 10); // 2x uv
+    ogl::buffer::Vbo::AddAttribute(m_vboId, 0, 3, tile::Tile::FLOATS_PER_VERTEX, 0);  // 3x position
+    ogl::buffer::Vbo::AddAttribute(m_vboId, 1, 3, tile::Tile::FLOATS_PER_VERTEX, 3);  // 3x normal
+    ogl::buffer::Vbo::AddAttribute(m_vboId, 2, 3, tile::Tile::FLOATS_PER_VERTEX, 6);  // 3x color
+    ogl::buffer::Vbo::AddAttribute(m_vboId, 3, 1, tile::Tile::FLOATS_PER_VERTEX, 9);  // 1x texture
+    ogl::buffer::Vbo::AddAttribute(m_vboId, 4, 2, tile::Tile::FLOATS_PER_VERTEX, 10); // 2x uv
 }
 
 void sg::city::map::RoadNetwork::Init()
@@ -188,39 +189,39 @@ void sg::city::map::RoadNetwork::Init()
 // Update
 //-------------------------------------------------
 
-sg::city::map::RoadNetwork::RoadType sg::city::map::RoadNetwork::DetermineRoadType(const Tile& t_tile)
+sg::city::map::RoadNetwork::RoadType sg::city::map::RoadNetwork::DetermineRoadType(const tile::RoadTile& t_tile)
 {
     const auto& neighbours{ t_tile.GetNeighbours() };
 
     uint8_t roadNeighbours{ 0 };
 
-    if (neighbours.count(Tile::Direction::NORTH))
+    if (neighbours.count(tile::Direction::NORTH))
     {
-        if (neighbours.at(Tile::Direction::NORTH)->GetType() == Map::TileType::TRAFFIC_NETWORK)
+        if (neighbours.at(tile::Direction::NORTH)->type == tile::TileType::TRAFFIC)
         {
             roadNeighbours = NORTH;
         }
     }
 
-    if (neighbours.count(Tile::Direction::EAST))
+    if (neighbours.count(tile::Direction::EAST))
     {
-        if (neighbours.at(Tile::Direction::EAST)->GetType() == Map::TileType::TRAFFIC_NETWORK)
+        if (neighbours.at(tile::Direction::EAST)->type == tile::TileType::TRAFFIC)
         {
             roadNeighbours |= EAST;
         }
     }
 
-    if (neighbours.count(Tile::Direction::SOUTH))
+    if (neighbours.count(tile::Direction::SOUTH))
     {
-        if (neighbours.at(Tile::Direction::SOUTH)->GetType() == Map::TileType::TRAFFIC_NETWORK)
+        if (neighbours.at(tile::Direction::SOUTH)->type == tile::TileType::TRAFFIC)
         {
             roadNeighbours |= SOUTH;
         }
     }
 
-    if (neighbours.count(Tile::Direction::WEST))
+    if (neighbours.count(tile::Direction::WEST))
     {
-        if (neighbours.at(Tile::Direction::WEST)->GetType() == Map::TileType::TRAFFIC_NETWORK)
+        if (neighbours.at(tile::Direction::WEST)->type == tile::TileType::TRAFFIC)
         {
             roadNeighbours |= WEST;
         }
@@ -268,13 +269,13 @@ sg::city::map::RoadNetwork::RoadType sg::city::map::RoadNetwork::DetermineRoadTy
 void sg::city::map::RoadNetwork::UpdateVbo()
 {
     // calculate the number of Tiles in m_vertices
-    const auto nrTiles{ static_cast<int>(m_vertices.size()) / Tile::FLOATS_PER_TILE };
+    const auto nrTiles{ static_cast<int>(m_vertices.size()) / tile::Tile::FLOATS_PER_TILE };
 
     // update Vbo
     if (nrTiles > 0)
     {
         ogl::buffer::Vbo::BindVbo(m_vboId);
-        glBufferSubData(GL_ARRAY_BUFFER, 0, nrTiles * Tile::SIZE_IN_BYTES_PER_TILE, m_vertices.data());
+        glBufferSubData(GL_ARRAY_BUFFER, 0, nrTiles * tile::Tile::SIZE_IN_BYTES_PER_TILE, m_vertices.data());
         ogl::buffer::Vbo::UnbindVbo();
     }
 }
@@ -880,7 +881,7 @@ void sg::city::map::RoadNetwork::UpdateRoadsTextures()
 
         // update uv values
 
-        const auto offset{ (static_cast<size_t>(positionInVbo) - 1) * Tile::FLOATS_PER_TILE };
+        const auto offset{ (static_cast<size_t>(positionInVbo) - 1) * tile::Tile::FLOATS_PER_TILE };
 
         const auto column{ roadType % static_cast<int>(TEXTURE_ATLAS_ROWS) };
         const auto xOffset{ static_cast<float>(column) / TEXTURE_ATLAS_ROWS };
@@ -889,28 +890,28 @@ void sg::city::map::RoadNetwork::UpdateRoadsTextures()
         const auto yOffset{ 1.0f - static_cast<float>(row) / TEXTURE_ATLAS_ROWS };
 
         // bl
-        m_vertices[offset + Tile::BOTTOM_LEFT_TEXTURE_X_T1] = (0.0f / TEXTURE_ATLAS_ROWS) + xOffset;
-        m_vertices[offset + Tile::BOTTOM_LEFT_TEXTURE_Y_T1] = (0.0f / TEXTURE_ATLAS_ROWS) + yOffset;
+        m_vertices[offset + tile::Tile::BOTTOM_LEFT_TEXTURE_X_T1] = (0.0f / TEXTURE_ATLAS_ROWS) + xOffset;
+        m_vertices[offset + tile::Tile::BOTTOM_LEFT_TEXTURE_Y_T1] = (0.0f / TEXTURE_ATLAS_ROWS) + yOffset;
 
         // br
-        m_vertices[offset + Tile::BOTTOM_RIGHT_TEXTURE_X_T1] = (1.0f / TEXTURE_ATLAS_ROWS) + xOffset;
-        m_vertices[offset + Tile::BOTTOM_RIGHT_TEXTURE_Y_T1] = (0.0f / TEXTURE_ATLAS_ROWS) + yOffset;
+        m_vertices[offset + tile::Tile::BOTTOM_RIGHT_TEXTURE_X_T1] = (1.0f / TEXTURE_ATLAS_ROWS) + xOffset;
+        m_vertices[offset + tile::Tile::BOTTOM_RIGHT_TEXTURE_Y_T1] = (0.0f / TEXTURE_ATLAS_ROWS) + yOffset;
 
         // tl
-        m_vertices[offset + Tile::TOP_LEFT_TEXTURE_X_T1] = (0.0f / TEXTURE_ATLAS_ROWS) + xOffset;
-        m_vertices[offset + Tile::TOP_LEFT_TEXTURE_Y_T1] = (1.0f / TEXTURE_ATLAS_ROWS) + yOffset;
+        m_vertices[offset + tile::Tile::TOP_LEFT_TEXTURE_X_T1] = (0.0f / TEXTURE_ATLAS_ROWS) + xOffset;
+        m_vertices[offset + tile::Tile::TOP_LEFT_TEXTURE_Y_T1] = (1.0f / TEXTURE_ATLAS_ROWS) + yOffset;
 
         // tl
-        m_vertices[offset + Tile::TOP_LEFT_TEXTURE_X_T2] = (0.0f / TEXTURE_ATLAS_ROWS) + xOffset;
-        m_vertices[offset + Tile::TOP_LEFT_TEXTURE_Y_T2] = (1.0f / TEXTURE_ATLAS_ROWS) + yOffset;
+        m_vertices[offset + tile::Tile::TOP_LEFT_TEXTURE_X_T2] = (0.0f / TEXTURE_ATLAS_ROWS) + xOffset;
+        m_vertices[offset + tile::Tile::TOP_LEFT_TEXTURE_Y_T2] = (1.0f / TEXTURE_ATLAS_ROWS) + yOffset;
 
         // br
-        m_vertices[offset + Tile::BOTTOM_RIGHT_TEXTURE_X_T2] = (1.0f / TEXTURE_ATLAS_ROWS) + xOffset;
-        m_vertices[offset + Tile::BOTTOM_RIGHT_TEXTURE_Y_T2] = (0.0f / TEXTURE_ATLAS_ROWS) + yOffset;
+        m_vertices[offset + tile::Tile::BOTTOM_RIGHT_TEXTURE_X_T2] = (1.0f / TEXTURE_ATLAS_ROWS) + xOffset;
+        m_vertices[offset + tile::Tile::BOTTOM_RIGHT_TEXTURE_Y_T2] = (0.0f / TEXTURE_ATLAS_ROWS) + yOffset;
 
         // tr
-        m_vertices[offset + Tile::TOP_RIGHT_TEXTURE_X_T2] = (1.0f / TEXTURE_ATLAS_ROWS) + xOffset;
-        m_vertices[offset + Tile::TOP_RIGHT_TEXTURE_Y_T2] = (1.0f / TEXTURE_ATLAS_ROWS) + yOffset;
+        m_vertices[offset + tile::Tile::TOP_RIGHT_TEXTURE_X_T2] = (1.0f / TEXTURE_ATLAS_ROWS) + xOffset;
+        m_vertices[offset + tile::Tile::TOP_RIGHT_TEXTURE_Y_T2] = (1.0f / TEXTURE_ATLAS_ROWS) + yOffset;
 
         // next
         tileIndex++;
@@ -1040,13 +1041,13 @@ void sg::city::map::RoadNetwork::AddAutoTrack(const int t_tileIndex, const int t
     }
 }
 
-sg::city::map::Tile::StopPattern sg::city::map::RoadNetwork::CreateStopPattern(std::string t_s) const
+sg::city::map::tile::RoadTile::StopPattern sg::city::map::RoadNetwork::CreateStopPattern(std::string t_s) const
 {
     t_s.erase(std::remove(t_s.begin(), t_s.end(), ' '), t_s.end());
 
     SG_OGL_ASSERT(t_s.size() == NODES_PER_TILE, "[RoadNetwork::CreateStopPattern()] Invalid string size.");
 
-    Tile::StopPattern p;
+    tile::RoadTile::StopPattern p;
     p.resize(NODES_PER_TILE, false);
 
     auto i{ 0 };

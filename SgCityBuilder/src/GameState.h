@@ -10,7 +10,7 @@
 #pragma once
 
 #include "SgOgl.h"
-#include "map/Map.h"
+#include "map/tile/Tile.h"
 
 namespace sg::city::city
 {
@@ -27,12 +27,13 @@ class GameState : public sg::ogl::state::State
 public:
     static constexpr auto MAP_SIZE{ 8 };
 
-    using SceneUniquePtr = std::unique_ptr<sg::ogl::scene::Scene>;
     using FirstPersonCameraSharedPtr = std::shared_ptr<sg::ogl::camera::FirstPersonCamera>;
-    using ForwardRendererUniquePtr = std::unique_ptr<sg::ogl::ecs::system::ForwardRenderSystem>;
-    using TextRendererUniquePtr = std::unique_ptr<sg::ogl::ecs::system::TextRenderSystem>;
-    using MousePickerUniquePtr = std::unique_ptr<sg::city::input::MousePicker>;
+    using SceneUniquePtr = std::unique_ptr<sg::ogl::scene::Scene>;
+
     using CityUniquePtr = std::unique_ptr<sg::city::city::City>;
+    using MousePickerUniquePtr = std::unique_ptr<sg::city::input::MousePicker>;
+
+    using TileIndexContainer = std::vector<int>;
 
     //-------------------------------------------------
     // Ctors. / Dtor.
@@ -64,22 +65,19 @@ private:
 
     FirstPersonCameraSharedPtr m_firstPersonCamera;
     SceneUniquePtr m_scene;
-    CityUniquePtr m_city;
-    TextRendererUniquePtr m_textRenderer;
-    ForwardRendererUniquePtr m_forwardRenderer;
-    MousePickerUniquePtr m_mousePicker;
-    sg::city::map::Map::TileType m_currentTileType{ sg::city::map::Map::TileType::TRAFFIC_NETWORK };
 
-    bool m_spawn{ false };
+    CityUniquePtr m_city;
+    MousePickerUniquePtr m_mousePicker;
+
+    sg::city::map::tile::TileType m_currentEditTileType{ sg::city::map::tile::TileType::TRAFFIC };
+
+    TileIndexContainer m_changedTiles;
 
     //-------------------------------------------------
     // Helper
     //-------------------------------------------------
 
     void Init();
-    void CreateExampleRoadNetwork() const;
-    void CreateExampleCar(int t_mapX, int t_mapZ) const;
-    void RenderDebug() const;
 
     //-------------------------------------------------
     // ImGui

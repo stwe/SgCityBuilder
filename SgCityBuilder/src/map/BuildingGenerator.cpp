@@ -14,7 +14,7 @@
 #include <math/Transform.h>
 #include "BuildingGenerator.h"
 #include "Map.h"
-#include "Tile.h"
+#include "tile/Tile.h"
 
 //-------------------------------------------------
 // Ctors. / Dtor.
