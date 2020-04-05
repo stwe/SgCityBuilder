@@ -9,8 +9,6 @@
 
 #include <random>
 #include <Color.h>
-#include <Log.h>
-#include <Core.h>
 #include <Application.h>
 #include <scene/Scene.h>
 #include <resource/Mesh.h>
@@ -19,7 +17,6 @@
 #include "Map.h"
 #include "shader/LineShader.h"
 #include "shader/NodeShader.h"
-#include "automata/AutoNode.h"
 
 //-------------------------------------------------
 // Ctors. / Dtor.
@@ -132,8 +129,6 @@ void sg::city::map::Map::CreateMap(const int t_mapSize)
     CreateTiles();
     StoreTileNeighbours();
     CreateRandomColors();
-    CreateNavigationNodes();
-    LinkTileNavigationNodes();
 
     // create an bind a new Vao
     m_mapMesh = std::make_unique<ogl::resource::Mesh>();
@@ -256,126 +251,6 @@ void sg::city::map::Map::CreateRandomColors()
     for (auto i{ 0 }; i < MAX_REGION_COLORS; ++i)
     {
         m_randomColors.emplace(i, ogl::Color(r(engine), g(engine), b(engine)));
-    }
-}
-
-void sg::city::map::Map::CreateNavigationNodes()
-{
-    SG_OGL_CORE_ASSERT(!m_tiles.empty(), "[Map::CreateNavigationNodes()] No Tiles available.")
-
-    SG_OGL_LOG_DEBUG("[Map::CreateNavigationNodes()] Create navigation nodes for the Tiles.");
-
-    for (auto& tile : m_tiles)
-    {
-        SG_OGL_CORE_ASSERT(tile->GetNavigationNodes().empty(), "[Map::CreateNavigationNodes()] The navigation nodes already exist.")
-
-        for (auto z{ 0 }; z < 7; ++z)
-        {
-            auto zOffset{ 0.0f };
-            switch (z)
-            {
-            case 0: zOffset =  0.000f; break;
-            case 1: zOffset = -0.083f; break;
-            case 2: zOffset = -0.333f; break;
-            case 3: zOffset = -0.500f; break;
-            case 4: zOffset = -0.667f; break;
-            case 5: zOffset = -0.917f; break;
-            case 6: zOffset = -1.000f; break;
-            default:;
-            }
-
-            for (auto x{ 0 }; x < 7; ++x)
-            {
-                auto xOffset{ 0.0f };
-                switch (x)
-                {
-                case 0: xOffset = 0.000f; break;
-                case 1: xOffset = 0.083f; break;
-                case 2: xOffset = 0.333f; break;
-                case 3: xOffset = 0.500f; break;
-                case 4: xOffset = 0.667f; break;
-                case 5: xOffset = 0.917f; break;
-                case 6: xOffset = 1.000f; break;
-                default:;
-                }
-
-                // converting unique_ptr to shared_ptr
-                tile->GetNavigationNodes().push_back(std::make_unique<automata::AutoNode>(glm::vec3(
-                    tile->GetWorldX() + xOffset,
-                    0.0f,
-                    tile->GetWorldZ() + zOffset))
-                );
-            }
-        }
-    }
-}
-
-void sg::city::map::Map::LinkTileNavigationNodes()
-{
-    SG_OGL_LOG_DEBUG("[Map::LinkTileNavigationNodes()] Link neighboring navigation nodes.");
-
-    for (auto z{ 0 }; z < m_mapSize; ++z)
-    {
-        for (auto x{ 0 }; x < m_mapSize; ++x)
-        {
-            auto& currentTile{ m_tiles[GetTileMapIndexByMapPosition(x, z)] };
-
-            if (z < m_mapSize - 1)
-            {
-                const auto northIndex{ currentTile->GetNeighbours().at(tile::Direction::NORTH) };
-
-                currentTile->GetNavigationNodes()[42] = m_tiles[northIndex]->GetNavigationNodes()[0];
-                currentTile->GetNavigationNodes()[43] = m_tiles[northIndex]->GetNavigationNodes()[1];
-                currentTile->GetNavigationNodes()[44] = m_tiles[northIndex]->GetNavigationNodes()[2];
-                currentTile->GetNavigationNodes()[45] = m_tiles[northIndex]->GetNavigationNodes()[3];
-                currentTile->GetNavigationNodes()[46] = m_tiles[northIndex]->GetNavigationNodes()[4];
-                currentTile->GetNavigationNodes()[47] = m_tiles[northIndex]->GetNavigationNodes()[5];
-                currentTile->GetNavigationNodes()[48] = m_tiles[northIndex]->GetNavigationNodes()[6];
-            }
-
-            if (x < m_mapSize - 1)
-            {
-                const auto eastIndex{ currentTile->GetNeighbours().at(tile::Direction::EAST) };
-
-                currentTile->GetNavigationNodes()[48] = m_tiles[eastIndex]->GetNavigationNodes()[42];
-                currentTile->GetNavigationNodes()[41] = m_tiles[eastIndex]->GetNavigationNodes()[35];
-                currentTile->GetNavigationNodes()[34] = m_tiles[eastIndex]->GetNavigationNodes()[28];
-                currentTile->GetNavigationNodes()[27] = m_tiles[eastIndex]->GetNavigationNodes()[21];
-                currentTile->GetNavigationNodes()[20] = m_tiles[eastIndex]->GetNavigationNodes()[14];
-                currentTile->GetNavigationNodes()[13] = m_tiles[eastIndex]->GetNavigationNodes()[7];
-                currentTile->GetNavigationNodes()[6] = m_tiles[eastIndex]->GetNavigationNodes()[0];
-            }
-        }
-    }
-
-    for (auto& tile : m_tiles)
-    {
-        auto& navigationNodes{ tile->GetNavigationNodes() };
-
-        navigationNodes[37].reset();
-        navigationNodes[39].reset();
-        navigationNodes[29].reset();
-        navigationNodes[33].reset();
-        navigationNodes[15].reset();
-        navigationNodes[19].reset();
-        navigationNodes[9].reset();
-        navigationNodes[11].reset();
-
-        // the 4 corners
-        navigationNodes[42].reset();
-        navigationNodes[48].reset();
-        navigationNodes[0].reset();
-        navigationNodes[6].reset();
-    }
-}
-
-void sg::city::map::Map::CreateNavigationNodesMeshes()
-{
-    SG_OGL_LOG_DEBUG("[Map::CreateNavigationNodesMeshes()] Create navigation nodes meshes.");
-
-    for (auto& tile : m_tiles)
-    {
-        tile->CreateNavigationNodesMesh();
     }
 }
 

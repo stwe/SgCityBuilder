@@ -11,6 +11,11 @@
 
 #include "tile/Tile.h"
 
+namespace sg::ogl::scene
+{
+    class Scene;
+}
+
 namespace sg::ogl
 {
     struct Color;
@@ -170,9 +175,6 @@ namespace sg::city::map
         void CreateTiles();
         void StoreTileNeighbours();
         void CreateRandomColors();
-        void CreateNavigationNodes();
-        void LinkTileNavigationNodes();
-        void CreateNavigationNodesMeshes();
 
         //-------------------------------------------------
         // Helper

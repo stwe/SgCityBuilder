@@ -16,19 +16,9 @@
 #include <glm/vec2.hpp>
 #include <memory>
 
-namespace sg::ogl::scene
-{
-    class Scene;
-}
-
 namespace sg::ogl::resource
 {
     class Mesh;
-}
-
-namespace sg::city::automata
-{
-    class AutoNode;
 }
 
 namespace sg::city::map
@@ -75,12 +65,7 @@ namespace sg::city::map::tile
     {
     public:
         using VertexContainer = std::vector<float>;
-
         using NeighbourContainer = std::unordered_map<Direction, int, DirectionHash>;
-
-        using NavigationNodeSharedPtr = std::shared_ptr<automata::AutoNode>;
-        using NavigationNodeContainer = std::vector<NavigationNodeSharedPtr>;
-
         using MeshUniquePtr = std::unique_ptr<ogl::resource::Mesh>;
 
         //-------------------------------------------------
@@ -236,16 +221,6 @@ namespace sg::city::map::tile
             TileType::TRAFFIC
         };
 
-        /**
-         * @brief The default height for debug stuff.
-         */
-        static constexpr auto VERTEX_HEIGHT{ 0.015 };
-
-        /**
-         * @brief GL_POINTS size for rendering nodes.
-         */
-        static constexpr auto POINT_SIZE{ 4.0f };
-
         //-------------------------------------------------
         // Public member
         //-------------------------------------------------
@@ -321,9 +296,6 @@ namespace sg::city::map::tile
         [[nodiscard]] const NeighbourContainer& GetNeighbours() const noexcept;
         [[nodiscard]] NeighbourContainer& GetNeighbours() noexcept;
 
-        [[nodiscard]] const NavigationNodeContainer& GetNavigationNodes() const noexcept;
-        [[nodiscard]] NavigationNodeContainer& GetNavigationNodes() noexcept;
-
         //-------------------------------------------------
         // Setter
         //-------------------------------------------------
@@ -351,20 +323,6 @@ namespace sg::city::map::tile
 
         static std::string TileTypeToString(TileType t_type);
 
-        //-------------------------------------------------
-        // Debug
-        //-------------------------------------------------
-
-        /**
-         * @brief Create a Mesh from the Navigation Nodes.
-         */
-        void CreateNavigationNodesMesh();
-
-        /**
-         * @brief Render the navigation nodes.
-         */
-        void RenderNavigationNodes() const;
-
     protected:
         /**
          * @brief Pointer to the parent Map.
@@ -375,13 +333,6 @@ namespace sg::city::map::tile
          * @brief The neighbors of this Tile.
          */
         NeighbourContainer m_neighbours;
-
-        /**
-         * @brief Each Tile links to multiple Navigation Nodes.
-         *        The Navigation Nodes are already in the base class
-         *        because they never change their position later, just their status.
-         */
-        NavigationNodeContainer m_navigationNodes;
 
     private:
         /**
@@ -418,12 +369,6 @@ namespace sg::city::map::tile
          * @brief Vertices of the Tile.
          */
         VertexContainer m_vertices;
-
-        /**
-         * @brief A Mesh with one Vertex for each Navigation Node.
-         *        Used for debugging purposes.
-         */
-        MeshUniquePtr m_navigationNodesMesh;
 
         /**
          * @brief The region Id of the Tile. Tiles in the same region are connected.

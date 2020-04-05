@@ -105,8 +105,7 @@ int sg::city::city::City::ReplaceTile(const int t_mapX, const int t_mapZ, map::t
     auto& tiles{ m_map->GetTiles() };
     const auto index{ m_map->GetTileMapIndexByMapPosition(t_mapX, t_mapZ) };
 
-    // store nodes and neighbours
-    const auto nodes{ tiles[index]->GetNavigationNodes() };
+    // store neighbours
     const auto neighbours{ tiles[index]->GetNeighbours() };
 
     // delete the unique pointer
@@ -141,8 +140,7 @@ int sg::city::city::City::ReplaceTile(const int t_mapX, const int t_mapZ, map::t
         tiles[index] = std::move(newTile);
     }
 
-    // copy nodes && neighbours
-    tiles[index]->GetNavigationNodes() = nodes;
+    // copy neighbours
     tiles[index]->GetNeighbours() = neighbours;
 
     return index;

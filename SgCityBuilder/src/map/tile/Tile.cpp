@@ -7,17 +7,9 @@
 // 
 // 2020 (c) stwe <https://github.com/stwe/SgCityBuilder>
 
-#include <Application.h>
-#include <Window.h>
-#include <camera/Camera.h>
-#include <resource/Mesh.h>
-#include <resource/ShaderManager.h>
-#include <scene/Scene.h>
-#include <math/Transform.h>
+#include <Log.h>
 #include "Tile.h"
 #include "map/Map.h"
-#include "shader/NodeShader.h"
-#include "automata/AutoNode.h"
 
 //-------------------------------------------------
 // Ctors. / Dtor.
@@ -68,9 +60,9 @@ glm::vec3 sg::city::map::tile::Tile::GetWorldPosition() const
 glm::vec3 sg::city::map::tile::Tile::GetWorldCenter() const
 {
     return glm::vec3(
-    (m_bottomLeft.x + m_bottomRight.x) * 0.5f,
-    0.0f,
-    (m_bottomLeft.z + m_topLeft.z) * 0.5f
+        (m_bottomLeft.x + m_bottomRight.x) * 0.5f,
+        0.0f,
+        (m_bottomLeft.z + m_topLeft.z) * 0.5f
     );
 }
 
@@ -92,16 +84,6 @@ const sg::city::map::tile::Tile::NeighbourContainer& sg::city::map::tile::Tile::
 sg::city::map::tile::Tile::NeighbourContainer& sg::city::map::tile::Tile::GetNeighbours() noexcept
 {
     return m_neighbours;
-}
-
-const sg::city::map::tile::Tile::NavigationNodeContainer& sg::city::map::tile::Tile::GetNavigationNodes() const noexcept
-{
-    return m_navigationNodes;
-}
-
-sg::city::map::tile::Tile::NavigationNodeContainer& sg::city::map::tile::Tile::GetNavigationNodes() noexcept
-{
-    return m_navigationNodes;
 }
 
 //-------------------------------------------------
@@ -255,85 +237,6 @@ std::string sg::city::map::tile::Tile::TileTypeToString(const TileType t_type)
     case TileType::INDUSTRIAL: return "Industrial Zone";
     case TileType::TRAFFIC: return "Roads or rails";
     }
-}
-
-//-------------------------------------------------
-// Debug
-//-------------------------------------------------
-
-void sg::city::map::tile::Tile::CreateNavigationNodesMesh()
-{
-    SG_OGL_CORE_ASSERT(!m_navigationNodes.empty(), "[Tile::CreateNavigationNodesMesh()] No Navigation Nodes available.")
-
-    VertexContainer vertexContainer;
-
-    for (auto& node : m_navigationNodes)
-    {
-        // some nodes are nullptr
-        if (node)
-        {
-            // position
-            vertexContainer.push_back(node->position.x);
-            vertexContainer.push_back(VERTEX_HEIGHT);
-            vertexContainer.push_back(node->position.z);
-
-            // color
-            if (node->block)
-            {
-                // red
-                vertexContainer.push_back(1.0f);
-                vertexContainer.push_back(0.0f);
-                vertexContainer.push_back(0.0f);
-            }
-            else
-            {
-                // green
-                vertexContainer.push_back(0.0f);
-                vertexContainer.push_back(1.0f);
-                vertexContainer.push_back(0.0f);
-            }
-        }
-    }
-
-    if (m_navigationNodesMesh)
-    {
-        m_navigationNodesMesh.reset();
-    }
-
-    m_navigationNodesMesh = std::make_unique<ogl::resource::Mesh>();
-
-    const ogl::buffer::BufferLayout bufferLayout{
-        { ogl::buffer::VertexAttributeType::POSITION, "aPosition" },
-        { ogl::buffer::VertexAttributeType::COLOR, "aColor" },
-    };
-
-    m_navigationNodesMesh->GetVao().AddVertexDataVbo(vertexContainer.data(), static_cast<int32_t>(vertexContainer.size()) / 6, bufferLayout);
-}
-
-void sg::city::map::tile::Tile::RenderNavigationNodes() const
-{
-    SG_OGL_CORE_ASSERT(m_navigationNodesMesh, "[Tile::RenderNavigationNodes()] Null pointer.")
-
-    ogl::math::Transform t;
-    t.position = m_map->position;
-    t.rotation = m_map->rotation;
-    t.scale = m_map->scale;
-
-    auto& shader{ m_map->GetScene()->GetApplicationContext()->GetShaderManager().GetShaderProgram<shader::NodeShader>() };
-    shader.Bind();
-
-    const auto projectionMatrix{ m_map->GetScene()->GetApplicationContext()->GetWindow().GetProjectionMatrix() };
-    const auto mvp{ projectionMatrix * m_map->GetScene()->GetCurrentCamera().GetViewMatrix() * static_cast<glm::mat4>(t) };
-
-    shader.SetUniform("mvpMatrix", mvp);
-
-    glPointSize(POINT_SIZE);
-
-    m_navigationNodesMesh->InitDraw();
-    m_navigationNodesMesh->DrawPrimitives(GL_POINTS);
-    m_navigationNodesMesh->EndDraw();
-
-    ogl::resource::ShaderProgram::Unbind();
 }
 
 //-------------------------------------------------

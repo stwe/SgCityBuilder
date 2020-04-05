@@ -90,7 +90,6 @@ void GameState::Render()
             if (tile->type == sg::city::map::tile::TileType::TRAFFIC)
             {
                 auto* roadTile{ dynamic_cast<sg::city::map::tile::RoadTile*>(tile.get()) };
-
                 SG_OGL_ASSERT(roadTile, "[GameState::Render()] Null pointer.");
 
                 roadTile->RenderNavigationNodes();
@@ -133,6 +132,10 @@ void GameState::Init()
     m_forwardRenderer = std::make_unique<sg::ogl::ecs::system::ForwardRenderSystem>(m_scene.get());
 }
 
+//-------------------------------------------------
+// Cars
+//-------------------------------------------------
+
 void GameState::CreateCar(const int t_mapX, const int t_mapZ) const
 {
     // create an Automata
@@ -141,6 +144,7 @@ void GameState::CreateCar(const int t_mapX, const int t_mapZ) const
         // create Entity from the Automata
         auto& automata{ m_city->automatas.back() };
 
+        // add components
         auto entity{ GetApplicationContext()->GetEntityFactory().CreateModelEntity(
             "res/model/Plane1/plane1.obj",
             glm::vec3(automata->position.x, 0.015f, automata->position.z),
@@ -149,6 +153,7 @@ void GameState::CreateCar(const int t_mapX, const int t_mapZ) const
             false
         ) };
 
+        // add Automata component
         GetApplicationContext()->registry.assign<sg::city::ecs::AutomataComponent>(
             entity,
             automata
@@ -156,19 +161,22 @@ void GameState::CreateCar(const int t_mapX, const int t_mapZ) const
     }
 }
 
-void GameState::UpdateCars(const double t_dt)
+void GameState::UpdateCars(const double t_dt) const
 {
+    // update Automatas
     for (auto& automata : m_city->automatas)
     {
         automata->Update(static_cast<float>(t_dt));
     }
 
+    // get view
     auto view{ m_scene->GetApplicationContext()->registry.view<
         sg::ogl::ecs::component::ModelComponent,
         sg::ogl::ecs::component::TransformComponent,
         sg::city::ecs::AutomataComponent>()
     };
 
+    // change the Transform Component of each Entity in the View
     for (auto entity : view)
     {
         auto& automataComponent{ view.get<sg::city::ecs::AutomataComponent>(entity) };

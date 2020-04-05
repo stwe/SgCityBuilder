@@ -13,6 +13,7 @@
 
 namespace sg::city::automata
 {
+    class AutoNode;
     class AutoTrack;
 }
 
@@ -51,6 +52,9 @@ namespace sg::city::map::tile
     class RoadTile : public Tile
     {
     public:
+        using NavigationNodeSharedPtr = std::shared_ptr<automata::AutoNode>;
+        using NavigationNodeContainer = std::vector<NavigationNodeSharedPtr>;
+
         using AutoTrackSharedPtr = std::shared_ptr<automata::AutoTrack>;
         using AutoTrackContainer = std::list<AutoTrackSharedPtr>;
 
@@ -61,7 +65,24 @@ namespace sg::city::map::tile
         // Const
         //-------------------------------------------------
 
+        /**
+         * @brief The default height for debug stuff.
+         */
+        static constexpr auto VERTEX_HEIGHT{ 0.015 };
+
+        /**
+         * @brief GL_POINTS size for rendering nodes.
+         */
+        static constexpr auto POINT_SIZE{ 4.0f };
+
+        /**
+         * @brief A Navigation Node is blocked.
+         */
         static constexpr auto STOP{ 'X' };
+
+        /**
+         * @brief The number of Navigation Nodes per Tile.
+         */
         static constexpr auto NODES_PER_TILE{ 49 };
 
         //-------------------------------------------------
@@ -97,6 +118,9 @@ namespace sg::city::map::tile
         // Getter
         //-------------------------------------------------
 
+        [[nodiscard]] const NavigationNodeContainer& GetNavigationNodes() const noexcept;
+        [[nodiscard]] NavigationNodeContainer& GetNavigationNodes() noexcept;
+
         [[nodiscard]] const AutoTrackContainer& GetAutoTracks() const noexcept;
         [[nodiscard]] AutoTrackContainer& GetAutoTracks() noexcept;
 
@@ -114,18 +138,33 @@ namespace sg::city::map::tile
         //-------------------------------------------------
 
         /**
-         * @brief Create a Mesh from the AutoTracks.
+         * @brief Create a Mesh from the Navigation Nodes.
+         */
+        void CreateNavigationNodesMesh();
+
+        /**
+         * @brief Render the Navigation Nodes.
+         */
+        void RenderNavigationNodes() const;
+
+        /**
+         * @brief Create a Mesh from the Auto Tracks.
          */
         void CreateAutoTracksMesh();
 
         /**
-         * @brief Render the auto tracks.
+         * @brief Render the Auto Tracks.
          */
         void RenderAutoTracks() const;
 
     protected:
 
     private:
+        /**
+         * @brief Each RoadTile links to multiple Navigation Nodes.
+         */
+        NavigationNodeContainer m_navigationNodes;
+
         /**
          * @brief Each RoadTile can have multiple Auto Tracks.
          */
@@ -137,6 +176,12 @@ namespace sg::city::map::tile
         StopPatternContainer m_stopPatterns;
 
         /**
+         * @brief A Mesh with one Vertex for each Navigation Node.
+         *        Used for debugging purposes.
+         */
+        MeshUniquePtr m_navigationNodesMesh;
+
+        /**
          * @brief A Mesh holding the whole Auto Tracks for debug.
          */
         MeshUniquePtr m_autoTracksMesh;
@@ -144,6 +189,16 @@ namespace sg::city::map::tile
         //-------------------------------------------------
         // Regulate traffic
         //-------------------------------------------------
+
+        /**
+         * @brief Creates the Navigation Nodes.
+         */
+        void CreateNavigationNodes();
+
+        /**
+         * @brief Link Navigation Nodes.
+         */
+        void LinkTileNavigationNodes();
 
         /**
          * @brief Recreates all Auto Tracks depending on the direction of the road.
@@ -182,7 +237,7 @@ namespace sg::city::map::tile
          * @param t_s The string from which the Pattern is created.
          * @return A StopPattern.
          */
-        StopPattern CreateStopPattern(std::string t_s) const;
+        [[nodiscard]] StopPattern CreateStopPattern(std::string t_s) const;
 
         /**
          * @brief Apply a Stop Pattern to Nodes.

@@ -82,8 +82,13 @@ private:
     //-------------------------------------------------
 
     void Init();
+
+    //-------------------------------------------------
+    // Cars
+    //-------------------------------------------------
+
     void CreateCar(int t_mapX, int t_mapZ) const;
-    void UpdateCars(double t_dt);
+    void UpdateCars(double t_dt) const;
 
     //-------------------------------------------------
     // ImGui
