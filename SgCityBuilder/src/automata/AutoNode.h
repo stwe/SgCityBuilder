@@ -12,6 +12,7 @@
 #include <glm/vec3.hpp>
 #include <memory>
 #include <list>
+#include <vector>
 
 namespace sg::city::automata
 {
@@ -27,6 +28,8 @@ namespace sg::city::automata
         // Public member
         //-------------------------------------------------
 
+        std::vector<int> tiles;
+
         glm::vec3 position{ glm::vec3(0.0f) };
         bool block{ false };
         AutoTrackContainer autoTracks;
@@ -37,7 +40,7 @@ namespace sg::city::automata
 
         AutoNode();
 
-        explicit AutoNode(const glm::vec3& t_position);
+        AutoNode(int t_tileIndex, const glm::vec3& t_position);
 
         AutoNode(const AutoNode& t_other) = delete;
         AutoNode(AutoNode&& t_other) noexcept = delete;

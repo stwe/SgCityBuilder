@@ -75,45 +75,23 @@ sg::city::map::tile::RoadTile::StopPatternContainer& sg::city::map::tile::RoadTi
 
 void sg::city::map::tile::RoadTile::Update()
 {
-    Tile::Update();
-
     SG_OGL_LOG_INFO("[RoadTile::Update()] Start RoadTile update process.");
 
     // update the RoadType (orientation of the road)
-    DetermineRoadType();
+    const auto typeHasChanged{ DetermineRoadType() };
 
-    // clear Auto Tracks and Stop Patterns
-    Clear();
-
-
-    // **** Navigation Nodes ****
-
-    CreateNavigationNodes();
     LinkTileNavigationNodes();
-
-
-    // **** Auto Tracks ****
-
-    // recreate the Auto Tracks
+    Clear();
     CreateAutoTracks();
 
+    if (typeHasChanged)
+    {
+        CreateStopPatterns();
+        ApplyStopPattern(0);
 
-    // **** Stop Pattern ****
-
-    // recreate the Stop Patterns
-    CreateStopPatterns();
-
-    // Apply StopPatterns to Nodes
-    ApplyStopPattern(0);
-
-
-    // **** Debug ****
-
-    // recreate the Auto Tracks Mesh
-    CreateAutoTracksMesh();
-
-    // recreate the Navigation Nodes Mesh
-    CreateNavigationNodesMesh();
+        CreateAutoTracksMesh();
+        CreateNavigationNodesMesh();
+    }
 }
 
 //-------------------------------------------------
@@ -263,6 +241,47 @@ void sg::city::map::tile::RoadTile::RenderAutoTracks() const
     ogl::resource::ShaderProgram::Unbind();
 }
 
+void sg::city::map::tile::RoadTile::Init()
+{
+    SG_OGL_CORE_ASSERT(!m_neighbours.empty(), "[RoadTile::Init()] No neighbours available. Call this function after creating the Tile.")
+
+    SG_OGL_CORE_ASSERT(m_navigationNodes.empty(), "[RoadTile::Init()] Call this function after creating the Tile.")
+    SG_OGL_CORE_ASSERT(m_autoTracks.empty(), "[RoadTile::Init()] Call this function after creating the Tile.")
+    SG_OGL_CORE_ASSERT(m_stopPatterns.empty(), "[RoadTile::Init()] Call this function after creating the Tile.")
+
+    // Tile
+
+    // we use the TileType number as value for the texture
+    SetTexture(static_cast<float>(type));
+
+    // we use the TileType color as Tile color
+    SetColor(TILE_TYPE_COLOR.at(type));
+
+    // update Vbo
+    m_map->UpdateMapVboByTileIndex(GetMapIndex());
+
+
+    // RoadTile
+
+    // set the RoadType (orientation of the road)
+    DetermineRoadType();
+
+    // create and link nodes
+    CreateNavigationNodes();
+    LinkTileNavigationNodes();
+
+    // create Auto Tracks
+    CreateAutoTracks();
+
+    // create and apply Stop Pattern
+    CreateStopPatterns();
+    ApplyStopPattern(0);
+
+    // create meshes for debug
+    CreateAutoTracksMesh();
+    CreateNavigationNodesMesh();
+}
+
 //-------------------------------------------------
 // Regulate traffic
 //-------------------------------------------------
@@ -300,7 +319,7 @@ void sg::city::map::tile::RoadTile::CreateNavigationNodes()
             }
 
             // converting unique_ptr to shared_ptr
-            m_navigationNodes.push_back(std::make_unique<automata::AutoNode>(glm::vec3(
+            m_navigationNodes.push_back(std::make_unique<automata::AutoNode>(GetMapIndex(), glm::vec3(
                 GetWorldX() + xOffset,
                 0.0f,
                 GetWorldZ() + zOffset)
@@ -312,19 +331,18 @@ void sg::city::map::tile::RoadTile::CreateNavigationNodes()
 
 void sg::city::map::tile::RoadTile::LinkTileNavigationNodes()
 {
-    SG_OGL_CORE_ASSERT(!m_neighbours.empty(), "[RoadTile::LinkTileNavigationNodes()] No neighbours available.")
-
-    SG_OGL_LOG_DEBUG("[RoadTile::LinkTileNavigationNodes()] Link neighboring navigation nodes.");
-
     if (GetMapZ() < m_map->GetMapSize() - 1)
     {
-        // get NORTH neighbour
-        const auto northIndex{ m_neighbours.at(Direction::NORTH) };
+        const auto northNeighbourIndex{ m_neighbours.at(Direction::NORTH) };
 
-        if (m_map->GetTiles()[northIndex]->type == TileType::TRAFFIC)
+        if (m_map->GetTiles()[northNeighbourIndex]->type == TileType::TRAFFIC)
         {
-            auto* northTile{ dynamic_cast<RoadTile*>(m_map->GetTiles()[northIndex].get()) };
+            auto* northTile{ dynamic_cast<RoadTile*>(m_map->GetTiles()[northNeighbourIndex].get()) };
             SG_OGL_CORE_ASSERT(northTile, "[RoadTile::LinkTileNavigationNodes()] Null pointer.")
+
+            const auto currentIndex{ GetMapIndex() };
+
+            SG_OGL_LOG_INFO("Link Tile {} NORTH with Tile {} SOUTH", currentIndex, northNeighbourIndex);
 
             m_navigationNodes[42] = northTile->GetNavigationNodes()[0];
             m_navigationNodes[43] = northTile->GetNavigationNodes()[1];
@@ -333,12 +351,60 @@ void sg::city::map::tile::RoadTile::LinkTileNavigationNodes()
             m_navigationNodes[46] = northTile->GetNavigationNodes()[4];
             m_navigationNodes[47] = northTile->GetNavigationNodes()[5];
             m_navigationNodes[48] = northTile->GetNavigationNodes()[6];
+
+            if (m_navigationNodes[42])
+            {
+                m_navigationNodes[42]->tiles.clear();
+                m_navigationNodes[42]->tiles.push_back(currentIndex);
+                m_navigationNodes[42]->tiles.push_back(northNeighbourIndex);
+            }
+
+            if (m_navigationNodes[43])
+            {
+                m_navigationNodes[43]->tiles.clear();
+                m_navigationNodes[43]->tiles.push_back(currentIndex);
+                m_navigationNodes[43]->tiles.push_back(northNeighbourIndex);
+            }
+
+            if (m_navigationNodes[44])
+            {
+                m_navigationNodes[44]->tiles.clear();
+                m_navigationNodes[44]->tiles.push_back(currentIndex);
+                m_navigationNodes[44]->tiles.push_back(northNeighbourIndex);
+            }
+
+            if (m_navigationNodes[45])
+            {
+                m_navigationNodes[45]->tiles.clear();
+                m_navigationNodes[45]->tiles.push_back(currentIndex);
+                m_navigationNodes[45]->tiles.push_back(northNeighbourIndex);
+            }
+
+            if (m_navigationNodes[46])
+            {
+                m_navigationNodes[46]->tiles.clear();
+                m_navigationNodes[46]->tiles.push_back(currentIndex);
+                m_navigationNodes[46]->tiles.push_back(northNeighbourIndex);
+            }
+
+            if (m_navigationNodes[47])
+            {
+                m_navigationNodes[47]->tiles.clear();
+                m_navigationNodes[47]->tiles.push_back(currentIndex);
+                m_navigationNodes[47]->tiles.push_back(northNeighbourIndex);
+            }
+
+            if (m_navigationNodes[48])
+            {
+                m_navigationNodes[48]->tiles.clear();
+                m_navigationNodes[48]->tiles.push_back(currentIndex);
+                m_navigationNodes[48]->tiles.push_back(northNeighbourIndex);
+            }
         }
     }
 
     if (GetMapX() < m_map->GetMapSize() - 1)
     {
-        // get EAST neighbour
         const auto eastIndex{ m_neighbours.at(Direction::EAST) };
 
         if (m_map->GetTiles()[eastIndex]->type == TileType::TRAFFIC)
@@ -946,7 +1012,7 @@ void sg::city::map::tile::RoadTile::CreateStopPatterns()
 // Helper
 //-------------------------------------------------
 
-void sg::city::map::tile::RoadTile::DetermineRoadType()
+bool sg::city::map::tile::RoadTile::DetermineRoadType()
 {
     uint8_t roadNeighbours{ 0 };
 
@@ -1022,14 +1088,14 @@ void sg::city::map::tile::RoadTile::DetermineRoadType()
     default: newRoadType = RoadType::ROAD_V;
     }
 
+    const auto oldRoadType{ roadType };
     roadType = newRoadType;
+
+    return oldRoadType != newRoadType;
 }
 
 void sg::city::map::tile::RoadTile::Clear()
 {
-    // clear Navigation Nodes from the Tile
-    m_navigationNodes.clear();
-
     // clear Auto Tracks from Tile
     m_autoTracks.clear();
 

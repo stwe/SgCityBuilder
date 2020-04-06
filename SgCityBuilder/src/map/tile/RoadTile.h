@@ -157,6 +157,15 @@ namespace sg::city::map::tile
          */
         void RenderAutoTracks() const;
 
+        //-------------------------------------------------
+        // Init
+        //-------------------------------------------------
+
+        /**
+         * @brief Call this function after creating the RoadTile.
+         */
+        void Init();
+
     protected:
 
     private:
@@ -216,8 +225,9 @@ namespace sg::city::map::tile
 
         /**
          * @brief Determines the correct RoadType for this Tile depending on the neighbors.
+         * @return True if the type has changed.
          */
-        void DetermineRoadType();
+        bool DetermineRoadType();
 
         /**
          * @brief Clear the Auto Tracks and Stop Patterns from the Tile and Nodes.

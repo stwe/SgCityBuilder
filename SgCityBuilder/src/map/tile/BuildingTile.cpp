@@ -29,7 +29,5 @@ sg::city::map::tile::BuildingTile::~BuildingTile() noexcept
 
 void sg::city::map::tile::BuildingTile::Update()
 {
-    Tile::Update();
-
     SG_OGL_LOG_INFO("[RoadTile::BuildingTile()] Start BuildingTile update process.");
 }

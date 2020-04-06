@@ -73,18 +73,14 @@ void sg::city::city::City::Update(const double t_dt, TileIndexContainer& t_chang
     for (auto changedTileIndex : t_changedTiles)
     {
         auto& tile{ m_map->GetTiles()[changedTileIndex] };
-
-        // Tile update
         tile->Update();
 
-        // Tile neighbours update
         for (auto& neighbour : tile->GetNeighbours())
         {
             if (m_map->GetTiles()[neighbour.second]->type == map::tile::TileType::TRAFFIC)
             {
                 m_map->GetTiles()[neighbour.second]->Update();
             }
-
         }
     }
 
@@ -125,6 +121,9 @@ int sg::city::city::City::ReplaceTile(const int t_mapX, const int t_mapZ, map::t
         };
 
         tiles[index] = std::move(newTile);
+        tiles[index]->GetNeighbours() = neighbours;
+
+        dynamic_cast<map::tile::RoadTile*>(tiles[index].get())->Init();
     }
     else
     {
@@ -138,10 +137,8 @@ int sg::city::city::City::ReplaceTile(const int t_mapX, const int t_mapZ, map::t
         };
 
         tiles[index] = std::move(newTile);
+        tiles[index]->GetNeighbours() = neighbours;
     }
-
-    // copy neighbours
-    tiles[index]->GetNeighbours() = neighbours;
 
     return index;
 }

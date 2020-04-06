@@ -296,6 +296,13 @@ namespace sg::city::map::tile
         [[nodiscard]] const NeighbourContainer& GetNeighbours() const noexcept;
         [[nodiscard]] NeighbourContainer& GetNeighbours() noexcept;
 
+        /**
+         * @brief For convenience.
+         *        Returns the own position (index) in the Tiles std::vector of the Map.
+         * @return int
+         */
+        [[nodiscard]] int GetMapIndex() const;
+
         //-------------------------------------------------
         // Setter
         //-------------------------------------------------

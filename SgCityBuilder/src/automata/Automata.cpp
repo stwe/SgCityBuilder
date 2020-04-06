@@ -20,6 +20,16 @@ void sg::city::automata::Automata::Update(const float t_dt)
         exitNode = currentTrack->endNode;
     }
 
+    /*
+    SG_OGL_LOG_INFO("Root Node x: {}, z: {}", rootNode->position.x, rootNode->position.z);
+
+    SG_OGL_LOG_INFO("Current Track - Start Node x: {}, z: {}", currentTrack->startNode->position.x, currentTrack->startNode->position.z);
+    SG_OGL_LOG_INFO("Current Track - End Node x: {}, z: {}", currentTrack->endNode->position.x, currentTrack->endNode->position.z);
+
+    SG_OGL_LOG_INFO("Exit Node x: {}, z: {}", exitNode->position.x, exitNode->position.z);
+    SG_OGL_LOG_INFO("");
+    */
+
     autoPosition += t_dt * 0.5f;
 
     if (autoPosition >= currentTrack->trackLength)
@@ -28,55 +38,22 @@ void sg::city::automata::Automata::Update(const float t_dt)
         {
             autoPosition -= currentTrack->trackLength;
 
-            std::shared_ptr<AutoTrack> newAutoTrack;
+            // Ziel erreicht - es wird eine neuer Track benoetigt
 
-            if (exitNode->autoTracks.size() == 1)
-            {
-                autoPosition = currentTrack->trackLength;
-                SG_OGL_LOG_WARN("No more tracks.");
-                deleteAutomata = true;
-                return;
-            }
+            //if (exitNode->autoTracks.size() == 1)
+            //    return;
 
-            if (exitNode->autoTracks.size() == 2)
+            // ersten Track aus der End Node holen
+            auto it{ exitNode->autoTracks.begin() };
+
+            // Track als neuen Track setzen
+            auto newAutoTrack = *it;
+
+            // Zeigervergleich
+            if (currentTrack == newAutoTrack)
             {
-                auto it{ exitNode->autoTracks.begin() };
+                ++it;
                 newAutoTrack = *it;
-                if (currentTrack == newAutoTrack)
-                {
-                    ++it;
-                    newAutoTrack = *it;
-                }
-            }
-            else
-            {
-                while (!newAutoTrack)
-                {
-                    // get a random value in range 0...size
-                    const auto i{ rand() % static_cast<int>(exitNode->autoTracks.size()) };
-                    auto j{ 0 };
-
-                    for (auto it{ exitNode->autoTracks.begin() }; it != exitNode->autoTracks.end(); ++it)
-                    {
-                        // get the track
-                        auto track{ *it };
-
-                        // create a target
-                        auto newExitNode{ track->startNode };
-                        if (newExitNode == exitNode)
-                        {
-                            newExitNode = track->endNode;
-                        }
-
-                        if (j == i && track != currentTrack && !newExitNode->block)
-                        {
-                            newAutoTrack = track;
-                            break;
-                        }
-
-                        j++;
-                    }
-                }
             }
 
             rootNode = exitNode;

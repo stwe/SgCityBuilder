@@ -86,6 +86,11 @@ sg::city::map::tile::Tile::NeighbourContainer& sg::city::map::tile::Tile::GetNei
     return m_neighbours;
 }
 
+int sg::city::map::tile::Tile::GetMapIndex() const
+{
+    return m_map->GetTileMapIndexByMapPosition(GetMapX(), GetMapZ());
+}
+
 //-------------------------------------------------
 // Setter
 //-------------------------------------------------
@@ -219,7 +224,7 @@ void sg::city::map::tile::Tile::Update()
     SetColor(TILE_TYPE_COLOR.at(type));
 
     // update Vbo
-    m_map->UpdateMapVboByTileIndex(m_map->GetTileMapIndexByMapPosition(static_cast<int>(m_mapX), static_cast<int>(m_mapZ)));
+    m_map->UpdateMapVboByTileIndex(GetMapIndex());
 }
 
 //-------------------------------------------------

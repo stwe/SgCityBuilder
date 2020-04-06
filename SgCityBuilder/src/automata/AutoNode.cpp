@@ -17,9 +17,10 @@ sg::city::automata::AutoNode::AutoNode()
 {
 }
 
-sg::city::automata::AutoNode::AutoNode(const glm::vec3& t_position)
+sg::city::automata::AutoNode::AutoNode(const int t_tileIndex, const glm::vec3& t_position)
     : position{ t_position }
 {
+    tiles.push_back(t_tileIndex);
 }
 
 sg::city::automata::AutoNode::~AutoNode() noexcept
