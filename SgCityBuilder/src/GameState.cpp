@@ -56,8 +56,12 @@ bool GameState::Input()
         if (m_mapPoint.x >= 0)
         {
             SG_OGL_LOG_INFO("[GameState::Input()] Replace Tile on x: {}, z: {}.", m_mapPoint.x, m_mapPoint.z);
-            const auto changedTileIndex{ m_city->ReplaceTile(m_mapPoint.x, m_mapPoint.z, m_currentEditTileType) };
-            m_changedTiles.push_back(changedTileIndex);
+            const auto[changedTileIndex, skip]{ m_city->ReplaceTile(m_mapPoint.x, m_mapPoint.z, m_currentEditTileType) };
+
+            if (!skip)
+            {
+                m_changedTiles.push_back(changedTileIndex);
+            }
 
             // delete mouse state
             sg::ogl::input::MouseInput::ClearMouseStates();
@@ -80,9 +84,10 @@ bool GameState::Update(const double t_dt)
 
 void GameState::Render()
 {
+    // render Map
     m_city->Render();
 
-    // only render after update of changed Tiles is complete
+    // only render the AutoTracks after update of changed Tiles is complete
     if (m_changedTiles.empty())
     {
         for (auto& tile : m_city->GetMap().GetTiles())
@@ -92,12 +97,15 @@ void GameState::Render()
                 auto* roadTile{ dynamic_cast<sg::city::map::tile::RoadTile*>(tile.get()) };
                 SG_OGL_ASSERT(roadTile, "[GameState::Render()] Null pointer.");
 
-                roadTile->RenderNavigationNodes();
                 roadTile->RenderAutoTracks();
             }
         }
     }
 
+    // render Navigation Nodes
+    m_city->GetMap().RenderNavigationNodes();
+
+    // render cars
     m_forwardRenderer->Render();
 
     RenderImGui();

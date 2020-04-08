@@ -72,15 +72,36 @@ void sg::city::city::City::Update(const double t_dt, TileIndexContainer& t_chang
 {
     for (auto changedTileIndex : t_changedTiles)
     {
-        auto& tile{ m_map->GetTiles()[changedTileIndex] };
-        tile->Update();
+        // get Tile
+        auto& changedTile{ m_map->GetTiles()[changedTileIndex] };
 
-        for (auto& neighbour : tile->GetNeighbours())
+        // check if the new Tile is of type TRAFFIC
+        if (changedTile->type == map::tile::TileType::TRAFFIC)
         {
-            if (m_map->GetTiles()[neighbour.second]->type == map::tile::TileType::TRAFFIC)
+            // if this is the case, clear AutoTracks and StopPattern from all TRAFFIC Tiles
+            for (auto& tile : m_map->GetTiles())
             {
-                m_map->GetTiles()[neighbour.second]->Update();
+                if (tile->type == map::tile::TileType::TRAFFIC)
+                {
+                    auto* roadTile{ dynamic_cast<map::tile::RoadTile*>(tile.get()) };
+                    SG_OGL_CORE_ASSERT(roadTile, "[City::Update()] Null pointer.")
+
+                    roadTile->ClearTracksAndStops();
+                }
             }
+
+            // and finally: update all TRAFFIC Tiles
+            for (auto& tile : m_map->GetTiles())
+            {
+                if (tile->type == map::tile::TileType::TRAFFIC)
+                {
+                    tile->Update();
+                }
+            }
+        }
+        else
+        {
+            changedTile->Update();
         }
     }
 
@@ -96,18 +117,25 @@ void sg::city::city::City::Render() const
 // Edit
 //-------------------------------------------------
 
-int sg::city::city::City::ReplaceTile(const int t_mapX, const int t_mapZ, map::tile::TileType t_tileType) const
+auto sg::city::city::City::ReplaceTile(const int t_mapX, const int t_mapZ, map::tile::TileType t_tileType) const -> std::tuple<int, bool>
 {
     auto& tiles{ m_map->GetTiles() };
-    const auto index{ m_map->GetTileMapIndexByMapPosition(t_mapX, t_mapZ) };
+    const auto currentTileIndex{ m_map->GetTileMapIndexByMapPosition(t_mapX, t_mapZ) };
+
+    // if the type does not change - skip
+    if (tiles[currentTileIndex]->type == t_tileType)
+    {
+        SG_OGL_LOG_INFO("[City::ReplaceTile()] This type already exists at this position. Skip replace.");
+        return { currentTileIndex, true };
+    }
 
     // store neighbours
-    const auto neighbours{ tiles[index]->GetNeighbours() };
+    const auto neighbours{ tiles[currentTileIndex]->GetNeighbours() };
 
     // delete the unique pointer
-    tiles[index].reset();
+    tiles[currentTileIndex].reset();
 
-    SG_OGL_ASSERT(tiles[index] == nullptr, "[City::ReplaceTile()] The pointer should be nullptr.");
+    SG_OGL_ASSERT(tiles[currentTileIndex] == nullptr, "[City::ReplaceTile()] The pointer should be nullptr.");
 
     if (t_tileType == map::tile::TileType::TRAFFIC)
     {
@@ -120,10 +148,10 @@ int sg::city::city::City::ReplaceTile(const int t_mapX, const int t_mapZ, map::t
             )
         };
 
-        tiles[index] = std::move(newTile);
-        tiles[index]->GetNeighbours() = neighbours;
+        tiles[currentTileIndex] = std::move(newTile);
+        tiles[currentTileIndex]->GetNeighbours() = neighbours;
 
-        dynamic_cast<map::tile::RoadTile*>(tiles[index].get())->Init();
+        dynamic_cast<map::tile::RoadTile*>(tiles[currentTileIndex].get())->Init();
     }
     else
     {
@@ -136,11 +164,11 @@ int sg::city::city::City::ReplaceTile(const int t_mapX, const int t_mapZ, map::t
             )
         };
 
-        tiles[index] = std::move(newTile);
-        tiles[index]->GetNeighbours() = neighbours;
+        tiles[currentTileIndex] = std::move(newTile);
+        tiles[currentTileIndex]->GetNeighbours() = neighbours;
     }
 
-    return index;
+    return { currentTileIndex, false };
 }
 
 //-------------------------------------------------

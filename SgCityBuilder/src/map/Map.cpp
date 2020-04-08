@@ -10,13 +10,17 @@
 #include <random>
 #include <Color.h>
 #include <Application.h>
+#include <Window.h>
+#include <camera/Camera.h>
 #include <scene/Scene.h>
 #include <resource/Mesh.h>
 #include <resource/ShaderManager.h>
 #include <resource/TextureManager.h>
+#include <math/Transform.h>
 #include "Map.h"
 #include "shader/LineShader.h"
 #include "shader/NodeShader.h"
+#include "automata/AutoNode.h"
 
 //-------------------------------------------------
 // Ctors. / Dtor.
@@ -51,6 +55,11 @@ sg::ogl::scene::Scene* sg::city::map::Map::GetScene() const
 int sg::city::map::Map::GetMapSize() const
 {
     return m_mapSize;
+}
+
+int sg::city::map::Map::GetNrOfAllTiles() const
+{
+    return m_mapSize * m_mapSize;
 }
 
 const sg::city::map::Map::TileTypeTextureContainer& sg::city::map::Map::GetTileTypeTextures() const noexcept
@@ -93,6 +102,26 @@ uint32_t sg::city::map::Map::GetFloatCountOfMap() const
     return static_cast<uint32_t>(m_tiles.size()) * tile::Tile::FLOATS_PER_TILE;
 }
 
+const sg::city::map::Map::TileNavigationNodeContainer& sg::city::map::Map::GetNavigationNodes() const noexcept
+{
+    return m_tileNavigationNodes;
+}
+
+sg::city::map::Map::TileNavigationNodeContainer& sg::city::map::Map::GetNavigationNodes() noexcept
+{
+    return m_tileNavigationNodes;
+}
+
+const sg::city::map::Map::NavigationNodeContainer& sg::city::map::Map::GetNavigationNodes(const int t_index) const noexcept
+{
+    return m_tileNavigationNodes[t_index];
+}
+
+sg::city::map::Map::NavigationNodeContainer& sg::city::map::Map::GetNavigationNodes(const int t_index) noexcept
+{
+    return m_tileNavigationNodes[t_index];
+}
+
 //-------------------------------------------------
 // Get Tile
 //-------------------------------------------------
@@ -126,9 +155,14 @@ void sg::city::map::Map::CreateMap(const int t_mapSize)
     m_mapSize = t_mapSize;
 
     StoreTileTypeTextures();
-    CreateTiles();
+    StoreTiles();
     StoreTileNeighbours();
-    CreateRandomColors();
+    StoreRandomColors();
+    StoreTileNavigationNodes();
+    LinkTileNavigationNodes();
+
+    // for debug
+    CreateNavigationNodesMesh();
 
     // create an bind a new Vao
     m_mapMesh = std::make_unique<ogl::resource::Mesh>();
@@ -157,12 +191,94 @@ void sg::city::map::Map::UpdateMapVboByTileIndex(const int t_tileIndex) const
 }
 
 //-------------------------------------------------
+// Debug
+//-------------------------------------------------
+
+void sg::city::map::Map::CreateNavigationNodesMesh()
+{
+    SG_OGL_CORE_ASSERT(!m_tileNavigationNodes.empty(), "[Map::CreateNavigationNodesMesh()] No Navigation Nodes available.")
+
+    VertexContainer vertexContainer;
+
+    for (auto tileIndex{ 0 }; tileIndex < GetNrOfAllTiles(); ++tileIndex)
+    {
+        for (auto& node : m_tileNavigationNodes[tileIndex])
+        {
+            // some nodes are nullptr
+            if (node)
+            {
+                // position
+                vertexContainer.push_back(node->position.x);
+                vertexContainer.push_back(VERTEX_HEIGHT);
+                vertexContainer.push_back(node->position.z);
+
+                // color
+                if (node->block)
+                {
+                    // red
+                    vertexContainer.push_back(1.0f);
+                    vertexContainer.push_back(0.0f);
+                    vertexContainer.push_back(0.0f);
+                }
+                else
+                {
+                    // green
+                    vertexContainer.push_back(0.0f);
+                    vertexContainer.push_back(1.0f);
+                    vertexContainer.push_back(0.0f);
+                }
+            }
+        }
+    }
+
+    if (m_navigationNodesMesh)
+    {
+        m_navigationNodesMesh.reset();
+    }
+
+    m_navigationNodesMesh = std::make_unique<ogl::resource::Mesh>();
+
+    const ogl::buffer::BufferLayout bufferLayout{
+        { ogl::buffer::VertexAttributeType::POSITION, "aPosition" },
+        { ogl::buffer::VertexAttributeType::COLOR, "aColor" },
+    };
+
+    m_navigationNodesMesh->GetVao().AddVertexDataVbo(vertexContainer.data(), static_cast<int32_t>(vertexContainer.size()) / 6, bufferLayout);
+}
+
+void sg::city::map::Map::RenderNavigationNodes() const
+{
+    SG_OGL_CORE_ASSERT(m_navigationNodesMesh, "[Map::RenderNavigationNodes()] Null pointer.")
+
+    ogl::math::Transform t;
+    t.position = position;
+    t.rotation = rotation;
+    t.scale = scale;
+
+    auto& shader{ m_scene->GetApplicationContext()->GetShaderManager().GetShaderProgram<shader::NodeShader>() };
+    shader.Bind();
+
+    const auto projectionMatrix{ m_scene->GetApplicationContext()->GetWindow().GetProjectionMatrix() };
+    const auto mvp{ projectionMatrix * m_scene->GetCurrentCamera().GetViewMatrix() * static_cast<glm::mat4>(t) };
+
+    shader.SetUniform("mvpMatrix", mvp);
+
+    glPointSize(POINT_SIZE);
+
+    m_navigationNodesMesh->InitDraw();
+    m_navigationNodesMesh->DrawPrimitives(GL_POINTS);
+    m_navigationNodesMesh->EndDraw();
+
+    ogl::resource::ShaderProgram::Unbind();
+}
+
+//-------------------------------------------------
 // Init
 //-------------------------------------------------
 
 void sg::city::map::Map::StoreTileTypeTextures()
 {
-    SG_OGL_LOG_DEBUG("[Map::LoadAndStoreTileTypeTextures()] Load a texture for each Tile Type.");
+    SG_OGL_LOG_DEBUG("[Map::StoreTileTypeTextures()] Load a texture for each Tile Type.");
 
     const auto n{ m_scene->GetApplicationContext()->GetTextureManager().GetTextureIdFromPath("res/texture/tileTypes/grass.jpg") };
     const auto r{ m_scene->GetApplicationContext()->GetTextureManager().GetTextureIdFromPath("res/texture/tileTypes/r.png") };
@@ -181,9 +297,9 @@ void sg::city::map::Map::StoreTileTypeTextures()
     m_roadTextureAtlasId = m_scene->GetApplicationContext()->GetTextureManager().GetTextureIdFromPath("res/texture/road/roads.png");
 }
 
-void sg::city::map::Map::CreateTiles()
+void sg::city::map::Map::StoreTiles()
 {
-    SG_OGL_LOG_DEBUG("[Map::CreateTiles()] Create {}x{} Tiles for the map.", m_mapSize, m_mapSize);
+    SG_OGL_LOG_DEBUG("[Map::StoreTiles()] Create ans store {}x{} Tiles for the map.", m_mapSize, m_mapSize);
 
     for (auto z{ 0 }; z < m_mapSize; ++z)
     {
@@ -237,9 +353,129 @@ void sg::city::map::Map::StoreTileNeighbours()
     }
 }
 
-void sg::city::map::Map::CreateRandomColors()
+void sg::city::map::Map::StoreTileNavigationNodes()
 {
-    SG_OGL_LOG_DEBUG("[Map::CreateRandomColors()] Create {} random Colors.", MAX_REGION_COLORS);
+    SG_OGL_CORE_ASSERT(!m_tiles.empty(), "[Map::StoreTileNavigationNodes()] No Tiles available.")
+    SG_OGL_CORE_ASSERT(m_tileNavigationNodes.empty(), "[Map::StoreTileNavigationNodes()] Navigation Nodes already exists.")
+
+    SG_OGL_LOG_DEBUG("[Map::StoreTileNavigationNodes()] Store Navigation Nodes for the Tiles.");
+
+    m_tileNavigationNodes.resize(GetNrOfAllTiles());
+
+    auto tileIndex{ 0 };
+    for (auto& tile : m_tiles)
+    {
+        NavigationNodeContainer navigationNodes;
+
+        for (auto z{ 0 }; z < 7; ++z)
+        {
+            auto zOffset{ 0.0f };
+            switch (z)
+            {
+            case 0: zOffset = 0.000f; break;
+            case 1: zOffset = -0.083f; break;
+            case 2: zOffset = -0.333f; break;
+            case 3: zOffset = -0.500f; break;
+            case 4: zOffset = -0.667f; break;
+            case 5: zOffset = -0.917f; break;
+            case 6: zOffset = -1.000f; break;
+            default:;
+            }
+
+            for (auto x{ 0 }; x < 7; ++x)
+            {
+                auto xOffset{ 0.0f };
+                switch (x)
+                {
+                case 0: xOffset = 0.000f; break;
+                case 1: xOffset = 0.083f; break;
+                case 2: xOffset = 0.333f; break;
+                case 3: xOffset = 0.500f; break;
+                case 4: xOffset = 0.667f; break;
+                case 5: xOffset = 0.917f; break;
+                case 6: xOffset = 1.000f; break;
+                default:;
+                }
+
+                // converting unique_ptr to shared_ptr
+                navigationNodes.push_back(std::make_unique<automata::AutoNode>(glm::vec3(
+                        tile->GetWorldX() + xOffset,
+                        0.0f,
+                        tile->GetWorldZ() + zOffset)
+                    )
+                );
+            }
+        }
+
+        m_tileNavigationNodes[tileIndex] = navigationNodes;
+        tileIndex++;
+    }
+}
+
+void sg::city::map::Map::LinkTileNavigationNodes()
+{
+    SG_OGL_CORE_ASSERT(!m_tiles.empty(), "[Map::LinkTileNavigationNodes()] No Tiles available.")
+    SG_OGL_CORE_ASSERT(!m_tileNavigationNodes.empty(), "[Map::LinkTileNavigationNodes()] No Navigation Nodes available.")
+
+    SG_OGL_LOG_DEBUG("[Map::LinkTileNavigationNodes()] Link neighboring Navigation Nodes.");
+
+    for (auto z{ 0 }; z < m_mapSize; ++z)
+    {
+        for (auto x{ 0 }; x < m_mapSize; ++x)
+        {
+            const auto currentTileIndex{ GetTileMapIndexByMapPosition(x, z) };
+            auto& currentTile{ m_tiles[currentTileIndex] };
+
+            if (z < m_mapSize - 1)
+            {
+                const auto northTileIndex{ currentTile->GetNeighbours().at(tile::Direction::NORTH) };
+
+                m_tileNavigationNodes[currentTileIndex][42] = m_tileNavigationNodes[northTileIndex][0];
+                m_tileNavigationNodes[currentTileIndex][43] = m_tileNavigationNodes[northTileIndex][1];
+                m_tileNavigationNodes[currentTileIndex][44] = m_tileNavigationNodes[northTileIndex][2];
+                m_tileNavigationNodes[currentTileIndex][45] = m_tileNavigationNodes[northTileIndex][3];
+                m_tileNavigationNodes[currentTileIndex][46] = m_tileNavigationNodes[northTileIndex][4];
+                m_tileNavigationNodes[currentTileIndex][47] = m_tileNavigationNodes[northTileIndex][5];
+                m_tileNavigationNodes[currentTileIndex][48] = m_tileNavigationNodes[northTileIndex][6];
+            }
+
+            if (x < m_mapSize - 1)
+            {
+                const auto eastTileIndex{ currentTile->GetNeighbours().at(tile::Direction::EAST) };
+
+                m_tileNavigationNodes[currentTileIndex][48] = m_tileNavigationNodes[eastTileIndex][42];
+                m_tileNavigationNodes[currentTileIndex][41] = m_tileNavigationNodes[eastTileIndex][35];
+                m_tileNavigationNodes[currentTileIndex][34] = m_tileNavigationNodes[eastTileIndex][28];
+                m_tileNavigationNodes[currentTileIndex][27] = m_tileNavigationNodes[eastTileIndex][21];
+                m_tileNavigationNodes[currentTileIndex][20] = m_tileNavigationNodes[eastTileIndex][14];
+                m_tileNavigationNodes[currentTileIndex][13] = m_tileNavigationNodes[eastTileIndex][7];
+                m_tileNavigationNodes[currentTileIndex][6] = m_tileNavigationNodes[eastTileIndex][0];
+            }
+        }
+    }
+
+    for (auto tileIndex{ 0 }; tileIndex < GetNrOfAllTiles(); ++tileIndex)
+    {
+        m_tileNavigationNodes[tileIndex][37].reset();
+        m_tileNavigationNodes[tileIndex][39].reset();
+        m_tileNavigationNodes[tileIndex][29].reset();
+        m_tileNavigationNodes[tileIndex][33].reset();
+        m_tileNavigationNodes[tileIndex][15].reset();
+        m_tileNavigationNodes[tileIndex][19].reset();
+        m_tileNavigationNodes[tileIndex][9].reset();
+        m_tileNavigationNodes[tileIndex][11].reset();
+
+        // the 4 corners
+        m_tileNavigationNodes[tileIndex][42].reset();
+        m_tileNavigationNodes[tileIndex][48].reset();
+        m_tileNavigationNodes[tileIndex][0].reset();
+        m_tileNavigationNodes[tileIndex][6].reset();
+    }
+}
+
+void sg::city::map::Map::StoreRandomColors()
+{
+    SG_OGL_LOG_DEBUG("[Map::StoreRandomColors()] Store {} random Colors.", MAX_REGION_COLORS);
 
     std::random_device seeder;
     std::mt19937 engine(seeder());

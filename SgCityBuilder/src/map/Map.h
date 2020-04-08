@@ -11,14 +11,14 @@
 
 #include "tile/Tile.h"
 
-namespace sg::ogl::scene
-{
-    class Scene;
-}
-
 namespace sg::ogl
 {
     struct Color;
+}
+
+namespace sg::ogl::scene
+{
+    class Scene;
 }
 
 namespace sg::ogl::resource
@@ -26,15 +26,26 @@ namespace sg::ogl::resource
     class Mesh;
 }
 
+namespace sg::city::automata
+{
+    class AutoNode;
+}
+
 namespace sg::city::map
 {
     class Map
     {
     public:
+        using VertexContainer = std::vector<float>;
+
         using TileTypeTextureContainer = std::unordered_map<tile::TileType, uint32_t, tile::TileTypeHash>;
 
         using TileUniquePtr = std::unique_ptr<tile::Tile>;
         using TileContainer = std::vector<TileUniquePtr>;
+
+        using NavigationNodeSharedPtr = std::shared_ptr<automata::AutoNode>;
+        using NavigationNodeContainer = std::vector<NavigationNodeSharedPtr>;
+        using TileNavigationNodeContainer = std::vector<NavigationNodeContainer>;
 
         using RandomColorContainer = std::unordered_map<int, ogl::Color>;
 
@@ -48,6 +59,21 @@ namespace sg::city::map
          * @brief 200 predefined colors are generated to show contiguous regions.
          */
         static constexpr auto MAX_REGION_COLORS{ 200 };
+
+        /**
+         * @brief The default height for debug stuff.
+         */
+        static constexpr auto VERTEX_HEIGHT{ 0.015 };
+
+        /**
+         * @brief GL_POINTS size for rendering nodes.
+         */
+        static constexpr auto POINT_SIZE{ 4.0f };
+
+        /**
+         * @brief The number of Navigation Nodes per Tile.
+         */
+        static constexpr auto NODES_PER_TILE{ 49 };
 
         //-------------------------------------------------
         // Public member
@@ -82,6 +108,7 @@ namespace sg::city::map
         [[nodiscard]] ogl::scene::Scene* GetScene() const;
 
         [[nodiscard]] int GetMapSize() const;
+        [[nodiscard]] int GetNrOfAllTiles() const;
 
         [[nodiscard]] const TileTypeTextureContainer& GetTileTypeTextures() const noexcept;
         [[nodiscard]] TileTypeTextureContainer& GetTileTypeTextures() noexcept;
@@ -95,6 +122,12 @@ namespace sg::city::map
         [[nodiscard]] ogl::resource::Mesh& GetMapMesh() noexcept;
 
         [[nodiscard]] uint32_t GetFloatCountOfMap() const;
+
+        [[nodiscard]] const TileNavigationNodeContainer& GetNavigationNodes() const noexcept;
+        [[nodiscard]] TileNavigationNodeContainer& GetNavigationNodes() noexcept;
+
+        [[nodiscard]] const NavigationNodeContainer& GetNavigationNodes(int t_index) const noexcept;
+        [[nodiscard]] NavigationNodeContainer& GetNavigationNodes(int t_index) noexcept;
 
         //-------------------------------------------------
         // Get Tile
@@ -123,6 +156,20 @@ namespace sg::city::map
         //-------------------------------------------------
 
         void UpdateMapVboByTileIndex(int t_tileIndex) const;
+
+        //-------------------------------------------------
+        // Debug
+        //-------------------------------------------------
+
+        /**
+         * @brief Create a Mesh from the Navigation Nodes.
+         */
+        void CreateNavigationNodesMesh();
+
+        /**
+         * @brief Render the Navigation Nodes.
+         */
+        void RenderNavigationNodes() const;
 
     protected:
 
@@ -167,14 +214,27 @@ namespace sg::city::map
          */
         uint32_t m_vboId{ 0 };
 
+        /**
+         * @brief Navigation Nodes for each Tile.
+         */
+        TileNavigationNodeContainer m_tileNavigationNodes;
+
+        /**
+         * @brief A Mesh with one Vertex for each Navigation Node.
+         *        Used for debugging purposes.
+         */
+        MeshUniquePtr m_navigationNodesMesh;
+
         //-------------------------------------------------
         // Init
         //-------------------------------------------------
 
         void StoreTileTypeTextures();
-        void CreateTiles();
+        void StoreTiles();
         void StoreTileNeighbours();
-        void CreateRandomColors();
+        void StoreTileNavigationNodes();
+        void LinkTileNavigationNodes();
+        void StoreRandomColors();
 
         //-------------------------------------------------
         // Helper

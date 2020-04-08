@@ -92,7 +92,7 @@ namespace sg::city::city
         // Edit
         //-------------------------------------------------
 
-        [[nodiscard]] int ReplaceTile(int t_mapX, int t_mapZ, map::tile::TileType t_tileType) const;
+        [[nodiscard]] auto ReplaceTile(int t_mapX, int t_mapZ, map::tile::TileType t_tileType) const -> std::tuple<int, bool>;
 
         //-------------------------------------------------
         // Spawn
