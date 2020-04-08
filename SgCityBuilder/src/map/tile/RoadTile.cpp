@@ -73,7 +73,20 @@ void sg::city::map::tile::RoadTile::Update()
     CreateStopPatterns();
     ApplyStopPattern(0);
 
+    // for debug
     CreateAutoTracksMesh();
+    switch (roadType)
+    {
+    case RoadType::ROAD_H:
+    case RoadType::ROAD_V:
+    case RoadType::ROAD_C1:
+    case RoadType::ROAD_C2:
+    case RoadType::ROAD_C3:
+    case RoadType::ROAD_C4:
+        break;
+             // since some Nodes may now be marked as blocked
+    default: m_map->CreateNavigationNodesMesh();
+    }
 }
 
 //-------------------------------------------------
