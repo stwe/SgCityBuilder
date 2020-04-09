@@ -197,14 +197,14 @@ bool sg::city::city::City::SpawnCarAtSafeTrack(const int t_mapX, const int t_map
     SG_OGL_LOG_INFO("[City::SpawnCarAtSafeTrack()] Spawn a new Car at map x: {}, map z: {}", tile->GetMapX(), tile->GetMapZ());
 
     // create an Automata
-    auto automata{ std::make_shared<automata::Automata>() };
+    auto automata{ std::make_unique<automata::Automata>() };
     automata->autoLength = 0.2f;
     automata->currentTrack = tile->safeAutoTrack;
-    automata->currentTrack->automatas.push_back(automata);
+    automata->currentTrack->automatas.push_back(automata.get());
     automata->rootNode = tile->safeAutoTrack->startNode;
     automata->Update(0.0f);
 
-    automatas.push_back(automata);
+    automatas.push_back(std::move(automata));
 
     return true;
 }

@@ -17,16 +17,15 @@ namespace sg::city::automata
     class AutoNode;
     class AutoTrack;
 
-    class Automata : public std::enable_shared_from_this<Automata>
+    class Automata
     {
     public:
         using AutoNodeSharedPtr = std::shared_ptr<AutoNode>;
         using AutoTrackSharedPtr = std::shared_ptr<AutoTrack>;
 
-        std::shared_ptr<Automata> GetShared()
-        {
-            return shared_from_this();
-        }
+        //-------------------------------------------------
+        // Public member
+        //-------------------------------------------------
 
         glm::vec3 position{ glm::vec3(0.0f) };
 
@@ -37,6 +36,23 @@ namespace sg::city::automata
         AutoTrackSharedPtr currentTrack;
 
         bool deleteAutomata{ false };
+
+        //-------------------------------------------------
+        // Ctors. / Dtor.
+        //-------------------------------------------------
+
+        Automata() = default;
+
+        Automata(const Automata& t_other) = delete;
+        Automata(Automata&& t_other) noexcept = delete;
+        Automata& operator=(const Automata& t_other) = delete;
+        Automata& operator=(Automata&& t_other) noexcept = delete;
+
+        ~Automata() noexcept;
+
+        //-------------------------------------------------
+        // Logic
+        //-------------------------------------------------
 
         void Update(float t_dt);
 

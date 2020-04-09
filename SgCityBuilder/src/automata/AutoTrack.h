@@ -28,8 +28,7 @@ namespace sg::city::automata
     public:
         using AutoNodeSharedPtr = std::shared_ptr<AutoNode>;
 
-        using AutomataSharedPtr = std::shared_ptr<Automata>;
-        using AutomataContainer = std::list<AutomataSharedPtr>;
+        using AutomataContainer = std::list<Automata*>;
 
         //-------------------------------------------------
         // Public member
@@ -55,7 +54,7 @@ namespace sg::city::automata
         AutoTrack& operator=(const AutoTrack& t_other) = delete;
         AutoTrack& operator=(AutoTrack&& t_other) noexcept = delete;
 
-        ~AutoTrack() noexcept = default;
+        ~AutoTrack() noexcept;
 
         //-------------------------------------------------
         // Getter

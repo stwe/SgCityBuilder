@@ -12,6 +12,19 @@
 #include "AutoNode.h"
 #include <Log.h>
 
+//-------------------------------------------------
+// Ctors. / Dtor.
+//-------------------------------------------------
+
+sg::city::automata::Automata::~Automata() noexcept
+{
+    SG_OGL_LOG_DEBUG("[Automata::~Automata()] Destruct Automata.");
+}
+
+//-------------------------------------------------
+// Logic
+//-------------------------------------------------
+
 void sg::city::automata::Automata::Update(const float t_dt)
 {
     auto exitNode{ currentTrack->startNode };
@@ -19,16 +32,6 @@ void sg::city::automata::Automata::Update(const float t_dt)
     {
         exitNode = currentTrack->endNode;
     }
-
-    /*
-    SG_OGL_LOG_INFO("Root Node x: {}, z: {}", rootNode->position.x, rootNode->position.z);
-
-    SG_OGL_LOG_INFO("Current Track - Start Node x: {}, z: {}", currentTrack->startNode->position.x, currentTrack->startNode->position.z);
-    SG_OGL_LOG_INFO("Current Track - End Node x: {}, z: {}", currentTrack->endNode->position.x, currentTrack->endNode->position.z);
-
-    SG_OGL_LOG_INFO("Exit Node x: {}, z: {}", exitNode->position.x, exitNode->position.z);
-    SG_OGL_LOG_INFO("");
-    */
 
     autoPosition += t_dt * 0.5f;
 
@@ -40,8 +43,11 @@ void sg::city::automata::Automata::Update(const float t_dt)
 
             // Ziel erreicht - es wird eine neuer Track benoetigt
 
-            //if (exitNode->autoTracks.size() == 1)
-            //    return;
+            if (exitNode->autoTracks.size() == 1)
+            {
+                deleteAutomata = true;
+                return;
+            }
 
             // ersten Track aus der End Node holen
             auto it{ exitNode->autoTracks.begin() };
@@ -49,7 +55,6 @@ void sg::city::automata::Automata::Update(const float t_dt)
             // Track als neuen Track setzen
             auto newAutoTrack = *it;
 
-            // Zeigervergleich
             if (currentTrack == newAutoTrack)
             {
                 ++it;
@@ -59,7 +64,7 @@ void sg::city::automata::Automata::Update(const float t_dt)
             rootNode = exitNode;
             currentTrack->automatas.pop_front();
             currentTrack = newAutoTrack;
-            currentTrack->automatas.push_back(GetShared());
+            currentTrack->automatas.push_back(this);
         }
         else
         {

@@ -171,10 +171,28 @@ void GameState::CreateCar(const int t_mapX, const int t_mapZ) const
 
 void GameState::UpdateCars(const double t_dt) const
 {
+    auto del{ false };
+
     // update Automatas
     for (auto& automata : m_city->automatas)
     {
-        automata->Update(static_cast<float>(t_dt));
+        if (automata)
+        {
+            automata->Update(static_cast<float>(t_dt));
+
+            // the Update function may have set deleteAutomata to true
+            if (automata->deleteAutomata)
+            {
+                // eliminating one owner of the automata shared_ptr
+                automata.reset();
+                del = true;
+            }
+        }
+    }
+
+    if (del)
+    {
+        m_city->automatas.erase(std::remove(m_city->automatas.begin(), m_city->automatas.end(), nullptr), m_city->automatas.end());
     }
 
     // get view
@@ -190,7 +208,16 @@ void GameState::UpdateCars(const double t_dt) const
         auto& automataComponent{ view.get<sg::city::ecs::AutomataComponent>(entity) };
         auto& transformComponent{ view.get<sg::ogl::ecs::component::TransformComponent>(entity) };
 
-        transformComponent.position = glm::vec3(automataComponent.automata->position.x, 0.015f, automataComponent.automata->position.z);
+        if (automataComponent.automata->deleteAutomata)
+        {
+            // eliminating the other owner of the automata shared_ptr -> instance is destroyed
+            automataComponent.automata.reset();
+            m_scene->GetApplicationContext()->registry.destroy(entity);
+        }
+        else
+        {
+            transformComponent.position = glm::vec3(automataComponent.automata->position.x, 0.015f, automataComponent.automata->position.z);
+        }
     }
 }
 
