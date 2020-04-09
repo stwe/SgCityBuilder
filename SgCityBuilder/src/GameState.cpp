@@ -14,6 +14,7 @@
 #include "map/Map.h"
 #include "map/tile/RoadTile.h"
 #include "automata/Automata.h"
+#include "automata/AutoTrack.h"
 
 //-------------------------------------------------
 // Ctors. / Dtor.
@@ -183,7 +184,13 @@ void GameState::UpdateCars(const double t_dt) const
             // the Update function may have set deleteAutomata to true
             if (automata->deleteAutomata)
             {
-                // eliminating one owner of the automata shared_ptr
+                // despawn
+
+                // 1) remove from the track
+                automata->currentTrack->automatas.remove(automata.get());
+
+                // 2) eliminating one owner of the automata shared_ptr
+                //    the automata is also owned by a car entity
                 automata.reset();
                 del = true;
             }
@@ -192,7 +199,8 @@ void GameState::UpdateCars(const double t_dt) const
 
     if (del)
     {
-        m_city->automatas.erase(std::remove(m_city->automatas.begin(), m_city->automatas.end(), nullptr), m_city->automatas.end());
+        // remove dead automata
+        m_city->automatas.remove(nullptr);
     }
 
     // get view
@@ -212,6 +220,8 @@ void GameState::UpdateCars(const double t_dt) const
         {
             // eliminating the other owner of the automata shared_ptr -> instance is destroyed
             automataComponent.automata.reset();
+
+            // destroy car entity
             m_scene->GetApplicationContext()->registry.destroy(entity);
         }
         else
