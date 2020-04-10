@@ -36,6 +36,7 @@ namespace sg::city::automata
         AutoTrackSharedPtr currentTrack;
 
         bool deleteAutomata{ false };
+        bool isEntity{ false };
 
         //-------------------------------------------------
         // Ctors. / Dtor.

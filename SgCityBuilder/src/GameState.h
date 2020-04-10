@@ -87,7 +87,6 @@ private:
     // Cars
     //-------------------------------------------------
 
-    void CreateCar(int t_mapX, int t_mapZ) const;
     void UpdateCars(double t_dt) const;
 
     //-------------------------------------------------

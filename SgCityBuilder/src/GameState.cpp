@@ -145,31 +145,6 @@ void GameState::Init()
 // Cars
 //-------------------------------------------------
 
-void GameState::CreateCar(const int t_mapX, const int t_mapZ) const
-{
-    // create an Automata
-    if (m_city->SpawnCarAtSafeTrack(t_mapX, t_mapZ))
-    {
-        // create Entity from the Automata
-        auto& automata{ m_city->automatas.back() };
-
-        // add components
-        auto entity{ GetApplicationContext()->GetEntityFactory().CreateModelEntity(
-            "res/model/Plane1/plane1.obj",
-            glm::vec3(automata->position.x, 0.015f, automata->position.z),
-            glm::vec3(0.0f),
-            glm::vec3(0.125f / 4.0f),
-            false
-        ) };
-
-        // add Automata component
-        GetApplicationContext()->registry.assign<sg::city::ecs::AutomataComponent>(
-            entity,
-            automata
-        );
-    }
-}
-
 void GameState::UpdateCars(const double t_dt) const
 {
     auto del{ false };
@@ -325,7 +300,7 @@ void GameState::RenderImGui()
 
     if (ImGui::Button("Spawn Car"))
     {
-        CreateCar(m_mapPoint.x, m_mapPoint.z);
+        m_city->TrySpawnCarAtSafeTrack(m_mapPoint.x, m_mapPoint.z);
     }
 
     ImGui::Spacing();

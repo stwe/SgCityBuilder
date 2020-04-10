@@ -85,7 +85,7 @@ namespace sg::city::city
         // Logic
         //-------------------------------------------------
 
-        void Update(double t_dt, TileIndexContainer& t_changedTiles) const;
+        void Update(double t_dt, TileIndexContainer& t_changedTiles);
         void Render() const;
 
         //-------------------------------------------------
@@ -98,7 +98,13 @@ namespace sg::city::city
         // Spawn
         //-------------------------------------------------
 
-        bool SpawnCarAtSafeTrack(int t_mapX, int t_mapZ);
+        /**
+         * @brief Tries to create an Automat and a Car Entity at the specified position on a RoadTile.
+         * @param t_mapX Map-x position of the Tile in Object Space.
+         * @param t_mapZ Map-z position of the Tile in Object Space.
+         * @return True if the Automata was created successfully.
+         */
+        bool TrySpawnCarAtSafeTrack(int t_mapX, int t_mapZ);
 
     protected:
 
@@ -128,6 +134,12 @@ namespace sg::city::city
         //-------------------------------------------------
 
         void Init(ogl::scene::Scene* t_scene, int t_mapSize);
+
+        //-------------------------------------------------
+        // Entity
+        //-------------------------------------------------
+
         void CreateMapEntity();
+        void CreateCarEntity();
     };
 }

@@ -12,6 +12,7 @@
 #include <Application.h>
 #include <glm/vec3.hpp>
 #include <ecs/component/Components.h>
+#include <ecs/factory/EntityFactory.h>
 #include <scene/Scene.h>
 #include "City.h"
 #include "map/Map.h"
@@ -68,8 +69,10 @@ sg::city::city::City::MapSharedPtr sg::city::city::City::GetMapSharedPtr() const
 // Logic
 //-------------------------------------------------
 
-void sg::city::city::City::Update(const double t_dt, TileIndexContainer& t_changedTiles) const
+void sg::city::city::City::Update(const double t_dt, TileIndexContainer& t_changedTiles)
 {
+    // handle the changed Tiles
+
     for (auto changedTileIndex : t_changedTiles)
     {
         // get Tile
@@ -106,6 +109,21 @@ void sg::city::city::City::Update(const double t_dt, TileIndexContainer& t_chang
     }
 
     t_changedTiles.clear();
+
+
+    // create some Automatas
+
+    if (automatas.size() < 4)
+    {
+        auto newCarCreated{ false };
+        auto attempts{ 12 };
+
+        while(!newCarCreated && attempts > 0)
+        {
+            attempts--;
+            newCarCreated = TrySpawnCarAtSafeTrack(rand() % m_map->GetMapSize(), rand() % m_map->GetMapSize());
+        }
+    }
 }
 
 void sg::city::city::City::Render() const
@@ -175,26 +193,22 @@ auto sg::city::city::City::ReplaceTile(const int t_mapX, const int t_mapZ, map::
 // Spawn
 //-------------------------------------------------
 
-bool sg::city::city::City::SpawnCarAtSafeTrack(const int t_mapX, const int t_mapZ)
+bool sg::city::city::City::TrySpawnCarAtSafeTrack(const int t_mapX, const int t_mapZ)
 {
     // get RoadTile at position
     auto* tile{ dynamic_cast<map::tile::RoadTile*>(&m_map->GetTileByMapPosition(t_mapX, t_mapZ)) };
     if (!tile)
     {
-        SG_OGL_LOG_INFO("[City::SpawnCarAtSafeTrack()] No Road Tile available at position x: {}, z: {}.", t_mapX, t_mapZ);
-
         return false;
     }
 
     // check if there is a Safe Auto Track
     if (!tile->safeAutoTrack)
     {
-        SG_OGL_LOG_INFO("[City::SpawnCarAtSafeTrack()] No Safe Auto Track found.");
-
         return false;
     }
 
-    SG_OGL_LOG_INFO("[City::SpawnCarAtSafeTrack()] Spawn a new Car at map x: {}, map z: {}", tile->GetMapX(), tile->GetMapZ());
+    SG_OGL_LOG_INFO("[City::TrySpawnCarAtSafeTrack()] Spawn a new car at Map x: {}, z: {}", tile->GetMapX(), tile->GetMapZ());
 
     // create an Automata
     auto automata{ std::make_unique<automata::Automata>() };
@@ -205,6 +219,8 @@ bool sg::city::city::City::SpawnCarAtSafeTrack(const int t_mapX, const int t_map
     automata->Update(0.0f);
 
     automatas.push_back(std::move(automata));
+
+    CreateCarEntity();
 
     return true;
 }
@@ -229,6 +245,10 @@ void sg::city::city::City::Init(ogl::scene::Scene* t_scene, const int t_mapSize)
     CreateMapEntity();
 }
 
+//-------------------------------------------------
+// Entity
+//-------------------------------------------------
+
 void sg::city::city::City::CreateMapEntity()
 {
     const auto entity{ m_scene->GetApplicationContext()->registry.create() };
@@ -245,5 +265,30 @@ void sg::city::city::City::CreateMapEntity()
         m_map->position,
         m_map->rotation,
         m_map->scale
+    );
+}
+
+void sg::city::city::City::CreateCarEntity()
+{
+    // create Entity from the last Automat in the list
+    auto& automata{ automatas.back() };
+
+    SG_OGL_ASSERT(!automata->isEntity, "[City::CreateCarEntity()] The Automat is already an Entity.");
+
+    // add a Model
+    auto entity{ m_scene->GetApplicationContext()->GetEntityFactory().CreateModelEntity(
+        "res/model/Plane1/plane1.obj",
+        glm::vec3(automata->position.x, 0.015f, automata->position.z),
+        glm::vec3(0.0f),
+        glm::vec3(0.125f / 4.0f),
+        false
+    ) };
+
+    automata->isEntity = true;
+
+    // add Automata as component
+    m_scene->GetApplicationContext()->registry.assign<ecs::AutomataComponent>(
+        entity,
+        automata
     );
 }
