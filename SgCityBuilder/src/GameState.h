@@ -77,6 +77,8 @@ private:
 
     ForwardRendererUniquePtr m_forwardRenderer;
 
+    bool m_renderNavigationNodes{ false };
+
     //-------------------------------------------------
     // Helper
     //-------------------------------------------------

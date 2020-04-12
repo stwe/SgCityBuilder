@@ -33,7 +33,132 @@ void sg::city::automata::Automata::Update(const float t_dt)
         exitNode = currentTrack->endNode;
     }
 
-    autoPosition += t_dt * 0.5f;
+    auto canMove{ true };
+    auto distanceToAutomataInFront{ 1.0f };
+
+    /*
+
+       N2  Start Node
+       |
+       |
+       A0
+       |   Current Track 0
+       |
+       |
+       N1  Exit Node ------------- link to Track 0 und Track 1
+       |
+       |
+       |   Track 1
+       A1
+       |
+       |
+       N0
+
+    */
+
+    /*
+
+         A0 - StartNode N2 ---- Track 0
+            - EndeNode  N1 ----
+                              | Track 0 und 1
+         A1 - StartNode N1 ----
+            - EndeNode  N0 ---- Track 0
+
+    */
+
+
+    // zu dem momentanen Track koennen noch andere Autos gehoeren
+    // Frage: ist dieses Auto ganz vorne in der Liste?
+
+    // get an iterator for this automata
+    auto itThisAutomata = std::find(currentTrack->automatas.begin(), currentTrack->automatas.end(), this);
+
+    // dieses Auto ist ganz vorne
+    if (*itThisAutomata == currentTrack->automatas.front()) // fuer A0 und A1 true
+    {
+        for (auto& track : exitNode->autoTracks) // A0 = currentTrack + Track 1   // A1 = nur der currentTrack
+        {
+            if (track != currentTrack && !track->automatas.empty()) // wird nur von A0 durchlaufen
+            {
+                // A0 und Track 1
+
+                // das Ende (letztes eingefuegtes Fahrzeug) des vorderen Tracks holen und den Abstand messen
+                // autoPosition      : 0......1
+                // autoLength immer  : 0.2
+                auto distanceFromAutomataExitNode{ track->automatas.back()->autoPosition - track->automatas.back()->autoLength };
+
+                // Am Anfang ist der Abstand negativ
+
+                if (distanceFromAutomataExitNode < 0.0f)
+                {
+                    distanceFromAutomataExitNode = 0.0f;
+                }
+
+                // jetzt wissen wir, dass sich vor uns ein Track mit einem anderen Fahrzeug befindet und wissen den Abstand
+                // dieses anderen Fahrzeugs zu unserer Exit Node (bzw. der StartNode des anderen Fahrzeugs)
+
+                //SG_OGL_LOG_INFO("Abstand zur exit node: {}", distanceFromAutomataExitNode);
+
+                //   0.4 < (1.0 + 0.9 - 0.2)
+
+                //   meine eigene auto position     < (track length              + distanceFromAutomataExitNode - autoLength)
+                if ((*itThisAutomata)->autoPosition < (currentTrack->trackLength + distanceFromAutomataExitNode - autoLength))
+                {
+                    distanceToAutomataInFront = (currentTrack->trackLength + distanceFromAutomataExitNode - 0.1f) - (*itThisAutomata)->autoPosition;
+                    SG_OGL_CORE_LOG_INFO("Distance: {}", distanceToAutomataInFront);
+                }
+                else
+                {
+                    canMove = false;
+                }
+            }
+        }
+    }
+    else
+    {
+        // der Automat ist auf dem Track nicht ganz vorn
+        auto itAutomataInFront = itThisAutomata;
+
+        // hole den Automaten vor diesem
+        itAutomataInFront--;
+
+        // itAutomataInFront Listenindex jetzt zB: 0
+        // itThisAutomata    Listenindex jetzt zB: 1
+
+        //                             Abstand zum vorderen Fahrzeug zB  = 0.4             > 0.3 ? Abstand zum vorderen Fahreug ok => Automat bewegen
+        //                             [0] = 0.5       - [1] = 0.1       = 0.4             > 0.2 + 0.1
+
+        if (fabs((*itAutomataInFront)->autoPosition - (*itThisAutomata)->autoPosition) > (*itAutomataInFront)->autoLength + 0.1f)
+        {
+            // abstand zum vorderen Fahrzeug groesser als 0.3
+
+            //                                                         0.5 - 0.2 - 0.1   - 0.1   =>   distance 0.1  (nicht 0.4, da Abzug von autoLength und Konstante 0.1)
+
+            // move Automata along track
+            distanceToAutomataInFront = (*itAutomataInFront)->autoPosition - (*itAutomataInFront)->autoLength - 0.1f - (*itThisAutomata)->autoPosition;
+            // => 0.1 in disem Beispiel
+        }
+        else
+        {
+            canMove = false;
+        }
+    }
+
+    if (canMove)
+    {
+        // distance nicht groesser als 1
+        if (distanceToAutomataInFront > currentTrack->trackLength)
+        {
+            distanceToAutomataInFront = currentTrack->trackLength;
+        }
+
+        // meistens: autoPosition += t_dt * 1.0 * 0.25
+        autoPosition += t_dt * std::max(distanceToAutomataInFront, 1.0f) * (autoLength < 0.1f ? 0.15f : 0.25f);
+
+        //autoPosition += t_dt * 0.125f;
+    }
+
+
 
     if (autoPosition >= currentTrack->trackLength)
     {

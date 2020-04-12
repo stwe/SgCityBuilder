@@ -57,6 +57,7 @@ namespace sg::city::city
         //-------------------------------------------------
 
         AutomataContainer automatas;
+        bool spawnCars{ false };
 
         //-------------------------------------------------
         // Ctors. / Dtor.

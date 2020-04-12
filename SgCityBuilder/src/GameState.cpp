@@ -104,7 +104,10 @@ void GameState::Render()
     }
 
     // render Navigation Nodes
-    m_city->GetMap().RenderNavigationNodes();
+    if (m_renderNavigationNodes)
+    {
+        m_city->GetMap().RenderNavigationNodes();
+    }
 
     // render cars
     m_forwardRenderer->Render();
@@ -298,7 +301,7 @@ void GameState::RenderImGui()
 
     ImGui::Text("City Automatas: %i", m_city->automatas.size());
 
-    if (ImGui::Button("Spawn Car"))
+    if (ImGui::Button("Spawn single car on current tile"))
     {
         m_city->TrySpawnCarAtSafeTrack(m_mapPoint.x, m_mapPoint.z);
     }
@@ -306,6 +309,16 @@ void GameState::RenderImGui()
     ImGui::Spacing();
     ImGui::Separator();
     ImGui::Spacing();
+
+    if (ImGui::Button("Enable spawn multiple cars"))
+    {
+        m_city->spawnCars = !m_city->spawnCars;
+    }
+
+    if (ImGui::Button("Render Navigation Nodes"))
+    {
+        m_renderNavigationNodes = !m_renderNavigationNodes;
+    }
 
     if (ImGui::Button("Wireframe mode"))
     {

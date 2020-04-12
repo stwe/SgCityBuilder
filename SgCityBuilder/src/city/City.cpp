@@ -113,15 +113,18 @@ void sg::city::city::City::Update(const double t_dt, TileIndexContainer& t_chang
 
     // create some Automatas
 
-    if (automatas.size() < 4)
+    if (spawnCars)
     {
-        auto newCarCreated{ false };
-        auto attempts{ 12 };
-
-        while(!newCarCreated && attempts > 0)
+        if (automatas.size() < 4)
         {
-            attempts--;
-            newCarCreated = TrySpawnCarAtSafeTrack(rand() % m_map->GetMapSize(), rand() % m_map->GetMapSize());
+            auto newCarCreated{ false };
+            auto attempts{ 12 };
+
+            while (!newCarCreated && attempts > 0)
+            {
+                attempts--;
+                newCarCreated = TrySpawnCarAtSafeTrack(rand() % m_map->GetMapSize(), rand() % m_map->GetMapSize());
+            }
         }
     }
 }
