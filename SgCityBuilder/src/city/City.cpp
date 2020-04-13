@@ -115,10 +115,10 @@ void sg::city::city::City::Update(const double t_dt, TileIndexContainer& t_chang
 
     if (spawnCars)
     {
-        if (automatas.size() < 4)
+        if (automatas.size() < MAX_AUTOMATAS)
         {
             auto newCarCreated{ false };
-            auto attempts{ 12 };
+            auto attempts{ ATTEMPS };
 
             while (!newCarCreated && attempts > 0)
             {

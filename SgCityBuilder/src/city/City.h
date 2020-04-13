@@ -50,7 +50,8 @@ namespace sg::city::city
         // Const
         //-------------------------------------------------
 
-
+        static constexpr auto MAX_AUTOMATAS{ 8u };
+        static constexpr auto ATTEMPS{ 12 };
 
         //-------------------------------------------------
         // Public member

@@ -71,7 +71,7 @@ void sg::city::automata::Automata::Update(const float t_dt)
     // Frage: ist dieses Auto ganz vorne in der Liste?
 
     // get an iterator for this automata
-    auto itThisAutomata = std::find(currentTrack->automatas.begin(), currentTrack->automatas.end(), this);
+    const auto itThisAutomata = std::find(currentTrack->automatas.begin(), currentTrack->automatas.end(), this);
 
     // dieses Auto ist ganz vorne
     if (*itThisAutomata == currentTrack->automatas.front()) // fuer A0 und A1 true
@@ -105,7 +105,6 @@ void sg::city::automata::Automata::Update(const float t_dt)
                 if ((*itThisAutomata)->autoPosition < (currentTrack->trackLength + distanceFromAutomataExitNode - autoLength))
                 {
                     distanceToAutomataInFront = (currentTrack->trackLength + distanceFromAutomataExitNode - 0.1f) - (*itThisAutomata)->autoPosition;
-                    SG_OGL_CORE_LOG_INFO("Distance: {}", distanceToAutomataInFront);
                 }
                 else
                 {
@@ -158,37 +157,81 @@ void sg::city::automata::Automata::Update(const float t_dt)
         //autoPosition += t_dt * 0.125f;
     }
 
-
-
     if (autoPosition >= currentTrack->trackLength)
     {
         if (!exitNode->block)
         {
             autoPosition -= currentTrack->trackLength;
 
-            // Ziel erreicht - es wird eine neuer Track benoetigt
+            std::shared_ptr<AutoTrack> newTrack;
 
-            if (exitNode->autoTracks.size() == 1)
+            // es existiert nur noch ein Track und das ist der momentane Track
+            if (exitNode->autoTracks.size() == 1 && *exitNode->autoTracks.begin() == currentTrack)
             {
+                // Automata zum loeschen markieren
                 deleteAutomata = true;
                 return;
             }
 
-            // ersten Track aus der End Node holen
-            auto it{ exitNode->autoTracks.begin() };
-
-            // Track als neuen Track setzen
-            auto newAutoTrack = *it;
-
-            if (currentTrack == newAutoTrack)
+            // es existieren zwei Tracks
+            if (exitNode->autoTracks.size() == 2)
             {
-                ++it;
-                newAutoTrack = *it;
+                // ersten Track aus der EndNode holen
+                auto it{ exitNode->autoTracks.begin() };
+
+                // Track als neuen Track setzen
+                newTrack = *it;
+
+                // falls es sich um den momentanen Track handelt, den anderen nehmen
+                if (currentTrack == newTrack)
+                {
+                    ++it;
+                    newTrack = *it;
+                }
+            }
+            else // mehr als zwei Tracks
+            {
+                while (!newTrack)
+                {
+                    // Zufallszahl zwischen 0 und der Anzahl Tracks
+                    const auto randomTrackIndex{ rand() % exitNode->autoTracks.size() };
+                    auto j{ 0u };
+
+                    // fuer alle Tracks in der EndNode
+                    for (auto it = exitNode->autoTracks.begin(); it != exitNode->autoTracks.end(); ++it)
+                    {
+                        // deref Iterator
+                        auto track = (*it);
+
+                        // neue EndNode aus dem Track ermitteln
+                        auto newExitNode = track->startNode;
+                        if (newExitNode == exitNode)
+                        {
+                            newExitNode = track->endNode;
+                        }
+
+                        // => neuer Track mit neuer EndNode benutzen, wenn j stimmt
+                        if (j == randomTrackIndex && track != currentTrack && !newExitNode->block)
+                        {
+                            newTrack = track;
+                            break;
+                        }
+
+                        j++; // noch nicht der richtige Track
+                    }
+                }
             }
 
+            // EndNode als neue StartNode benutzen
             rootNode = exitNode;
+
+            // Automaten vorne aus der Liste loeschen
             currentTrack->automatas.pop_front();
-            currentTrack = newAutoTrack;
+
+            // neuen Track als aktuellen Track benutzen
+            currentTrack = newTrack;
+
+            // Automaten hinten wieder anfuegen
             currentTrack->automatas.push_back(this);
         }
         else
