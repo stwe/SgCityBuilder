@@ -206,19 +206,29 @@ bool sg::city::city::City::TrySpawnCarAtSafeTrack(const int t_mapX, const int t_
     }
 
     // check if there is a Safe Auto Track
-    if (!tile->safeAutoTrack)
+    if (!tile->HasSafeTrack())
     {
         return false;
     }
 
+    // get the safe AutoTrack
+    const auto it{ std::find_if(tile->GetAutoTracks().begin(), tile->GetAutoTracks().end(),
+        [](const std::shared_ptr<automata::AutoTrack>& t_autoTrack)
+             {
+                return t_autoTrack->isSafe;
+             }
+        )
+    };
+
+    SG_OGL_ASSERT(*it, "[City::TrySpawnCarAtSafeTrack()] Invalid iterator.");
     SG_OGL_LOG_INFO("[City::TrySpawnCarAtSafeTrack()] Spawn a new car at Map x: {}, z: {}", tile->GetMapX(), tile->GetMapZ());
 
     // create an Automata
     auto automata{ std::make_unique<automata::Automata>() };
     automata->autoLength = 0.2f;
-    automata->currentTrack = tile->safeAutoTrack;
+    automata->currentTrack = *it;
     automata->currentTrack->automatas.push_back(automata.get());
-    automata->rootNode = tile->safeAutoTrack->startNode;
+    automata->rootNode = (*it)->startNode;
     automata->Update(0.0f);
 
     automatas.push_back(std::move(automata));

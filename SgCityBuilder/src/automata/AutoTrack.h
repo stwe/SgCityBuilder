@@ -43,6 +43,8 @@ namespace sg::city::automata
 
         AutomataContainer automatas;
 
+        bool isSafe{ false };
+
         //-------------------------------------------------
         // Ctors. / Dtor.
         //-------------------------------------------------

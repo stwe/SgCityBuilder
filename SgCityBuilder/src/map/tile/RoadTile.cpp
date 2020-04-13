@@ -58,6 +58,11 @@ sg::city::map::tile::RoadTile::StopPatternContainer& sg::city::map::tile::RoadTi
     return m_stopPatterns;
 }
 
+bool sg::city::map::tile::RoadTile::HasSafeTrack() const
+{
+    return roadType == RoadType::ROAD_V || roadType == RoadType::ROAD_H;
+}
+
 //-------------------------------------------------
 // Logic
 //-------------------------------------------------
@@ -895,66 +900,14 @@ void sg::city::map::tile::RoadTile::AddAutoTrack(const int t_fromNodeIndex, cons
     track->endNode = to;
     track->tile = this;
     track->trackLength = length(track->startNode->position - track->endNode->position);
+    track->isSafe = t_safeCarAutoTrack;
 
     // inserting at end of Tile track list
     m_autoTracks.push_back(track);
 
-    if (t_safeCarAutoTrack)
-    {
-        safeAutoTrack = track;
-    }
-
-    /*
-    SG_OGL_LOG_INFO("---------------------");
-    SG_OGL_LOG_INFO("| New Track created |");
-    SG_OGL_LOG_INFO("---------------------");
-    SG_OGL_LOG_INFO("Tileindex: {}", t_tileIndex);
-    SG_OGL_LOG_INFO("Track address: {}", (void*)track.get());
-    SG_OGL_LOG_INFO("Track is safe: {}", t_safeCarAutoTrack);
-    SG_OGL_LOG_INFO("Track from {} --> to {}", t_fromNodeIndex, t_toNodeIndex);
-    SG_OGL_LOG_INFO("Track length: {}", track->trackLength);
-    SG_OGL_LOG_INFO("New number of Tracks in the Tile: {}", tile->GetAutoTracks().size());
-    */
-
     // store the auto track in the nodes
     from->autoTracks.push_back(m_autoTracks.back());
     to->autoTracks.push_back(m_autoTracks.back());
-
-    /*
-    SG_OGL_LOG_INFO("");
-
-    for (auto& trackf : from->autoTracks)
-    {
-        SG_OGL_LOG_INFO("Track address: {} is added to node: {}", (void*)trackf.get(), t_fromNodeIndex);
-
-        SG_OGL_LOG_INFO("node From {}  - the track start at x: {}", t_fromNodeIndex, trackf->startNode->position.x);
-        SG_OGL_LOG_INFO("node From {}  - the track start at z: {}", t_fromNodeIndex, trackf->startNode->position.z);
-
-        SG_OGL_LOG_INFO("node From {}  - the track end at x: {}", t_fromNodeIndex, trackf->endNode->position.x);
-        SG_OGL_LOG_INFO("node From {}  - the track end at z: {}", t_fromNodeIndex, trackf->endNode->position.z);
-
-        SG_OGL_LOG_INFO("");
-    }
-
-    for (auto& trackt : to->autoTracks)
-    {
-        SG_OGL_LOG_INFO("Track address: {} is added to node: {}", (void*)trackt.get(), t_toNodeIndex);
-
-        SG_OGL_LOG_INFO("node To {}  - track start x: {}", t_toNodeIndex, trackt->startNode->position.x);
-        SG_OGL_LOG_INFO("node To {}  - track start z: {}", t_toNodeIndex, trackt->startNode->position.z);
-
-        SG_OGL_LOG_INFO("node To {}  - track end x: {}", t_toNodeIndex, trackt->endNode->position.x);
-        SG_OGL_LOG_INFO("node To {}  - track end z: {}", t_toNodeIndex, trackt->endNode->position.z);
-
-        SG_OGL_LOG_INFO("");
-    }
-
-    SG_OGL_LOG_INFO("node From {} count tracks: {} ", t_fromNodeIndex, from->autoTracks.size());
-    SG_OGL_LOG_INFO("node To {} count tracks: {} ", t_toNodeIndex, to->autoTracks.size());
-
-    SG_OGL_LOG_INFO("");
-    SG_OGL_LOG_INFO("");
-    */
 }
 
 sg::city::map::tile::RoadTile::StopPattern sg::city::map::tile::RoadTile::CreateStopPattern(std::string t_s) const

@@ -71,11 +71,6 @@ namespace sg::city::map::tile
         //-------------------------------------------------
 
         /**
-         * @brief The tile may have a Safe Track to spawn a car or a pedestrian.
-         */
-        AutoTrackSharedPtr safeAutoTrack;
-
-        /**
          * @brief The orientation of the road.
          */
         RoadType roadType{ RoadType::ROAD_V };
@@ -104,6 +99,8 @@ namespace sg::city::map::tile
 
         [[nodiscard]] const StopPatternContainer& GetStopPatterns() const noexcept;
         [[nodiscard]] StopPatternContainer& GetStopPatterns() noexcept;
+
+        [[nodiscard]] bool HasSafeTrack() const;
 
         //-------------------------------------------------
         // Logic
