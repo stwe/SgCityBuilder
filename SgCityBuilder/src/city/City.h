@@ -52,6 +52,7 @@ namespace sg::city::city
 
         static constexpr auto MAX_AUTOMATAS{ 8u };
         static constexpr auto ATTEMPS{ 12 };
+        static constexpr auto STOP_PATTERN_SPEED{ 0.75f };
 
         //-------------------------------------------------
         // Public member
@@ -130,6 +131,16 @@ namespace sg::city::city
          * @brief Renders the Map.
          */
         MapRendererUniquePtr m_mapRenderer;
+
+        /**
+         * @brief Is used as a timer to change the StopPattern.
+         */
+        float m_stopPatternTimer{ 0.0f };
+
+        /**
+         * @brief The StopPattern index.
+         */
+        int m_currentStopPattern{ 0 };
 
         //-------------------------------------------------
         // Init

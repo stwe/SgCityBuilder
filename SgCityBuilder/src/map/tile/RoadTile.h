@@ -108,6 +108,12 @@ namespace sg::city::map::tile
 
         void Update() override;
 
+        /**
+         * @brief Apply a Stop Pattern to Nodes.
+         * @param t_index The index of the Stop Pattern.
+         */
+        void ApplyStopPattern(int t_index);
+
         //-------------------------------------------------
         // Debug
         //-------------------------------------------------
@@ -196,11 +202,5 @@ namespace sg::city::map::tile
          * @return A StopPattern.
          */
         [[nodiscard]] StopPattern CreateStopPattern(std::string t_s) const;
-
-        /**
-         * @brief Apply a Stop Pattern to Nodes.
-         * @param t_index The index of the Stop Pattern.
-         */
-        void ApplyStopPattern(int t_index);
     };
 }

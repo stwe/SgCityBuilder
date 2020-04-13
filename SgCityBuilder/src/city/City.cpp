@@ -111,6 +111,34 @@ void sg::city::city::City::Update(const double t_dt, TileIndexContainer& t_chang
     t_changedTiles.clear();
 
 
+    // change StopPattern
+
+    for (auto& tile : m_map->GetTiles())
+    {
+        if (tile->type == map::tile::TileType::TRAFFIC)
+        {
+            auto* roadTile{ dynamic_cast<map::tile::RoadTile*>(tile.get()) };
+            SG_OGL_CORE_ASSERT(roadTile, "[City::Update()] Null pointer.")
+
+            if (!roadTile->GetStopPatterns().empty() && !automatas.empty())
+            {
+                m_stopPatternTimer += static_cast<float>(t_dt) * STOP_PATTERN_SPEED;
+                if (m_stopPatternTimer >= 5.0f) // todo
+                {
+                    m_stopPatternTimer -= 5.0f;
+
+                    m_currentStopPattern++;
+                    m_currentStopPattern %= roadTile->GetStopPatterns().size();
+
+                    SG_OGL_LOG_INFO("[City::Update()] StopPattern changed.");
+
+                    roadTile->ApplyStopPattern(m_currentStopPattern);
+                }
+            }
+        }
+    }
+
+
     // create some Automatas
 
     if (spawnCars)

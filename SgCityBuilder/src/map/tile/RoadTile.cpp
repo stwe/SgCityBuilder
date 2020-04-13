@@ -72,25 +72,35 @@ void sg::city::map::tile::RoadTile::Update()
     SG_OGL_LOG_INFO("[RoadTile::Update()] Start RoadTile update process.");
 
     DetermineRoadType();
-
     CreateAutoTracks();
-
     CreateStopPatterns();
+
+    // is exist a StopPattern, use the index 0 by default
     ApplyStopPattern(0);
 
     // for debug
     CreateAutoTracksMesh();
-    switch (roadType)
+}
+
+void sg::city::map::tile::RoadTile::ApplyStopPattern(const int t_index)
+{
+    if (!m_stopPatterns.empty())
     {
-    case RoadType::ROAD_H:
-    case RoadType::ROAD_V:
-    case RoadType::ROAD_C1:
-    case RoadType::ROAD_C2:
-    case RoadType::ROAD_C3:
-    case RoadType::ROAD_C4:
-        break;
-             // since some Nodes may now be marked as blocked
-    default: m_map->CreateNavigationNodesMesh();
+        SG_OGL_ASSERT(t_index >= 0 && t_index < static_cast<int>(m_stopPatterns.size()), "[RoadTile::ApplyStopPattern()] Invalid index.");
+
+        auto i{ 0 };
+        for (auto& node : m_map->GetNavigationNodes(GetMapIndex()))
+        {
+            if (node)
+            {
+                node->block = m_stopPatterns[t_index][i];
+            }
+
+            i++;
+        }
+
+        // for debug
+        m_map->CreateNavigationNodesMesh();
     }
 }
 
@@ -189,12 +199,11 @@ void sg::city::map::tile::RoadTile::Init()
     // set the RoadType (orientation of the road)
     DetermineRoadType();
 
-    // create Auto Tracks
+    // create AutoTracks
     CreateAutoTracks();
 
-    // create and apply Stop Pattern
+    // create StopPattern
     CreateStopPatterns();
-    ApplyStopPattern(0);
 
     // create AutoTrack mesh for debug
     CreateAutoTracksMesh();
@@ -932,23 +941,4 @@ sg::city::map::tile::RoadTile::StopPattern sg::city::map::tile::RoadTile::Create
     }
 
     return pattern;
-}
-
-void sg::city::map::tile::RoadTile::ApplyStopPattern(const int t_index)
-{
-    if (!m_stopPatterns.empty())
-    {
-        SG_OGL_ASSERT(t_index >= 0 && t_index < static_cast<int>(m_stopPatterns.size()), "[RoadTile::ApplyStopPattern()] Invalid index.");
-
-        auto i{ 0 };
-        for (auto& node : m_map->GetNavigationNodes(GetMapIndex()))
-        {
-            if (node)
-            {
-                node->block = m_stopPatterns[t_index][i];
-            }
-
-            i++;
-        }
-    }
 }
