@@ -211,27 +211,24 @@ void sg::city::map::Map::FindConnectedRegions()
         tile->region = tile::Tile::NO_REGION;
     }
 
-    for (auto z{ 0 }; z < m_mapSize; ++z)
+    for (auto& tile : m_tiles)
     {
-        for (auto x{ 0 }; x < m_mapSize; ++x)
+        auto found{ false };
+        const auto tileIndex{ tile->GetMapIndex() };
+
+        for (auto tileType : tile::Tile::REGION_TILE_TYPES)
         {
-            auto found{ false };
-            const auto tileIndex{ GetTileMapIndexByMapPosition(x, z) };
-
-            for (auto tileType : tile::Tile::REGION_TILE_TYPES)
+            if (tileType == m_tiles[tileIndex]->type)
             {
-                if (tileType == m_tiles[tileIndex]->type)
-                {
-                    found = true;
-                    break;
-                }
+                found = true;
+                break;
             }
+        }
 
-            if (m_tiles[tileIndex]->region == tile::Tile::NO_REGION && found)
-            {
-                regions++;
-                DepthSearch(*m_tiles[tileIndex], regions);
-            }
+        if (m_tiles[tileIndex]->region == tile::Tile::NO_REGION && found)
+        {
+            regions++;
+            DepthSearch(*m_tiles[tileIndex], regions);
         }
     }
 
