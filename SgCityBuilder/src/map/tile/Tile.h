@@ -84,6 +84,11 @@ namespace sg::city::map::tile
          */
         static constexpr auto MAX_POPULATION{ 50 };
 
+        /**
+         * @brief The value in case the Tile does not belong to any region.
+         */
+        static constexpr auto NO_REGION{ 0 };
+
         // Bottom left T1
 
         static constexpr auto BOTTOM_LEFT_POS_X_T1{ 0 };
@@ -235,6 +240,11 @@ namespace sg::city::map::tile
          */
         float population{ 0.0 };
 
+        /**
+         * @brief The region Id of the Tile. Tiles in the same region are connected.
+         */
+        int region{ NO_REGION };
+
         //-------------------------------------------------
         // Ctors. / Dtor.
         //-------------------------------------------------
@@ -376,11 +386,6 @@ namespace sg::city::map::tile
          * @brief Vertices of the Tile.
          */
         VertexContainer m_vertices;
-
-        /**
-         * @brief The region Id of the Tile. Tiles in the same region are connected.
-         */
-        int m_region{ 0 };
 
         //-------------------------------------------------
         // Init

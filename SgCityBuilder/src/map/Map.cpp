@@ -122,6 +122,11 @@ sg::city::map::Map::NavigationNodeContainer& sg::city::map::Map::GetNavigationNo
     return m_tileNavigationNodes[t_index];
 }
 
+int sg::city::map::Map::GetNumRegions() const
+{
+    return m_numRegions;
+}
+
 //-------------------------------------------------
 // Get Tile
 //-------------------------------------------------
@@ -188,6 +193,49 @@ void sg::city::map::Map::UpdateMapVboByTileIndex(const int t_tileIndex) const
     ogl::buffer::Vbo::BindVbo(m_vboId);
     glBufferSubData(GL_ARRAY_BUFFER, t_tileIndex * tile::Tile::SIZE_IN_BYTES_PER_TILE, tile::Tile::SIZE_IN_BYTES_PER_TILE, m_tiles[t_tileIndex]->GetVertices().data());
     ogl::buffer::Vbo::UnbindVbo();
+}
+
+//-------------------------------------------------
+// Regions
+//-------------------------------------------------
+
+void sg::city::map::Map::FindConnectedRegions()
+{
+    // todo: in city update
+
+    auto regions{ 0 };
+
+    // delete the regions Id from all Tiles
+    for (auto& tile : m_tiles)
+    {
+        tile->region = tile::Tile::NO_REGION;
+    }
+
+    for (auto z{ 0 }; z < m_mapSize; ++z)
+    {
+        for (auto x{ 0 }; x < m_mapSize; ++x)
+        {
+            auto found{ false };
+            const auto tileIndex{ GetTileMapIndexByMapPosition(x, z) };
+
+            for (auto tileType : tile::Tile::REGION_TILE_TYPES)
+            {
+                if (tileType == m_tiles[tileIndex]->type)
+                {
+                    found = true;
+                    break;
+                }
+            }
+
+            if (m_tiles[tileIndex]->region == tile::Tile::NO_REGION && found)
+            {
+                regions++;
+                DepthSearch(*m_tiles[tileIndex], regions);
+            }
+        }
+    }
+
+    m_numRegions = regions;
 }
 
 //-------------------------------------------------
@@ -497,6 +545,41 @@ void sg::city::map::Map::StoreRandomColors()
 int32_t sg::city::map::Map::GetVerticesCountOfMap() const
 {
     return static_cast<int32_t>(m_tiles.size()) * tile::Tile::VERTICES_PER_TILE;
+}
+
+void sg::city::map::Map::DepthSearch(tile::Tile& t_startTile, const int t_region)
+{
+    if (t_startTile.region != tile::Tile::NO_REGION)
+    {
+        return;
+    }
+
+    auto found{ false };
+
+    for (auto tileType : tile::Tile::REGION_TILE_TYPES)
+    {
+        if (tileType == t_startTile.type)
+        {
+            found = true;
+            break;
+        }
+    }
+
+    if (!found)
+    {
+        return;
+    }
+
+    t_startTile.region = t_region;
+
+    // changing the color needs also a Vbo update
+    t_startTile.SetColor(static_cast<glm::vec3>(m_randomColors[t_region - 1]));
+    UpdateMapVboByTileIndex(t_startTile.GetMapIndex());
+
+    for (auto& neighbour : t_startTile.GetNeighbours())
+    {
+        DepthSearch(*m_tiles[neighbour.second], t_region);
+    }
 }
 
 //-------------------------------------------------

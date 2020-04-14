@@ -129,6 +129,8 @@ namespace sg::city::map
         [[nodiscard]] const NavigationNodeContainer& GetNavigationNodes(int t_index) const noexcept;
         [[nodiscard]] NavigationNodeContainer& GetNavigationNodes(int t_index) noexcept;
 
+        [[nodiscard]] int GetNumRegions() const;
+
         //-------------------------------------------------
         // Get Tile
         //-------------------------------------------------
@@ -156,6 +158,12 @@ namespace sg::city::map
         //-------------------------------------------------
 
         void UpdateMapVboByTileIndex(int t_tileIndex) const;
+
+        //-------------------------------------------------
+        // Regions
+        //-------------------------------------------------
+
+        void FindConnectedRegions();
 
         //-------------------------------------------------
         // Debug
@@ -215,6 +223,11 @@ namespace sg::city::map
         uint32_t m_vboId{ 0 };
 
         /**
+         * @brief The current number of regions.
+         */
+        int m_numRegions{ 0 };
+
+        /**
          * @brief Navigation Nodes for each Tile.
          */
         TileNavigationNodeContainer m_tileNavigationNodes;
@@ -241,6 +254,8 @@ namespace sg::city::map
         //-------------------------------------------------
 
         [[nodiscard]] int32_t GetVerticesCountOfMap() const;
+
+        void DepthSearch(tile::Tile& t_startTile, int t_region);
 
         //-------------------------------------------------
         // Vbo

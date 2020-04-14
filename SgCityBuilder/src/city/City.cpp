@@ -139,6 +139,11 @@ void sg::city::city::City::Update(const double t_dt, TileIndexContainer& t_chang
     }
 
 
+    // connect regions
+
+    m_map->FindConnectedRegions();
+
+
     // create some Automatas
 
     if (spawnCars)

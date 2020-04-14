@@ -299,25 +299,35 @@ void GameState::RenderImGui()
         ImGui::Text("Current Tile z: %i", tile.GetMapZ());
     }
 
-    ImGui::Text("City Automatas: %i", m_city->automatas.size());
-
     if (ImGui::Button("Spawn single car on current tile"))
     {
         m_city->TrySpawnCarAtSafeTrack(m_mapPoint.x, m_mapPoint.z);
+    }
+
+    if (ImGui::Button("Spawn multiple cars on random tiles"))
+    {
+        m_city->spawnCars = !m_city->spawnCars;
     }
 
     ImGui::Spacing();
     ImGui::Separator();
     ImGui::Spacing();
 
-    if (ImGui::Button("Enable spawn multiple cars"))
-    {
-        m_city->spawnCars = !m_city->spawnCars;
-    }
+    ImGui::Text("Number of regions: %i", m_city->GetMap().GetNumRegions());
+    ImGui::Text("City Automatas: %i", m_city->automatas.size());
+
+    ImGui::Spacing();
+    ImGui::Separator();
+    ImGui::Spacing();
 
     if (ImGui::Button("Render Navigation Nodes"))
     {
         m_renderNavigationNodes = !m_renderNavigationNodes;
+    }
+
+    if (ImGui::Button("Show contiguous regions"))
+    {
+        m_city->GetMap().showRegions = !m_city->GetMap().showRegions;
     }
 
     if (ImGui::Button("Wireframe mode"))
