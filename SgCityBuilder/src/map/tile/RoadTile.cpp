@@ -63,6 +63,11 @@ bool sg::city::map::tile::RoadTile::HasSafeTrack() const
     return roadType == RoadType::ROAD_V || roadType == RoadType::ROAD_H;
 }
 
+int sg::city::map::tile::RoadTile::GetCurrentStopPatternIndex() const
+{
+    return m_currentStopPatternIndex;
+}
+
 //-------------------------------------------------
 // Logic
 //-------------------------------------------------
@@ -98,6 +103,9 @@ void sg::city::map::tile::RoadTile::ApplyStopPattern(const int t_index)
 
             i++;
         }
+
+        // store given index as current
+        m_currentStopPatternIndex = t_index;
 
         // for debug
         m_map->CreateNavigationNodesMesh();

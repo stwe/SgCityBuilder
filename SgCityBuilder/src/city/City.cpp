@@ -127,16 +127,23 @@ void sg::city::city::City::Update(const double t_dt, TileIndexContainer& t_chang
             if (!roadTile->GetStopPatterns().empty() && !automatas.empty())
             {
                 m_stopPatternTimer += static_cast<float>(t_dt) * STOP_PATTERN_SPEED;
-                if (m_stopPatternTimer >= 5.0f) // todo
+                if (m_stopPatternTimer >= 5.0f)
                 {
-                    m_stopPatternTimer -= 5.0f;
+                    m_stopPatternTimer = 0.0f;
 
-                    m_currentStopPattern++;
-                    m_currentStopPattern %= roadTile->GetStopPatterns().size();
+                    const auto lastIndex{ static_cast<int>(roadTile->GetStopPatterns().size()) - 1 };
+                    const auto currentIndex{ roadTile->GetCurrentStopPatternIndex() };
 
-                    SG_OGL_LOG_INFO("[City::Update()] StopPattern changed.");
+                    if (currentIndex == lastIndex)
+                    {
+                        roadTile->ApplyStopPattern(0);
+                    }
+                    else
+                    {
+                        roadTile->ApplyStopPattern(currentIndex + 1);
+                    }
 
-                    roadTile->ApplyStopPattern(m_currentStopPattern);
+                    SG_OGL_LOG_WARN("[City::Update()] StopPattern changed.");
                 }
             }
         }

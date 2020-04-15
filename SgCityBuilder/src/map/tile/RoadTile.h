@@ -102,6 +102,8 @@ namespace sg::city::map::tile
 
         [[nodiscard]] bool HasSafeTrack() const;
 
+        [[nodiscard]] int GetCurrentStopPatternIndex() const;
+
         //-------------------------------------------------
         // Logic
         //-------------------------------------------------
@@ -163,6 +165,11 @@ namespace sg::city::map::tile
          * @brief A Mesh holding the whole Auto Tracks for debug.
          */
         MeshUniquePtr m_autoTracksMesh;
+
+        /**
+         * @brief The index of the current StopPattern.
+         */
+        int m_currentStopPatternIndex{ 0 };
 
         //-------------------------------------------------
         // Regulate traffic
