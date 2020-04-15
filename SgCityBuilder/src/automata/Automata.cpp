@@ -152,7 +152,7 @@ void sg::city::automata::Automata::Update(const float t_dt)
         }
 
         // meistens: autoPosition += t_dt * 1.0 * 0.25
-        autoPosition += t_dt * std::max(distanceToAutomataInFront, 1.0f) * (autoLength < 0.1f ? 0.15f : 0.25f);
+        autoPosition += t_dt * std::max(distanceToAutomataInFront, 1.0f) * (autoLength < 0.1f ? 0.25f : 0.5f);
 
         //autoPosition += t_dt * 0.125f;
     }

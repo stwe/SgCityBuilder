@@ -340,10 +340,10 @@ void sg::city::city::City::CreateCarEntity()
 
     // add a Model
     auto entity{ m_scene->GetApplicationContext()->GetEntityFactory().CreateModelEntity(
-        "res/model/Plane1/plane1.obj",
+        "res/model/CarKit/suv.obj",
         glm::vec3(automata->position.x, 0.015f, automata->position.z),
-        glm::vec3(0.0f),
-        glm::vec3(0.125f / 4.0f),
+        glm::vec3(0.0f, 90.0f, 0.0f),
+        glm::vec3(0.17f),
         false
     ) };
 
