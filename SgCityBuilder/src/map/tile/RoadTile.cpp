@@ -248,12 +248,12 @@ void sg::city::map::tile::RoadTile::CreateAutoTracks()
     switch (roadType)
     {
     case RoadType::ROAD_H:
-        AddAutoTrack(34, 28);
-        AddAutoTrack(14, 20, true);
+        AddAutoTrack(34, 28, 0.0f);
+        AddAutoTrack(14, 20, 180.0f, true);
         break;
     case RoadType::ROAD_V:
-        AddAutoTrack(44, 2, true);
-        AddAutoTrack(4, 46);
+        AddAutoTrack(44, 2, 90.0f, true);
+        AddAutoTrack(4, 46, 270.0f);
         break;
 
         /*
@@ -263,10 +263,10 @@ void sg::city::map::tile::RoadTile::CreateAutoTracks()
          * |
          */
     case RoadType::ROAD_C1:
-        AddAutoTrack(34, 30);
-        AddAutoTrack(30, 2);
-        AddAutoTrack(4, 18);
-        AddAutoTrack(18, 20);
+        AddAutoTrack(34, 30, 0.0f);
+        AddAutoTrack(30, 2, 90.0f);
+        AddAutoTrack(4, 18, 270.0f);
+        AddAutoTrack(18, 20, 180.0f);
         break;
 
         /*
@@ -276,10 +276,10 @@ void sg::city::map::tile::RoadTile::CreateAutoTracks()
          *            |
          */
     case RoadType::ROAD_C2:
-        AddAutoTrack(4, 32);
-        AddAutoTrack(32, 28);
-        AddAutoTrack(14, 16);
-        AddAutoTrack(16, 2);
+        AddAutoTrack(4, 32, 270.0f);
+        AddAutoTrack(32, 28, 0.0f);
+        AddAutoTrack(14, 16, 180.0f);
+        AddAutoTrack(16, 2, 90.0f);
         break;
 
         /*
@@ -289,10 +289,10 @@ void sg::city::map::tile::RoadTile::CreateAutoTracks()
          *  --------->
          */
     case RoadType::ROAD_C3:
-        AddAutoTrack(44, 16);
-        AddAutoTrack(16, 20);
-        AddAutoTrack(34, 32);
-        AddAutoTrack(32, 46);
+        AddAutoTrack(44, 16, 90.0f);
+        AddAutoTrack(16, 20, 180.0f);
+        AddAutoTrack(34, 32, 0.0f);
+        AddAutoTrack(32, 46, 270.0f);
         break;
 
         /*
@@ -302,10 +302,10 @@ void sg::city::map::tile::RoadTile::CreateAutoTracks()
          * <---------
          */
     case RoadType::ROAD_C4:
-        AddAutoTrack(44, 30);
-        AddAutoTrack(30, 28);
-        AddAutoTrack(14, 18);
-        AddAutoTrack(18, 46);
+        AddAutoTrack(44, 30, 90.0f);
+        AddAutoTrack(30, 28, 0.0f);
+        AddAutoTrack(14, 18, 180.0f);
+        AddAutoTrack(18, 46, 270.0f);
         break;
 
         /*
@@ -315,19 +315,19 @@ void sg::city::map::tile::RoadTile::CreateAutoTracks()
          *       |
          */
     case RoadType::ROAD_T1:
-        AddAutoTrack(34, 32);
-        AddAutoTrack(32, 30);
-        AddAutoTrack(30, 28);
+        AddAutoTrack(34, 32, 0.0f);
+        AddAutoTrack(32, 30, 0.0f);
+        AddAutoTrack(30, 28, 0.0f);
 
-        AddAutoTrack(14, 16);
-        AddAutoTrack(16, 18);
-        AddAutoTrack(18, 20);
+        AddAutoTrack(14, 16, 180.0f);
+        AddAutoTrack(16, 18, 180.0f);
+        AddAutoTrack(18, 20, 180.0f);
 
-        AddAutoTrack(30, 16);
-        AddAutoTrack(16, 2);
+        AddAutoTrack(30, 16, 90.0f);
+        AddAutoTrack(16, 2, 90.0f);
 
-        AddAutoTrack(4, 18);
-        AddAutoTrack(18, 32);
+        AddAutoTrack(4, 18, 270.0f);
+        AddAutoTrack(18, 32, 270.0f);
         break;
 
         /*
@@ -337,19 +337,19 @@ void sg::city::map::tile::RoadTile::CreateAutoTracks()
          *  <--------->
          */
     case RoadType::ROAD_T4:
-        AddAutoTrack(34, 32);
-        AddAutoTrack(32, 30);
-        AddAutoTrack(30, 28);
+        AddAutoTrack(34, 32, 0.0f);
+        AddAutoTrack(32, 30, 0.0f);
+        AddAutoTrack(30, 28, 0.0f);
 
-        AddAutoTrack(14, 16);
-        AddAutoTrack(16, 18);
-        AddAutoTrack(18, 20);
+        AddAutoTrack(14, 16, 180.0f);
+        AddAutoTrack(16, 18, 180.0f);
+        AddAutoTrack(18, 20, 180.0f);
 
-        AddAutoTrack(44, 30);
-        AddAutoTrack(30, 16);
+        AddAutoTrack(44, 30, 90.0f);
+        AddAutoTrack(30, 16, 90.0f);
 
-        AddAutoTrack(18, 32);
-        AddAutoTrack(32, 46);
+        AddAutoTrack(18, 32, 270.0f);
+        AddAutoTrack(32, 46, 270.0f);
         break;
 
         /*
@@ -359,19 +359,19 @@ void sg::city::map::tile::RoadTile::CreateAutoTracks()
          * |
          */
     case RoadType::ROAD_T2:
-        AddAutoTrack(44, 30);
-        AddAutoTrack(30, 16);
-        AddAutoTrack(16, 2);
+        AddAutoTrack(44, 30, 90.0f);
+        AddAutoTrack(30, 16, 90.0f);
+        AddAutoTrack(16, 2, 90.0f);
 
-        AddAutoTrack(4, 18);
-        AddAutoTrack(18, 32);
-        AddAutoTrack(32, 46);
+        AddAutoTrack(4, 18, 270.0f);
+        AddAutoTrack(18, 32, 270.0f);
+        AddAutoTrack(32, 46, 270.0f);
 
-        AddAutoTrack(34, 32);
-        AddAutoTrack(32, 30);
+        AddAutoTrack(34, 32, 0.0f);
+        AddAutoTrack(32, 30, 0.0f);
 
-        AddAutoTrack(16, 18);
-        AddAutoTrack(18, 20);
+        AddAutoTrack(16, 18, 180.0f);
+        AddAutoTrack(18, 20, 180.0f);
         break;
 
         /*
@@ -381,37 +381,37 @@ void sg::city::map::tile::RoadTile::CreateAutoTracks()
          *         |
          */
     case RoadType::ROAD_T3:
-        AddAutoTrack(44, 30);
-        AddAutoTrack(30, 16);
-        AddAutoTrack(16, 2);
+        AddAutoTrack(44, 30, 90.0f);
+        AddAutoTrack(30, 16, 90.0f);
+        AddAutoTrack(16, 2, 90.0f);
 
-        AddAutoTrack(4, 18);
-        AddAutoTrack(18, 32);
-        AddAutoTrack(32, 46);
+        AddAutoTrack(4, 18, 270.0f);
+        AddAutoTrack(18, 32, 270.0f);
+        AddAutoTrack(32, 46, 270.0f);
 
-        AddAutoTrack(32, 30);
-        AddAutoTrack(30, 28);
+        AddAutoTrack(32, 30, 0.0f);
+        AddAutoTrack(30, 28, 0.0f);
 
-        AddAutoTrack(14, 16);
-        AddAutoTrack(16, 18);
+        AddAutoTrack(14, 16, 180.0f);
+        AddAutoTrack(16, 18, 180.0f);
         break;
 
     case RoadType::ROAD_X:
-        AddAutoTrack(44, 30);
-        AddAutoTrack(30, 16);
-        AddAutoTrack(16, 2);
+        AddAutoTrack(44, 30, 90.0f);
+        AddAutoTrack(30, 16, 90.0f);
+        AddAutoTrack(16, 2, 90.0f);
 
-        AddAutoTrack(4, 18);
-        AddAutoTrack(18, 32);
-        AddAutoTrack(32, 46);
+        AddAutoTrack(4, 18, 270.0f);
+        AddAutoTrack(18, 32, 270.0f);
+        AddAutoTrack(32, 46, 270.0f);
 
-        AddAutoTrack(34, 32);
-        AddAutoTrack(32, 30);
-        AddAutoTrack(30, 28);
+        AddAutoTrack(34, 32, 0.0f);
+        AddAutoTrack(32, 30, 0.0f);
+        AddAutoTrack(30, 28, 0.0f);
 
-        AddAutoTrack(14, 16);
-        AddAutoTrack(16, 18);
-        AddAutoTrack(18, 20);
+        AddAutoTrack(14, 16, 180.0f);
+        AddAutoTrack(16, 18, 180.0f);
+        AddAutoTrack(18, 20, 180.0f);
         break;
 
     default:;
@@ -899,7 +899,7 @@ bool sg::city::map::tile::RoadTile::DetermineRoadType()
     return oldRoadType != newRoadType;
 }
 
-void sg::city::map::tile::RoadTile::AddAutoTrack(const int t_fromNodeIndex, const int t_toNodeIndex, const bool t_safeCarAutoTrack)
+void sg::city::map::tile::RoadTile::AddAutoTrack(const int t_fromNodeIndex, const int t_toNodeIndex, const float t_rotation, const bool t_safeCarAutoTrack)
 {
     SG_OGL_CORE_ASSERT(t_fromNodeIndex >= 0 && t_fromNodeIndex <= 48, "[RoadTile::AddAutoTrack()] Invalid From index.")
     SG_OGL_CORE_ASSERT(t_toNodeIndex >= 0 && t_toNodeIndex <= 48, "[RoadTile::AddAutoTrack()] Invalid To index.")
@@ -918,6 +918,7 @@ void sg::city::map::tile::RoadTile::AddAutoTrack(const int t_fromNodeIndex, cons
     track->tile = this;
     track->trackLength = length(track->startNode->position - track->endNode->position);
     track->isSafe = t_safeCarAutoTrack;
+    track->rotation = t_rotation;
 
     // inserting at end of Tile track list
     m_autoTracks.push_back(track);

@@ -205,6 +205,7 @@ void GameState::UpdateCars(const double t_dt) const
         else
         {
             transformComponent.position = glm::vec3(automataComponent.automata->position.x, 0.015f, automataComponent.automata->position.z);
+            transformComponent.rotation = glm::vec3(0.0f, automataComponent.automata->currentTrack->rotation, 0.0f);
         }
     }
 }

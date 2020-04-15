@@ -198,10 +198,11 @@ namespace sg::city::map::tile
         /**
          * @brief Creates a single Auto Track.
          * @param t_fromNodeIndex The From Node
-         * @param t_toNodeIndex  The To Node.
+         * @param t_toNodeIndex The To Node.
+         * @param t_rotation The rotation of the car.
          * @param t_safeCarAutoTrack True if the Track is safe.
          */
-        void AddAutoTrack(int t_fromNodeIndex, int t_toNodeIndex, bool t_safeCarAutoTrack = false);
+        void AddAutoTrack(int t_fromNodeIndex, int t_toNodeIndex, float t_rotation = 0.0f, bool t_safeCarAutoTrack = false);
 
         /**
          * @brief Creates a single Stop Pattern.

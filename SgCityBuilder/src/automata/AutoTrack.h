@@ -45,6 +45,11 @@ namespace sg::city::automata
 
         bool isSafe{ false };
 
+        /**
+         * @brief The rotation of the car model.
+         */
+        float rotation{ 0.0f };
+
         //-------------------------------------------------
         // Ctors. / Dtor.
         //-------------------------------------------------
