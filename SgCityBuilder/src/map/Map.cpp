@@ -247,6 +247,11 @@ void sg::city::map::Map::CreateNavigationNodesMesh()
 
     for (auto tileIndex{ 0 }; tileIndex < GetNrOfAllTiles(); ++tileIndex)
     {
+        if (m_tiles[tileIndex]->type != tile::TileType::TRAFFIC)
+        {
+            continue;
+        }
+
         for (auto& node : m_tileNavigationNodes[tileIndex])
         {
             // some nodes are nullptr
@@ -274,6 +279,11 @@ void sg::city::map::Map::CreateNavigationNodesMesh()
                 }
             }
         }
+    }
+
+    if (vertexContainer.empty())
+    {
+        return;
     }
 
     if (m_navigationNodesMesh)

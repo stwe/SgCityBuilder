@@ -26,11 +26,13 @@ namespace sg::city::automata
 namespace sg::city::map
 {
     class Map;
+    class RoadNetwork;
 }
 
 namespace sg::city::renderer
 {
     class MapRenderer;
+    class RoadNetworkRenderer;
 }
 
 namespace sg::city::city
@@ -45,6 +47,9 @@ namespace sg::city::city
 
         using AutomataSharedPtr = std::shared_ptr<automata::Automata>;
         using AutomataContainer = std::list<AutomataSharedPtr>;
+
+        using RoadNetworkSharedPtr = std::shared_ptr<map::RoadNetwork>;
+        using RoadNetworkRendererUniquePtr = std::unique_ptr<renderer::RoadNetworkRenderer>;
 
         //-------------------------------------------------
         // Const
@@ -142,6 +147,16 @@ namespace sg::city::city
          */
         int m_currentStopPattern{ 0 };
 
+        /**
+         * @brief The RoadNetwork of the City.
+         */
+        RoadNetworkSharedPtr m_roadNetwork;
+
+        /**
+         * @brief Renders the RoadNetwork.
+         */
+        RoadNetworkRendererUniquePtr m_roadNetworkRenderer;
+
         //-------------------------------------------------
         // Init
         //-------------------------------------------------
@@ -154,5 +169,6 @@ namespace sg::city::city
 
         void CreateMapEntity();
         void CreateCarEntity();
+        void CreateRoadNetworkEntity();
     };
 }

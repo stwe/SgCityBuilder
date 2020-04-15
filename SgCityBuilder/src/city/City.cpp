@@ -16,8 +16,10 @@
 #include <scene/Scene.h>
 #include "City.h"
 #include "map/Map.h"
+#include "map/RoadNetwork.h"
 #include "map/tile/RoadTile.h"
 #include "renderer/MapRenderer.h"
+#include "renderer/RoadNetworkRenderer.h"
 #include "automata/Automata.h"
 #include "automata/AutoTrack.h"
 
@@ -101,6 +103,8 @@ void sg::city::city::City::Update(const double t_dt, TileIndexContainer& t_chang
                     tile->Update();
                 }
             }
+
+            m_roadNetwork->CreateRoadNetworkMesh();
         }
         else
         {
@@ -165,6 +169,7 @@ void sg::city::city::City::Update(const double t_dt, TileIndexContainer& t_chang
 void sg::city::city::City::Render() const
 {
     m_mapRenderer->Render();
+    m_roadNetworkRenderer->Render();
 }
 
 //-------------------------------------------------
@@ -284,11 +289,16 @@ void sg::city::city::City::Init(ogl::scene::Scene* t_scene, const int t_mapSize)
     m_map->rotation = glm::vec3(0.0f);
     m_map->scale = glm::vec3(1.0f);
 
+    // create RoadNetwork
+    m_roadNetwork = std::make_shared<map::RoadNetwork>(this);
+
     // create Renderer
     m_mapRenderer = std::make_unique<renderer::MapRenderer>(t_scene);
+    m_roadNetworkRenderer = std::make_unique<renderer::RoadNetworkRenderer>(t_scene);
 
-    // create Map Entity
+    // create entities
     CreateMapEntity();
+    CreateRoadNetworkEntity();
 }
 
 //-------------------------------------------------
@@ -336,5 +346,22 @@ void sg::city::city::City::CreateCarEntity()
     m_scene->GetApplicationContext()->registry.assign<ecs::AutomataComponent>(
         entity,
         automata
+    );
+}
+
+void sg::city::city::City::CreateRoadNetworkEntity()
+{
+    const auto entity{ m_scene->GetApplicationContext()->registry.create() };
+
+    m_scene->GetApplicationContext()->registry.assign<ecs::RoadNetworkComponent>(
+        entity,
+        m_roadNetwork
+    );
+
+    m_scene->GetApplicationContext()->registry.assign<ogl::ecs::component::TransformComponent>(
+        entity,
+        m_map->position,
+        m_map->rotation,
+        m_map->scale
     );
 }
