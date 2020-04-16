@@ -9,29 +9,28 @@
 
 #pragma once
 
-#include <memory>
-#include <glm/mat4x4.hpp>
+#include "tile/BuildingTile.h"
 
-namespace sg::ogl::resource
+namespace sg::city::city
 {
-    class Mesh;
+    class City;
 }
 
 namespace sg::city::map
 {
-    class Map;
-
     class BuildingGenerator
     {
     public:
-        using VertexContainer = std::vector<float>;
-        using TileIndexContainer = std::vector<int>;
         using MeshUniquePtr = std::unique_ptr<ogl::resource::Mesh>;
+        using VertexContainer = std::vector<float>;
         using MatricesContainer = std::vector<glm::mat4>;
 
-        static constexpr uint32_t NUMBER_OF_FLOATS_PER_INSTANCE{ 16 };
+        //-------------------------------------------------
+        // Const
+        //-------------------------------------------------
+
         static constexpr auto DRAW_COUNT{ 36 };
-        static constexpr auto NO_BUILDING{ -1 };
+        static constexpr uint32_t NUMBER_OF_FLOATS_PER_INSTANCE{ 16 };
 
         //-------------------------------------------------
         // Ctors. / Dtor.
@@ -39,7 +38,7 @@ namespace sg::city::map
 
         BuildingGenerator() = delete;
 
-        explicit BuildingGenerator(Map* t_map);
+        explicit BuildingGenerator(city::City* t_city);
 
         BuildingGenerator(const BuildingGenerator& t_other) = delete;
         BuildingGenerator(BuildingGenerator&& t_other) noexcept = delete;
@@ -55,53 +54,32 @@ namespace sg::city::map
         [[nodiscard]] const ogl::resource::Mesh& GetMesh() const noexcept;
         [[nodiscard]] ogl::resource::Mesh& GetMesh() noexcept;
 
-        [[nodiscard]] uint32_t GetTextureAtlasId() const;
         [[nodiscard]] uint32_t GetInstances() const;
+        [[nodiscard]] uint32_t GetBuildingTextureAtlasId() const;
 
         //-------------------------------------------------
-        // Add Building
+        // Add
         //-------------------------------------------------
 
-        void StoreBuildingOnPosition(const glm::vec3& t_mapPoint);
-
-        //-------------------------------------------------
-        // Update
-        //-------------------------------------------------
-
-        void Update();
+        void AddBuilding(tile::BuildingTile& t_buildingTile);
 
     protected:
 
     private:
         /**
-         * @brief A pointer to the parent Map.
+         * @brief A pointer to the parent City.
          */
-        Map* m_map{ nullptr };
+        city::City* m_city{ nullptr };
 
         /**
-         * @brief The Vbo Id holding the instanced data of all buildings.
-         */
-        uint32_t m_vboId{ 0 };
-
-        /**
-         * @brief A quad mesh using as default geometry for a building.
+         * @brief A quad mesh using as default geometry for a single building.
          */
         MeshUniquePtr m_quadMesh;
 
         /**
-         * @brief The texture Id of the building texture atlas.
+         * @brief The Id of the Vbo holding the instanced data of all buildings.
          */
-        uint32_t m_buildingTextureAtlasId{ 0 };
-
-        /**
-         * @brief Stores the position of the building in the Vbo.
-         */
-        TileIndexContainer m_lookupTable;
-
-        /**
-         * @brief The current number of building instances.
-         */
-        uint32_t m_instances{ 0 };
+        uint32_t m_vboId{ 0 };
 
         /**
          * @brief The transformation matrices for all the instances.
@@ -113,14 +91,7 @@ namespace sg::city::map
         //-------------------------------------------------
 
         void InitQuadMesh();
+        void InitVboForInstancedData();
         void Init();
-
-        void AddBuildingInstance(const glm::vec3& t_mapPoint);
-
-        //-------------------------------------------------
-        // Update
-        //-------------------------------------------------
-
-        void UpdateVbo();
     };
 }

@@ -185,12 +185,17 @@ void sg::city::map::tile::RoadTile::RenderAutoTracks() const
     ogl::resource::ShaderProgram::Unbind();
 }
 
+//-------------------------------------------------
+// Init
+//-------------------------------------------------
+
 void sg::city::map::tile::RoadTile::Init()
 {
     SG_OGL_CORE_ASSERT(!m_neighbours.empty(), "[RoadTile::Init()] No neighbours available. Call this function after creating the Tile.")
     SG_OGL_CORE_ASSERT(m_autoTracks.empty(), "[RoadTile::Init()] Call this function after creating the Tile.")
     SG_OGL_CORE_ASSERT(m_stopPatterns.empty(), "[RoadTile::Init()] Call this function after creating the Tile.")
 
+    /*
     // Tile
 
     // we use the TileType number as value for the texture
@@ -201,6 +206,7 @@ void sg::city::map::tile::RoadTile::Init()
 
     // update Vbo
     m_map->UpdateMapVboByTileIndex(GetMapIndex());
+    */
 
 
     // RoadTile
@@ -447,7 +453,7 @@ void sg::city::map::tile::RoadTile::CreateStopPatterns()
         // Allow West Traffic
         m_stopPatterns.push_back(
             CreateStopPattern(
-                ". . X . O . ."
+             ". . X . O . ."
                 ". . . X . . ."
                 "X . X . O . X"
                 ". X . . . X ."
@@ -458,7 +464,7 @@ void sg::city::map::tile::RoadTile::CreateStopPatterns()
         // Stop West Traffic
         m_stopPatterns.push_back(
             CreateStopPattern(
-                ". . X . O . ."
+             ". . X . O . ."
                 ". . . X . . ."
                 "X . X . O . X"
                 ". X . . . X ."
@@ -469,7 +475,7 @@ void sg::city::map::tile::RoadTile::CreateStopPatterns()
         // Stop North Traffic
         m_stopPatterns.push_back(
             CreateStopPattern(
-                ". . O . X . ."
+             ". . O . X . ."
                 ". . . X . . ."
                 "O . O . X . X"
                 ". X . . . X ."
@@ -480,7 +486,7 @@ void sg::city::map::tile::RoadTile::CreateStopPatterns()
         // Stop North Traffic
         m_stopPatterns.push_back(
             CreateStopPattern(
-                ". . X . X . ."
+             ". . X . X . ."
                 ". . . X . . ."
                 "O . O . X . X"
                 ". X . . . X ."
@@ -491,7 +497,7 @@ void sg::city::map::tile::RoadTile::CreateStopPatterns()
         // Allow East Traffic
         m_stopPatterns.push_back(
             CreateStopPattern(
-                ". . X . O . ."
+             ". . X . O . ."
                 ". . . X . . ."
                 "O . O . O . O"
                 ". X . . . X ."
@@ -502,7 +508,7 @@ void sg::city::map::tile::RoadTile::CreateStopPatterns()
         // Stop East Traffic
         m_stopPatterns.push_back(
             CreateStopPattern(
-                ". . X . O . ."
+             ". . X . O . ."
                 ". . . X . . ."
                 "O . O . O . X"
                 ". X . . . X ."
@@ -513,7 +519,7 @@ void sg::city::map::tile::RoadTile::CreateStopPatterns()
         // Allow South Traffic
         m_stopPatterns.push_back(
             CreateStopPattern(
-                ". . X . O . ."
+             ". . X . O . ."
                 ". . . X . . ."
                 "O . O . O . X"
                 ". X . . . X ."
@@ -524,7 +530,7 @@ void sg::city::map::tile::RoadTile::CreateStopPatterns()
         // Allow South Traffic
         m_stopPatterns.push_back(
             CreateStopPattern(
-                ". . X . O . ."
+             ". . X . O . ."
                 ". . . X . . ."
                 "O . O . O . X"
                 ". X . . . X ."
@@ -538,7 +544,7 @@ void sg::city::map::tile::RoadTile::CreateStopPatterns()
         // Allow West Traffic
         m_stopPatterns.push_back(
             CreateStopPattern(
-                ". . X . X . ."
+             ". . X . X . ."
                 ". . . X . . ."
                 "X . X . X . X"
                 ". X . . . X ."
@@ -549,7 +555,7 @@ void sg::city::map::tile::RoadTile::CreateStopPatterns()
         // Stop West Traffic
         m_stopPatterns.push_back(
             CreateStopPattern(
-                ". . X . X . ."
+             ". . X . X . ."
                 ". . . X . . ."
                 "X . X . X . X"
                 ". X . . . X ."
@@ -560,7 +566,7 @@ void sg::city::map::tile::RoadTile::CreateStopPatterns()
         // Allow East Traffic
         m_stopPatterns.push_back(
             CreateStopPattern(
-                ". . X . X . ."
+             ". . X . X . ."
                 ". . . X . . ."
                 "O . O . O . O"
                 ". X . . . X ."
@@ -571,7 +577,7 @@ void sg::city::map::tile::RoadTile::CreateStopPatterns()
         // Stop East Traffic
         m_stopPatterns.push_back(
             CreateStopPattern(
-                ". . X . X . ."
+             ". . X . X . ."
                 ". . . X . . ."
                 "O . O . O . X"
                 ". X . . . X ."
@@ -582,7 +588,7 @@ void sg::city::map::tile::RoadTile::CreateStopPatterns()
         // Allow South Traffic
         m_stopPatterns.push_back(
             CreateStopPattern(
-                ". . X . X . ."
+             ". . X . X . ."
                 ". . . X . . ."
                 "O . O . O . X"
                 ". X . . . X ."
@@ -593,7 +599,7 @@ void sg::city::map::tile::RoadTile::CreateStopPatterns()
         // Stop South Traffic
         m_stopPatterns.push_back(
             CreateStopPattern(
-                ". . X . X . ."
+             ". . X . X . ."
                 ". . . X . . ."
                 "O . O . O . X"
                 ". X . . . X ."
@@ -607,7 +613,7 @@ void sg::city::map::tile::RoadTile::CreateStopPatterns()
         // Allow North Traffic
         m_stopPatterns.push_back(
             CreateStopPattern(
-                ". . O . X . ."
+             ". . O . X . ."
                 ". . . X . . ."
                 "X . O . X . X"
                 ". . . . . X ."
@@ -618,7 +624,7 @@ void sg::city::map::tile::RoadTile::CreateStopPatterns()
         // Stop North Traffic
         m_stopPatterns.push_back(
             CreateStopPattern(
-                ". . X . X . ."
+             ". . X . X . ."
                 ". . . X . . ."
                 "X . O . X . X"
                 ". . . . . X ."
@@ -629,7 +635,7 @@ void sg::city::map::tile::RoadTile::CreateStopPatterns()
         // Allow East Traffic
         m_stopPatterns.push_back(
             CreateStopPattern(
-                ". . X . O . ."
+            ". . X . O . ."
                 ". . . X . . ."
                 "X . O . O . O"
                 ". . . . . X ."
@@ -640,7 +646,7 @@ void sg::city::map::tile::RoadTile::CreateStopPatterns()
         // Stop East Traffic
         m_stopPatterns.push_back(
             CreateStopPattern(
-                ". . X . O . ."
+             ". . X . O . ."
                 ". . . X . . ."
                 "X . O . O . X"
                 ". . . . . X ."
@@ -651,7 +657,7 @@ void sg::city::map::tile::RoadTile::CreateStopPatterns()
         // Allow South Traffic
         m_stopPatterns.push_back(
             CreateStopPattern(
-                ". . X . O . ."
+             ". . X . O . ."
                 ". . . X . . ."
                 "X . X . O . X"
                 ". . . . . X ."
@@ -662,7 +668,7 @@ void sg::city::map::tile::RoadTile::CreateStopPatterns()
         // Stop South Traffic
         m_stopPatterns.push_back(
             CreateStopPattern(
-                ". . X . O . ."
+             ". . X . O . ."
                 ". . . X . . ."
                 "X . X . O . X"
                 ". . . . . X ."
@@ -676,7 +682,7 @@ void sg::city::map::tile::RoadTile::CreateStopPatterns()
         // Allow West Traffic
         m_stopPatterns.push_back(
             CreateStopPattern(
-                ". . X . O . ."
+             ". . X . O . ."
                 ". . . X . . ."
                 "X . X . O . X"
                 ". X . . . X ."
@@ -687,7 +693,7 @@ void sg::city::map::tile::RoadTile::CreateStopPatterns()
         // Stop West Traffic
         m_stopPatterns.push_back(
             CreateStopPattern(
-                ". . X . O . ."
+             ". . X . O . ."
                 ". . . X . . ."
                 "X . X . O . X"
                 ". X . . . X ."
@@ -698,7 +704,7 @@ void sg::city::map::tile::RoadTile::CreateStopPatterns()
         // Allow North Traffic
         m_stopPatterns.push_back(
             CreateStopPattern(
-                ". . O . X . ."
+             ". . O . X . ."
                 ". . . X . . ."
                 "O . O . X . X"
                 ". X . . . X ."
@@ -709,7 +715,7 @@ void sg::city::map::tile::RoadTile::CreateStopPatterns()
         // Stop North Traffic
         m_stopPatterns.push_back(
             CreateStopPattern(
-                ". . X . X . ."
+             ". . X . X . ."
                 ". . . X . . ."
                 "O . O . X . X"
                 ". X . . . X ."
@@ -720,7 +726,7 @@ void sg::city::map::tile::RoadTile::CreateStopPatterns()
         // Allow South Traffic
         m_stopPatterns.push_back(
             CreateStopPattern(
-                ". . X . O . ."
+             ". . X . O . ."
                 ". . . X . . ."
                 "O . O . O . X"
                 ". X . . . X ."
@@ -731,7 +737,7 @@ void sg::city::map::tile::RoadTile::CreateStopPatterns()
         // Stop South Traffic
         m_stopPatterns.push_back(
             CreateStopPattern(
-                ". . X . O . ."
+             ". . X . O . ."
                 ". . . X . . ."
                 "O . O . O . X"
                 ". X . . . X ."
@@ -745,7 +751,7 @@ void sg::city::map::tile::RoadTile::CreateStopPatterns()
         // Allow West Traffic
         m_stopPatterns.push_back(
             CreateStopPattern(
-                ". . X . O . ."
+             ". . X . O . ."
                 ". . . X . . ."
                 "X . X . O . X"
                 ". X . . . X ."
@@ -756,7 +762,7 @@ void sg::city::map::tile::RoadTile::CreateStopPatterns()
         // Stop West Traffic
         m_stopPatterns.push_back(
             CreateStopPattern(
-                ". . X . O . ."
+             ". . X . O . ."
                 ". . . X . . ."
                 "X . X . O . X"
                 ". X . . . X ."
@@ -767,7 +773,7 @@ void sg::city::map::tile::RoadTile::CreateStopPatterns()
         // Allow North Traffic
         m_stopPatterns.push_back(
             CreateStopPattern(
-                ". . O . X . ."
+             ". . O . X . ."
                 ". . . X . . ."
                 "O . O . X . X"
                 ". X . . . X ."
@@ -778,7 +784,7 @@ void sg::city::map::tile::RoadTile::CreateStopPatterns()
         // Stop North Traffic
         m_stopPatterns.push_back(
             CreateStopPattern(
-                ". . X . X . ."
+             ". . X . X . ."
                 ". . . X . . ."
                 "O . O . X . X"
                 ". X . . . X ."
@@ -789,7 +795,7 @@ void sg::city::map::tile::RoadTile::CreateStopPatterns()
         // Allow East Traffic
         m_stopPatterns.push_back(
             CreateStopPattern(
-                ". . X . O . ."
+             ". . X . O . ."
                 ". . . X . . ."
                 "O . O . O . O"
                 ". X . . . X ."
@@ -800,7 +806,7 @@ void sg::city::map::tile::RoadTile::CreateStopPatterns()
         // Stop East Traffic
         m_stopPatterns.push_back(
             CreateStopPattern(
-                ". . X . O . ."
+             ". . X . O . ."
                 ". . . X . . ."
                 "O . O . O . X"
                 ". X . . . X ."

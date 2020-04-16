@@ -27,12 +27,14 @@ namespace sg::city::map
 {
     class Map;
     class RoadNetwork;
+    class BuildingGenerator;
 }
 
 namespace sg::city::renderer
 {
     class MapRenderer;
     class RoadNetworkRenderer;
+    class BuildingsRenderer;
 }
 
 namespace sg::city::city
@@ -50,6 +52,9 @@ namespace sg::city::city
 
         using RoadNetworkSharedPtr = std::shared_ptr<map::RoadNetwork>;
         using RoadNetworkRendererUniquePtr = std::unique_ptr<renderer::RoadNetworkRenderer>;
+
+        using BuildingGeneratorSharedPtr = std::shared_ptr<map::BuildingGenerator>;
+        using BuildingsRendererUniquePtr = std::unique_ptr<renderer::BuildingsRenderer>;
 
         //-------------------------------------------------
         // Const
@@ -158,6 +163,16 @@ namespace sg::city::city
          */
         RoadNetworkRendererUniquePtr m_roadNetworkRenderer;
 
+        /**
+         * @brief Contains all buildings of the City.
+         */
+        BuildingGeneratorSharedPtr m_buildingGenerator;
+
+        /**
+         * @brief Renders all buildings.
+         */
+        BuildingsRendererUniquePtr m_buildingsRenderer;
+
         //-------------------------------------------------
         // Init
         //-------------------------------------------------
@@ -171,5 +186,6 @@ namespace sg::city::city
         void CreateMapEntity();
         void CreateCarEntity();
         void CreateRoadNetworkEntity();
+        void CreateBuildingsEntity();
     };
 }

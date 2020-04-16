@@ -17,9 +17,12 @@
 #include "City.h"
 #include "map/Map.h"
 #include "map/RoadNetwork.h"
+#include "map/BuildingGenerator.h"
 #include "map/tile/RoadTile.h"
+#include "map/tile/BuildingTile.h"
 #include "renderer/MapRenderer.h"
 #include "renderer/RoadNetworkRenderer.h"
+#include "renderer/BuildingsRenderer.h"
 #include "automata/Automata.h"
 #include "automata/AutoTrack.h"
 
@@ -106,6 +109,16 @@ void sg::city::city::City::Update(const double t_dt, TileIndexContainer& t_chang
 
             m_roadNetwork->CreateRoadNetworkMesh();
         }
+        else if(changedTile->type == map::tile::TileType::RESIDENTIAL)
+        {
+            auto* buildingTile{ dynamic_cast<map::tile::BuildingTile*>(changedTile.get()) };
+            SG_OGL_CORE_ASSERT(buildingTile, "[City::Update()] Null pointer.")
+
+            m_buildingGenerator->AddBuilding(*buildingTile);
+
+            // todo: so far nothing to do in Update()
+            changedTile->Update();
+        }
         else
         {
             changedTile->Update();
@@ -177,6 +190,7 @@ void sg::city::city::City::Render() const
 {
     m_mapRenderer->Render();
     m_roadNetworkRenderer->Render();
+    m_buildingsRenderer->Render();
 }
 
 //-------------------------------------------------
@@ -219,9 +233,25 @@ auto sg::city::city::City::ReplaceTile(const int t_mapX, const int t_mapZ, map::
 
         dynamic_cast<map::tile::RoadTile*>(tiles[currentTileIndex].get())->Init();
     }
+    else if(t_tileType == map::tile::TileType::RESIDENTIAL)
+    {
+        // create a BuildingTile
+        auto newTile{ std::make_unique<map::tile::BuildingTile>(
+                static_cast<float>(t_mapX),
+                static_cast<float>(t_mapZ),
+                t_tileType,
+                m_map.get()
+            )
+        };
+
+        tiles[currentTileIndex] = std::move(newTile);
+        tiles[currentTileIndex]->GetNeighbours() = neighbours;
+
+        // todo: init?
+    }
     else
     {
-        // create a new Tile with the new type
+        // default: create a new Tile with the new type
         auto newTile{ std::make_unique<map::tile::Tile>(
                 static_cast<float>(t_mapX),
                 static_cast<float>(t_mapZ),
@@ -317,13 +347,18 @@ void sg::city::city::City::Init(ogl::scene::Scene* t_scene, const int t_mapSize)
     // create RoadNetwork
     m_roadNetwork = std::make_shared<map::RoadNetwork>(this);
 
+    // create BuildingGenerator
+    m_buildingGenerator = std::make_shared<map::BuildingGenerator>(this);
+
     // create Renderer
     m_mapRenderer = std::make_unique<renderer::MapRenderer>(t_scene);
     m_roadNetworkRenderer = std::make_unique<renderer::RoadNetworkRenderer>(t_scene);
+    m_buildingsRenderer = std::make_unique<renderer::BuildingsRenderer>(t_scene);
 
     // create entities
     CreateMapEntity();
     CreateRoadNetworkEntity();
+    CreateBuildingsEntity();
 }
 
 //-------------------------------------------------
@@ -381,6 +416,23 @@ void sg::city::city::City::CreateRoadNetworkEntity()
     m_scene->GetApplicationContext()->registry.assign<ecs::RoadNetworkComponent>(
         entity,
         m_roadNetwork
+    );
+
+    m_scene->GetApplicationContext()->registry.assign<ogl::ecs::component::TransformComponent>(
+        entity,
+        m_map->position,
+        m_map->rotation,
+        m_map->scale
+    );
+}
+
+void sg::city::city::City::CreateBuildingsEntity()
+{
+    const auto entity{ m_scene->GetApplicationContext()->registry.create() };
+
+    m_scene->GetApplicationContext()->registry.assign<ecs::BuildingsComponent>(
+        entity,
+        m_buildingGenerator
     );
 
     m_scene->GetApplicationContext()->registry.assign<ogl::ecs::component::TransformComponent>(

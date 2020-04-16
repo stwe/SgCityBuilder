@@ -7,27 +7,29 @@
 // 
 // 2020 (c) stwe <https://github.com/stwe/SgCityBuilder>
 
-#include <Application.h>
-#include <scene/Scene.h>
+#include <Core.h>
 #include <resource/Mesh.h>
-#include <resource/TextureManager.h>
 #include <math/Transform.h>
 #include "BuildingGenerator.h"
 #include "Map.h"
-#include "tile/Tile.h"
+#include "city/City.h"
 
 //-------------------------------------------------
 // Ctors. / Dtor.
 //-------------------------------------------------
 
-sg::city::map::BuildingGenerator::BuildingGenerator(Map* t_map)
-    : m_map{ t_map }
+sg::city::map::BuildingGenerator::BuildingGenerator(city::City* t_city)
+    : m_city{ t_city }
 {
+    SG_OGL_CORE_ASSERT(t_city, "[BuildingGenerator::BuildingGenerator()] Null pointer.")
+    SG_OGL_LOG_DEBUG("[BuildingGenerator::BuildingGenerator()] Construct BuildingGenerator.");
+
     Init();
 }
 
 sg::city::map::BuildingGenerator::~BuildingGenerator() noexcept
 {
+    SG_OGL_LOG_DEBUG("BuildingGenerator::~BuildingGenerator()] Destruct BuildingGenerator.");
 }
 
 //-------------------------------------------------
@@ -44,51 +46,37 @@ sg::ogl::resource::Mesh& sg::city::map::BuildingGenerator::GetMesh() noexcept
     return *m_quadMesh;
 }
 
-uint32_t sg::city::map::BuildingGenerator::GetTextureAtlasId() const
-{
-    return m_buildingTextureAtlasId;
-}
-
 uint32_t sg::city::map::BuildingGenerator::GetInstances() const
 {
-    return m_instances;
+    return static_cast<int>(m_matrices.size());
+}
+
+uint32_t sg::city::map::BuildingGenerator::GetBuildingTextureAtlasId() const
+{
+    return m_city->GetMap().GetBuildingTextureAtlasId();
 }
 
 //-------------------------------------------------
-// Add Building
+// Add
 //-------------------------------------------------
 
-void sg::city::map::BuildingGenerator::StoreBuildingOnPosition(const glm::vec3& t_mapPoint)
+void sg::city::map::BuildingGenerator::AddBuilding(tile::BuildingTile& t_buildingTile)
 {
-    // get Tile index by given map point
-    //const auto tileIndex{ m_map->GetTileIndexByPosition(t_mapPoint) };
+    ogl::math::Transform transform;
+    transform.position = glm::vec3(t_buildingTile.GetWorldX() + 0.5f, 0.5f, t_buildingTile.GetWorldZ() + -0.5f);
+    transform.scale = glm::vec3(1.0f);
 
-    // checks whether the Tile is already stored as a building
-    /*
-    if (m_lookupTable[tileIndex] > 0)
+    m_matrices.push_back(static_cast<glm::mat4>(transform));
+
+    const auto instances{ GetInstances() };
+    if (instances > 0)
     {
-        return;
+        const auto sizeInBytes{ instances * NUMBER_OF_FLOATS_PER_INSTANCE * static_cast<uint32_t>(sizeof(float)) };
+
+        ogl::buffer::Vbo::BindVbo(m_vboId);
+        glBufferSubData(GL_ARRAY_BUFFER, 0, sizeInBytes, m_matrices.data());
+        ogl::buffer::Vbo::UnbindVbo();
     }
-    */
-
-    // update TileType
-    //m_map->ChangeTileTypeOnPosition(t_mapPoint, Map::TileType::RESIDENTIAL);
-
-    // Add a building (there is currently only one type of building)
-    AddBuildingInstance(t_mapPoint);
-
-    // update BuildingGenerator
-    Update();
-}
-
-//-------------------------------------------------
-// Update
-//-------------------------------------------------
-
-// todo make private
-void sg::city::map::BuildingGenerator::Update()
-{
-    UpdateVbo();
 }
 
 //-------------------------------------------------
@@ -98,8 +86,6 @@ void sg::city::map::BuildingGenerator::Update()
 void sg::city::map::BuildingGenerator::InitQuadMesh()
 {
     /*
-
-    512x256 = 128x128 textures
 
     0, 1                                            1, 1
              -----------------------------------------
@@ -171,19 +157,15 @@ void sg::city::map::BuildingGenerator::InitQuadMesh()
     m_quadMesh->GetVao().AddVertexDataVbo(vertices.data(), DRAW_COUNT, bufferLayout);
 }
 
-void sg::city::map::BuildingGenerator::Init()
+void sg::city::map::BuildingGenerator::InitVboForInstancedData()
 {
-    // a simple cube as a building
-    InitQuadMesh();
+    SG_OGL_CORE_ASSERT(m_quadMesh, "[BuildingGenerator::InitVboForInstancedData()] Null pointer.")
 
     // create Vbo for instanced data
     m_vboId = ogl::buffer::Vbo::GenerateVbo();
 
-    // get the number of Tiles
-    const auto nrOfTiles{ m_map->GetMapSize() * m_map->GetMapSize() };
-
-    // only one building on one tile is possible at the moment ---> number of Tiles (128 * 128) * 16 floats per instance
-    ogl::buffer::Vbo::InitEmpty(m_vboId, nrOfTiles * NUMBER_OF_FLOATS_PER_INSTANCE, GL_DYNAMIC_DRAW);
+    // only one building on one tile is possible at the moment ---> number of Tiles * 16 floats per instance
+    ogl::buffer::Vbo::InitEmpty(m_vboId, m_city->GetMap().GetNrOfAllTiles() * NUMBER_OF_FLOATS_PER_INSTANCE, GL_DYNAMIC_DRAW);
 
     // get and bind the Vao of the quad Mesh
     auto& vao{ m_quadMesh->GetVao() };
@@ -197,43 +179,15 @@ void sg::city::map::BuildingGenerator::Init()
 
     // unbind quad Mesh Vao
     ogl::buffer::Vao::UnbindVao();
-
-    // load texture atlas
-    m_buildingTextureAtlasId = m_map->GetScene()->GetApplicationContext()->GetTextureManager().GetTextureIdFromPath("res/texture/sc.png", true);
-
-    // Every Tile can be a (and only one) building. The lookup table stores the position of the Tile in the Vbo.
-    // The default value -1 (NO_BUILDING) means that the Tile is currently not a building and is therefore not in the Vbo.
-    m_lookupTable.resize(nrOfTiles, NO_BUILDING);
 }
 
-void sg::city::map::BuildingGenerator::AddBuildingInstance(const glm::vec3& t_mapPoint)
+void sg::city::map::BuildingGenerator::Init()
 {
-    //auto& tile{ m_map->GetTileByPosition(t_mapPoint) };
+    SG_OGL_LOG_DEBUG("[BuildingGenerator::Init()] Initialize BuildingGenerator.");
 
-    // todo: use Bottom left instead mapX
+    // a simple cube as building
+    InitQuadMesh();
 
-    ogl::math::Transform transform;
-    //transform.position = glm::vec3(tile.GetMapX() + 0.5f, 0.5f, -tile.GetMapZ() + -0.5f);
-    transform.scale = glm::vec3(1.0f);
-
-    m_matrices.push_back(static_cast<glm::mat4>(transform));
-
-    m_instances = static_cast<int>(m_matrices.size());
-    //m_lookupTable[m_map->GetTileIndexByPosition(t_mapPoint)] = m_instances;
-}
-
-//-------------------------------------------------
-// Update
-//-------------------------------------------------
-
-void sg::city::map::BuildingGenerator::UpdateVbo()
-{
-    if (m_instances > 0)
-    {
-        const auto sizeInBytes{ m_instances * NUMBER_OF_FLOATS_PER_INSTANCE * static_cast<uint32_t>(sizeof(float)) };
-
-        ogl::buffer::Vbo::BindVbo(m_vboId);
-        glBufferSubData(GL_ARRAY_BUFFER, 0, sizeInBytes, m_matrices.data());
-        ogl::buffer::Vbo::UnbindVbo();
-    }
+    // create a Vbo for instanced data
+    InitVboForInstancedData();
 }

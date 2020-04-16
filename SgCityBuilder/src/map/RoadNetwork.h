@@ -23,7 +23,6 @@ namespace sg::city::map
     public:
         using MeshUniquePtr = std::unique_ptr<ogl::resource::Mesh>;
         using VertexContainer = std::vector<float>;
-        using TileIndexContainer = std::vector<int>;
 
         //-------------------------------------------------
         // Const

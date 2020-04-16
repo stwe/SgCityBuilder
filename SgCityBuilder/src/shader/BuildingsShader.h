@@ -21,7 +21,7 @@ namespace sg::city::shader
             SetUniform("projectionMatrix", t_scene.GetApplicationContext()->GetWindow().GetProjectionMatrix());
             SetUniform("viewMatrix", t_scene.GetCurrentCamera().GetViewMatrix());
             SetUniform("quadTextureAtlas", 0);
-            ogl::resource::TextureManager::BindForReading(buildingsComponent.buildingGenerator->GetTextureAtlasId(), GL_TEXTURE0);
+            ogl::resource::TextureManager::BindForReading(buildingsComponent.buildingGenerator->GetBuildingTextureAtlasId(), GL_TEXTURE0);
         }
 
         [[nodiscard]] std::string GetFolderName() const override

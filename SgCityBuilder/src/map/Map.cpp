@@ -77,6 +77,11 @@ uint32_t sg::city::map::Map::GetRoadTextureAtlasId() const
     return m_roadTextureAtlasId;
 }
 
+uint32_t sg::city::map::Map::GetBuildingTextureAtlasId() const
+{
+    return m_buildingTextureAtlasId;
+}
+
 const sg::city::map::Map::TileContainer& sg::city::map::Map::GetTiles() const noexcept
 {
     return m_tiles;
@@ -338,7 +343,7 @@ void sg::city::map::Map::RenderNavigationNodes() const
 
 void sg::city::map::Map::StoreTileTypeTextures()
 {
-    SG_OGL_LOG_DEBUG("[Map::StoreTileTypeTextures()] Load a texture for each Tile Type.");
+    SG_OGL_LOG_DEBUG("[Map::StoreTileTypeTextures()] Load all textures.");
 
     const auto n{ m_scene->GetApplicationContext()->GetTextureManager().GetTextureIdFromPath("res/texture/tileTypes/grass.jpg") };
     const auto r{ m_scene->GetApplicationContext()->GetTextureManager().GetTextureIdFromPath("res/texture/tileTypes/r.png") };
@@ -352,9 +357,8 @@ void sg::city::map::Map::StoreTileTypeTextures()
     m_tileTypeTextures.emplace(tile::TileType::INDUSTRIAL, i);
     m_tileTypeTextures.emplace(tile::TileType::TRAFFIC, t);
 
-    SG_OGL_LOG_DEBUG("[Map::LoadAndStoreTileTypeTextures()] Load road texture atlas.");
-
     m_roadTextureAtlasId = m_scene->GetApplicationContext()->GetTextureManager().GetTextureIdFromPath("res/texture/road/roads.png");
+    m_buildingTextureAtlasId = m_scene->GetApplicationContext()->GetTextureManager().GetTextureIdFromPath("res/texture/sc.png", true);
 }
 
 void sg::city::map::Map::StoreTiles()

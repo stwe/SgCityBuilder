@@ -79,8 +79,10 @@ private:
 
     ForwardRendererUniquePtr m_forwardRenderer;
 
+#ifdef ENABLE_TRAFFIC_DEBUG
     bool m_renderAutoTracks{ false };
     bool m_renderNavigationNodes{ false };
+#endif
 
     //-------------------------------------------------
     // Helper
