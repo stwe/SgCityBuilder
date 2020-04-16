@@ -114,6 +114,12 @@ namespace sg::city::city
          */
         bool TrySpawnCarAtSafeTrack(int t_mapX, int t_mapZ);
 
+        //-------------------------------------------------
+        // Debug
+        //-------------------------------------------------
+
+        void RenderAutoTracks() const;
+
     protected:
 
     private:
@@ -141,11 +147,6 @@ namespace sg::city::city
          * @brief Is used as a timer to change the StopPattern.
          */
         float m_stopPatternTimer{ 0.0f };
-
-        /**
-         * @brief The StopPattern index.
-         */
-        int m_currentStopPattern{ 0 };
 
         /**
          * @brief The RoadNetwork of the City.

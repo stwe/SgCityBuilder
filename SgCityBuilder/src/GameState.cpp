@@ -12,7 +12,6 @@
 #include "city/City.h"
 #include "ecs/Components.h"
 #include "map/Map.h"
-#include "map/tile/RoadTile.h"
 #include "automata/Automata.h"
 #include "automata/AutoTrack.h"
 
@@ -88,19 +87,11 @@ void GameState::Render()
     // render Map
     m_city->Render();
 
+#ifdef ENABLE_TRAFFIC_DEBUG
     // only render the AutoTracks after update of changed Tiles is complete
-    if (m_changedTiles.empty())
+    if (m_changedTiles.empty() && m_renderAutoTracks)
     {
-        for (auto& tile : m_city->GetMap().GetTiles())
-        {
-            if (tile->type == sg::city::map::tile::TileType::TRAFFIC)
-            {
-                auto* roadTile{ dynamic_cast<sg::city::map::tile::RoadTile*>(tile.get()) };
-                SG_OGL_ASSERT(roadTile, "[GameState::Render()] Null pointer.");
-
-                roadTile->RenderAutoTracks();
-            }
-        }
+        m_city->RenderAutoTracks();
     }
 
     // render Navigation Nodes
@@ -108,6 +99,7 @@ void GameState::Render()
     {
         m_city->GetMap().RenderNavigationNodes();
     }
+#endif
 
     // render cars
     m_forwardRenderer->Render();
@@ -321,10 +313,17 @@ void GameState::RenderImGui()
     ImGui::Separator();
     ImGui::Spacing();
 
+#ifdef ENABLE_TRAFFIC_DEBUG
+    if (ImGui::Button("Render AutoTracks"))
+    {
+        m_renderAutoTracks = !m_renderAutoTracks;
+    }
+
     if (ImGui::Button("Render Navigation Nodes"))
     {
         m_renderNavigationNodes = !m_renderNavigationNodes;
     }
+#endif
 
     if (ImGui::Button("Show contiguous regions"))
     {

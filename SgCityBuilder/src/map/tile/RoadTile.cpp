@@ -85,6 +85,7 @@ void sg::city::map::tile::RoadTile::Update()
 
     // for debug
     CreateAutoTracksMesh();
+    m_map->CreateNavigationNodesMesh();
 }
 
 void sg::city::map::tile::RoadTile::ApplyStopPattern(const int t_index)

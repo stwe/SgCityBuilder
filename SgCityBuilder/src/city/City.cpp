@@ -284,6 +284,24 @@ bool sg::city::city::City::TrySpawnCarAtSafeTrack(const int t_mapX, const int t_
 }
 
 //-------------------------------------------------
+// Debug
+//-------------------------------------------------
+
+void sg::city::city::City::RenderAutoTracks() const
+{
+    for (auto& tile : m_map->GetTiles())
+    {
+        if (tile->type == map::tile::TileType::TRAFFIC)
+        {
+            auto* roadTile{ dynamic_cast<sg::city::map::tile::RoadTile*>(tile.get()) };
+            SG_OGL_ASSERT(roadTile, "[City::RenderAutoTracks()] Null pointer.");
+
+            roadTile->RenderAutoTracks();
+        }
+    }
+}
+
+//-------------------------------------------------
 // Init
 //-------------------------------------------------
 

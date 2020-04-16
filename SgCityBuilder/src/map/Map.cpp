@@ -303,7 +303,12 @@ void sg::city::map::Map::CreateNavigationNodesMesh()
 
 void sg::city::map::Map::RenderNavigationNodes() const
 {
-    SG_OGL_CORE_ASSERT(m_navigationNodesMesh, "[Map::RenderNavigationNodes()] Null pointer.")
+    if (!m_navigationNodesMesh)
+    {
+        SG_OGL_LOG_WARN("[Map::RenderNavigationNodes()] Mesh was not created.");
+
+        return;
+    }
 
     ogl::math::Transform t;
     t.position = position;

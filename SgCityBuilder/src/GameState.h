@@ -9,6 +9,8 @@
 
 #pragma once
 
+//#define ENABLE_TRAFFIC_DEBUG
+
 #include "SgOgl.h"
 #include "map/tile/Tile.h"
 
@@ -77,6 +79,7 @@ private:
 
     ForwardRendererUniquePtr m_forwardRenderer;
 
+    bool m_renderAutoTracks{ false };
     bool m_renderNavigationNodes{ false };
 
     //-------------------------------------------------
