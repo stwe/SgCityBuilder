@@ -10,6 +10,7 @@
 #include <Core.h>
 #include <resource/Mesh.h>
 #include <math/Transform.h>
+#include <random>
 #include "BuildingGenerator.h"
 #include "Map.h"
 #include "city/City.h"
@@ -48,7 +49,7 @@ sg::ogl::resource::Mesh& sg::city::map::BuildingGenerator::GetMesh() noexcept
 
 uint32_t sg::city::map::BuildingGenerator::GetInstances() const
 {
-    return static_cast<int>(m_matrices.size());
+    return static_cast<int>(m_instanceDatas.size());
 }
 
 uint32_t sg::city::map::BuildingGenerator::GetBuildingTextureAtlasId() const
@@ -62,20 +63,21 @@ uint32_t sg::city::map::BuildingGenerator::GetBuildingTextureAtlasId() const
 
 void sg::city::map::BuildingGenerator::AddBuilding(tile::BuildingTile& t_buildingTile)
 {
-    ogl::math::Transform transform;
-    transform.position = glm::vec3(t_buildingTile.GetWorldX() + 0.5f, 0.5f, t_buildingTile.GetWorldZ() + -0.5f);
-    transform.scale = glm::vec3(1.0f);
-
-    m_matrices.push_back(static_cast<glm::mat4>(transform));
-
-    const auto instances{ GetInstances() };
-    if (instances > 0)
+    auto floors{ rand() % 10 + 1 };
+    if (floors == 1)
     {
-        const auto sizeInBytes{ instances * NUMBER_OF_FLOATS_PER_INSTANCE * static_cast<uint32_t>(sizeof(float)) };
+        floors++;
+    }
 
-        ogl::buffer::Vbo::BindVbo(m_vboId);
-        glBufferSubData(GL_ARRAY_BUFFER, 0, sizeInBytes, m_matrices.data());
-        ogl::buffer::Vbo::UnbindVbo();
+    std::random_device seeder;
+    std::mt19937 engine(seeder());
+
+    const std::uniform_real_distribution<float> col(0.4, 0.8);
+    const auto randomCol{ col(engine) };
+
+    for (auto i{ 0 }; i < floors; ++i)
+    {
+        AddFloor(t_buildingTile, glm::vec3(randomCol));
     }
 }
 
@@ -89,11 +91,11 @@ void sg::city::map::BuildingGenerator::InitQuadMesh()
 
     0, 1                                            1, 1
              -----------------------------------------
-             |       |  bottom   |   top   |    x    |
+             |   R   |  bottom   |   top   |    x    |
     0, 0.5   -----------------------------------------
-             |       |           |         |    x    |
+             |       |           |    R    |    x    |
              -----------------------------------------
-    0, 0           0, 0.25     0, 0.5    0, 0.75    1, 0
+    0, 0             0.25        0.5       0.75     1, 0
 
     */
 
@@ -164,18 +166,19 @@ void sg::city::map::BuildingGenerator::InitVboForInstancedData()
     // create Vbo for instanced data
     m_vboId = ogl::buffer::Vbo::GenerateVbo();
 
-    // only one building on one tile is possible at the moment ---> number of Tiles * 16 floats per instance
-    ogl::buffer::Vbo::InitEmpty(m_vboId, m_city->GetMap().GetNrOfAllTiles() * NUMBER_OF_FLOATS_PER_INSTANCE, GL_DYNAMIC_DRAW);
+    const auto floatCount{ m_city->GetMap().GetNrOfAllTiles() * MAX_INSTANCES_PER_TILE * NUMBER_OF_FLOATS_PER_INSTANCE };
+    ogl::buffer::Vbo::InitEmpty(m_vboId, floatCount, GL_DYNAMIC_DRAW);
 
     // get and bind the Vao of the quad Mesh
     auto& vao{ m_quadMesh->GetVao() };
     vao.BindVao();
 
     // set attributes of the above Vbo
-    ogl::buffer::Vbo::AddInstancedAttribute(m_vboId, 3, 4, NUMBER_OF_FLOATS_PER_INSTANCE, 0);
+    ogl::buffer::Vbo::AddInstancedAttribute(m_vboId, 3, 4, NUMBER_OF_FLOATS_PER_INSTANCE, 0); // mat4x4
     ogl::buffer::Vbo::AddInstancedAttribute(m_vboId, 4, 4, NUMBER_OF_FLOATS_PER_INSTANCE, 4);
     ogl::buffer::Vbo::AddInstancedAttribute(m_vboId, 5, 4, NUMBER_OF_FLOATS_PER_INSTANCE, 8);
     ogl::buffer::Vbo::AddInstancedAttribute(m_vboId, 6, 4, NUMBER_OF_FLOATS_PER_INSTANCE, 12);
+    ogl::buffer::Vbo::AddInstancedAttribute(m_vboId, 7, 4, NUMBER_OF_FLOATS_PER_INSTANCE, 16); // 3x color, 1x use texture
 
     // unbind quad Mesh Vao
     ogl::buffer::Vao::UnbindVao();
@@ -190,4 +193,49 @@ void sg::city::map::BuildingGenerator::Init()
 
     // create a Vbo for instanced data
     InitVboForInstancedData();
+}
+
+//-------------------------------------------------
+// Floors
+//-------------------------------------------------
+
+void sg::city::map::BuildingGenerator::AddFloor(tile::BuildingTile& t_buildingTile, const glm::vec3& t_color)
+{
+    const auto floor{ t_buildingTile.floors };
+
+    SG_OGL_CORE_ASSERT(floor <= MAX_INSTANCES_PER_TILE, "[BuildingGenerator::AddFloor()] The maximum number of floors has already been reached.")
+
+    ogl::math::Transform transform;
+    const auto posY{ floor == 0 ? 0.125f : 0.5f };
+
+    float offsetY;
+    if (floor == 0)
+    {
+        offsetY = 0.0f;
+    } else if (floor == 1)
+    {
+        offsetY = 0.25f;
+    }
+    else
+    {
+        offsetY = floor - 1.0f + 0.25f;
+    }
+
+    transform.position = glm::vec3(t_buildingTile.GetWorldX() + 0.5f, posY + offsetY, t_buildingTile.GetWorldZ() + -0.5f);
+    transform.scale = glm::vec3(1.0f, floor == 0 ? 0.25f : 1.0f, 1.0f);
+
+    const auto useTexture{ floor == 0 ? 0.0f : 1.0f };
+    m_instanceDatas.push_back({ static_cast<glm::mat4>(transform), glm::vec4(t_color, useTexture) } );
+
+    const auto instances{ GetInstances() };
+    if (instances > 0)
+    {
+        const auto sizeInBytes{ instances * NUMBER_OF_FLOATS_PER_INSTANCE * static_cast<uint32_t>(sizeof(float)) };
+
+        ogl::buffer::Vbo::BindVbo(m_vboId);
+        glBufferSubData(GL_ARRAY_BUFFER, 0, sizeInBytes, m_instanceDatas.data());
+        ogl::buffer::Vbo::UnbindVbo();
+    }
+
+    t_buildingTile.floors++;
 }

@@ -21,16 +21,33 @@ namespace sg::city::map
     class BuildingGenerator
     {
     public:
+        struct BuildingInstanceData
+        {
+            glm::mat4 transformationMatrix;
+            glm::vec4 color;
+        };
+
         using MeshUniquePtr = std::unique_ptr<ogl::resource::Mesh>;
         using VertexContainer = std::vector<float>;
-        using MatricesContainer = std::vector<glm::mat4>;
+        using BuildingInstanceContainer = std::vector<BuildingInstanceData>;
 
         //-------------------------------------------------
         // Const
         //-------------------------------------------------
 
         static constexpr auto DRAW_COUNT{ 36 };
-        static constexpr uint32_t NUMBER_OF_FLOATS_PER_INSTANCE{ 16 };
+
+        // 4x4 tranformation Matrix                                                    = 16 floats
+        // 3x  color                                                                   =  3 floats
+        // 1x  texture flag (use the colors alpha value: 0 = use texture, 1 use color) =  1 float
+        //                                                                             -----------
+        //                                                                             = 20 floats
+        static constexpr uint32_t NUMBER_OF_FLOATS_PER_INSTANCE{ 20 };
+
+        /**
+         * @brief Required to calculate the maximum number of quads instances.
+         */
+        static constexpr uint32_t MAX_INSTANCES_PER_TILE{ 10 };
 
         //-------------------------------------------------
         // Ctors. / Dtor.
@@ -82,9 +99,9 @@ namespace sg::city::map
         uint32_t m_vboId{ 0 };
 
         /**
-         * @brief The transformation matrices for all the instances.
+         * @brief The the instances data.
          */
-        MatricesContainer m_matrices;
+        BuildingInstanceContainer m_instanceDatas;
 
         //-------------------------------------------------
         // Init
@@ -93,5 +110,11 @@ namespace sg::city::map
         void InitQuadMesh();
         void InitVboForInstancedData();
         void Init();
+
+        //-------------------------------------------------
+        // Floors
+        //-------------------------------------------------
+
+        void AddFloor(tile::BuildingTile& t_buildingTile, const glm::vec3& t_color);
     };
 }

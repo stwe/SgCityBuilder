@@ -248,7 +248,7 @@ namespace sg::city::map
         // Init
         //-------------------------------------------------
 
-        void StoreTileTypeTextures();
+        void StoreTextures();
         void StoreTiles();
         void StoreTileNeighbours();
         void StoreTileNavigationNodes();

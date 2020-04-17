@@ -9,7 +9,7 @@
 
 #pragma once
 
-//#define ENABLE_TRAFFIC_DEBUG
+#define ENABLE_TRAFFIC_DEBUG
 
 #include "SgOgl.h"
 #include "map/tile/Tile.h"

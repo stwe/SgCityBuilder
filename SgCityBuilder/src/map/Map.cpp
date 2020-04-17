@@ -164,7 +164,7 @@ void sg::city::map::Map::CreateMap(const int t_mapSize)
 
     m_mapSize = t_mapSize;
 
-    StoreTileTypeTextures();
+    StoreTextures();
     StoreTiles();
     StoreTileNeighbours();
     StoreRandomColors();
@@ -341,7 +341,7 @@ void sg::city::map::Map::RenderNavigationNodes() const
 // Init
 //-------------------------------------------------
 
-void sg::city::map::Map::StoreTileTypeTextures()
+void sg::city::map::Map::StoreTextures()
 {
     SG_OGL_LOG_DEBUG("[Map::StoreTileTypeTextures()] Load all textures.");
 
@@ -358,7 +358,7 @@ void sg::city::map::Map::StoreTileTypeTextures()
     m_tileTypeTextures.emplace(tile::TileType::TRAFFIC, t);
 
     m_roadTextureAtlasId = m_scene->GetApplicationContext()->GetTextureManager().GetTextureIdFromPath("res/texture/road/roads.png");
-    m_buildingTextureAtlasId = m_scene->GetApplicationContext()->GetTextureManager().GetTextureIdFromPath("res/texture/sc.png", true);
+    m_buildingTextureAtlasId = m_scene->GetApplicationContext()->GetTextureManager().GetTextureIdFromPath("res/texture/line.png", true);
 }
 
 void sg::city::map::Map::StoreTiles()
