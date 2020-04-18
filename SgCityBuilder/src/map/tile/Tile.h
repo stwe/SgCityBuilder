@@ -216,6 +216,18 @@ namespace sg::city::map::tile
         };
 
         /**
+         * @brief For iterating over all Tile types.
+         */
+        inline static const std::vector<TileType> TILE_TYPES
+        {
+            TileType::NONE,
+            TileType::RESIDENTIAL,
+            TileType::COMMERCIAL,
+            TileType::INDUSTRIAL,
+            TileType::TRAFFIC
+        };
+
+        /**
          * @brief Tile types that can build regions.
          */
         inline static const std::vector<TileType> REGION_TILE_TYPES

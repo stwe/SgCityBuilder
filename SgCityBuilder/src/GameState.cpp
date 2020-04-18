@@ -225,61 +225,39 @@ void GameState::RenderImGui()
     ImGui_ImplGlfw_NewFrame();
     ImGui::NewFrame();
 
-    ImGui::Begin("Map Edit");
+    ImGui::Begin("Menu");
 
-    if (m_currentEditTileType == sg::city::map::tile::TileType::NONE)
+    for (auto type : sg::city::map::tile::Tile::TILE_TYPES)
     {
-        ImGui::Text(sg::city::map::tile::Tile::TileTypeToString(sg::city::map::tile::TileType::NONE).c_str());
+        const auto i{ static_cast<int>(type) };
+
+        if (m_buttons[i])
+        {
+            ImGui::PushID(i);
+            ImGui::PushStyleColor(ImGuiCol_Button, static_cast<ImVec4>(ImColor::HSV(7.0f, 0.6f, 0.6f)));
+            ImGui::PushStyleColor(ImGuiCol_ButtonHovered, static_cast<ImVec4>(ImColor::HSV(7.0f, 0.7f, 0.7f)));
+            ImGui::PushStyleColor(ImGuiCol_ButtonActive, static_cast<ImVec4>(ImColor::HSV(7.0f, 0.8f, 0.8f)));
+            ImGui::Button(sg::city::map::tile::Tile::TileTypeToString(type).c_str());
+            if (ImGui::IsItemClicked(0))
+            {
+                m_buttons[i] = !m_buttons[i];
+            }
+
+            ImGui::PopStyleColor(3);
+            ImGui::PopID();
+        }
+        else
+        {
+            if (ImGui::Button(sg::city::map::tile::Tile::TileTypeToString(type).c_str()))
+            {
+                std::fill(m_buttons.begin(), m_buttons.end(), false);
+                m_buttons[i] = true;
+                m_currentEditTileType = type;
+            }
+        }
     }
 
-    if (m_currentEditTileType == sg::city::map::tile::TileType::RESIDENTIAL)
-    {
-        ImGui::Text(sg::city::map::tile::Tile::TileTypeToString(sg::city::map::tile::TileType::RESIDENTIAL).c_str());
-    }
-
-    if (m_currentEditTileType == sg::city::map::tile::TileType::COMMERCIAL)
-    {
-        ImGui::Text(sg::city::map::tile::Tile::TileTypeToString(sg::city::map::tile::TileType::COMMERCIAL).c_str());
-    }
-
-    if (m_currentEditTileType == sg::city::map::tile::TileType::INDUSTRIAL)
-    {
-        ImGui::Text(sg::city::map::tile::Tile::TileTypeToString(sg::city::map::tile::TileType::INDUSTRIAL).c_str());
-    }
-
-    if (m_currentEditTileType == sg::city::map::tile::TileType::TRAFFIC)
-    {
-        ImGui::Text(sg::city::map::tile::Tile::TileTypeToString(sg::city::map::tile::TileType::TRAFFIC).c_str());
-    }
-
-    ImGui::Spacing();
-    ImGui::Separator();
-    ImGui::Spacing();
-
-    if (ImGui::Button(sg::city::map::tile::Tile::TileTypeToString(sg::city::map::tile::TileType::NONE).c_str()))
-    {
-        m_currentEditTileType = sg::city::map::tile::TileType::NONE;
-    }
-
-    if (ImGui::Button(sg::city::map::tile::Tile::TileTypeToString(sg::city::map::tile::TileType::RESIDENTIAL).c_str()))
-    {
-        m_currentEditTileType = sg::city::map::tile::TileType::RESIDENTIAL;
-    }
-
-    if (ImGui::Button(sg::city::map::tile::Tile::TileTypeToString(sg::city::map::tile::TileType::COMMERCIAL).c_str()))
-    {
-        m_currentEditTileType = sg::city::map::tile::TileType::COMMERCIAL;
-    }
-
-    if (ImGui::Button(sg::city::map::tile::Tile::TileTypeToString(sg::city::map::tile::TileType::INDUSTRIAL).c_str()))
-    {
-        m_currentEditTileType = sg::city::map::tile::TileType::INDUSTRIAL;
-    }
-
-    if (ImGui::Button(sg::city::map::tile::Tile::TileTypeToString(sg::city::map::tile::TileType::TRAFFIC).c_str()))
-    {
-        m_currentEditTileType = sg::city::map::tile::TileType::TRAFFIC;
-    }
+    ImGui::Text("Current number of regions: %i", m_city->GetMap().GetNumRegions());
 
     ImGui::Spacing();
     ImGui::Separator();
@@ -306,6 +284,8 @@ void GameState::RenderImGui()
         ImGui::Text("Current Tile z: %i", tile.GetMapZ());
     }
 
+    ImGui::Text("City Automatas: %i", m_city->automatas.size());
+
     if (ImGui::Button("Spawn single car on current tile"))
     {
         m_city->TrySpawnCarAtSafeTrack(m_mapPoint.x, m_mapPoint.z);
@@ -315,13 +295,6 @@ void GameState::RenderImGui()
     {
         m_city->spawnCars = !m_city->spawnCars;
     }
-
-    ImGui::Spacing();
-    ImGui::Separator();
-    ImGui::Spacing();
-
-    ImGui::Text("Number of regions: %i", m_city->GetMap().GetNumRegions());
-    ImGui::Text("City Automatas: %i", m_city->automatas.size());
 
     ImGui::Spacing();
     ImGui::Separator();

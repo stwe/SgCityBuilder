@@ -73,11 +73,12 @@ private:
     CityUniquePtr m_city;
     MousePickerUniquePtr m_mousePicker;
 
-    sg::city::map::tile::TileType m_currentEditTileType{ sg::city::map::tile::TileType::TRAFFIC };
-
     TileIndexContainer m_changedTiles;
 
     ForwardRendererUniquePtr m_forwardRenderer;
+
+    sg::city::map::tile::TileType m_currentEditTileType{ sg::city::map::tile::TileType::RESIDENTIAL };
+    std::vector<bool> m_buttons{ false, true, false, false, false };
 
 #ifdef ENABLE_TRAFFIC_DEBUG
     bool m_renderAutoTracks{ false };
