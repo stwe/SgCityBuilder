@@ -21,7 +21,7 @@
 sg::city::map::RoadNetwork::RoadNetwork(city::City* t_city)
     : m_city{ t_city }
 {
-    SG_OGL_CORE_ASSERT(t_city, "[RoadNetwork::RoadNetwork()] Null pointer.")
+    SG_OGL_ASSERT(t_city, "[RoadNetwork::RoadNetwork()] Null pointer.")
     SG_OGL_LOG_DEBUG("[RoadNetwork::RoadNetwork()] Construct RoadNetwork.");
 
     Init();

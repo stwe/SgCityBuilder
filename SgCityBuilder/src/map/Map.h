@@ -75,6 +75,10 @@ namespace sg::city::map
          */
         static constexpr auto NODES_PER_TILE{ 49 };
 
+        static constexpr const char* MAP_FILE_NAME{ "res/config/CityMap.map" };
+        inline static const auto MAP_FILE_HEADER_INFO{ "sg_city_map" };
+        static constexpr auto MAP_FILE_HEADER_LENGTH{ 11 };
+
         //-------------------------------------------------
         // Public member
         //-------------------------------------------------
@@ -165,6 +169,13 @@ namespace sg::city::map
         //-------------------------------------------------
 
         void FindConnectedRegions();
+
+        //-------------------------------------------------
+        // File I/O
+        //-------------------------------------------------
+
+        void SaveMap();
+        void LoadMap();
 
         //-------------------------------------------------
         // Debug
@@ -262,6 +273,27 @@ namespace sg::city::map
         [[nodiscard]] int32_t GetVerticesCountOfMap() const;
 
         void DepthSearch(tile::Tile& t_startTile, int t_region);
+
+        //-------------------------------------------------
+        // File utils
+        //-------------------------------------------------
+
+        template<typename T>
+        static void VectorWrite(std::ofstream& t_outFile, const std::vector<T>& t_data)
+        {
+            const std::size_t count = t_data.size();
+            t_outFile.write(reinterpret_cast<const char*>(&count), sizeof(std::size_t));
+            t_outFile.write(reinterpret_cast<const char*>(t_data.data()), count * sizeof(T));
+        }
+
+        template<typename T>
+        static void VectorRead(std::ifstream& t_inFile, std::vector<T>& t_data)
+        {
+            std::size_t count;
+            t_inFile.read(reinterpret_cast<char*>(&count), sizeof(std::size_t));
+            t_data.resize(count);
+            t_inFile.read(reinterpret_cast<char*>(t_data.data()), count * sizeof(T));
+        }
 
         //-------------------------------------------------
         // Vbo

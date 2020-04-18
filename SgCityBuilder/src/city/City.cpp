@@ -34,7 +34,7 @@ sg::city::city::City::City(std::string t_name, ogl::scene::Scene* t_scene, const
     : m_name{ std::move(t_name) }
     , m_scene{ t_scene }
 {
-    SG_OGL_CORE_ASSERT(t_scene, "[City::City()] Null pointer.")
+    SG_OGL_ASSERT(t_scene, "[City::City()] Null pointer.")
 
     SG_OGL_LOG_DEBUG("[City::City()] Construct City.");
 
@@ -92,7 +92,7 @@ void sg::city::city::City::Update(const double t_dt, TileIndexContainer& t_chang
                 if (tile->type == map::tile::TileType::TRAFFIC)
                 {
                     auto* roadTile{ dynamic_cast<map::tile::RoadTile*>(tile.get()) };
-                    SG_OGL_CORE_ASSERT(roadTile, "[City::Update()] Null pointer.")
+                    SG_OGL_ASSERT(roadTile, "[City::Update()] Null pointer.")
 
                     roadTile->ClearTracksAndStops();
                 }
@@ -112,7 +112,7 @@ void sg::city::city::City::Update(const double t_dt, TileIndexContainer& t_chang
         else if(changedTile->type == map::tile::TileType::RESIDENTIAL)
         {
             auto* buildingTile{ dynamic_cast<map::tile::BuildingTile*>(changedTile.get()) };
-            SG_OGL_CORE_ASSERT(buildingTile, "[City::Update()] Null pointer.")
+            SG_OGL_ASSERT(buildingTile, "[City::Update()] Null pointer.")
 
             m_buildingGenerator->AddBuilding(*buildingTile);
 
@@ -135,7 +135,7 @@ void sg::city::city::City::Update(const double t_dt, TileIndexContainer& t_chang
         if (tile->type == map::tile::TileType::TRAFFIC)
         {
             auto* roadTile{ dynamic_cast<map::tile::RoadTile*>(tile.get()) };
-            SG_OGL_CORE_ASSERT(roadTile, "[City::Update()] Null pointer.")
+            SG_OGL_ASSERT(roadTile, "[City::Update()] Null pointer.")
 
             if (!roadTile->GetStopPatterns().empty() && !automatas.empty())
             {

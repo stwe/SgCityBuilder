@@ -27,7 +27,7 @@
 sg::city::map::tile::RoadTile::RoadTile(const float t_mapX, const float t_mapZ, const TileType t_type, Map* t_map)
     : Tile(t_mapX, t_mapZ, t_type, t_map)
 {
-    SG_OGL_CORE_ASSERT(t_type == TileType::TRAFFIC, "[RoadTile::RoadTile()] Invalid Tile Type.")
+    SG_OGL_ASSERT(t_type == TileType::TRAFFIC, "[RoadTile::RoadTile()] Invalid Tile Type.")
 }
 
 sg::city::map::tile::RoadTile::~RoadTile() noexcept
@@ -119,7 +119,7 @@ void sg::city::map::tile::RoadTile::ApplyStopPattern(const int t_index)
 
 void sg::city::map::tile::RoadTile::CreateAutoTracksMesh()
 {
-    SG_OGL_CORE_ASSERT(!m_autoTracks.empty(), "[RoadTile::CreateAutoTracksMesh()] No Auto Tracks available.")
+    SG_OGL_ASSERT(!m_autoTracks.empty(), "[RoadTile::CreateAutoTracksMesh()] No Auto Tracks available.")
 
     VertexContainer vertexContainer;
 
@@ -163,7 +163,7 @@ void sg::city::map::tile::RoadTile::CreateAutoTracksMesh()
 
 void sg::city::map::tile::RoadTile::RenderAutoTracks() const
 {
-    SG_OGL_CORE_ASSERT(m_autoTracksMesh, "[RoadTile::RenderAutoTracks()] Null pointer.")
+    SG_OGL_ASSERT(m_autoTracksMesh, "[RoadTile::RenderAutoTracks()] Null pointer.")
 
     ogl::math::Transform t;
     t.position = m_map->position;
@@ -191,9 +191,9 @@ void sg::city::map::tile::RoadTile::RenderAutoTracks() const
 
 void sg::city::map::tile::RoadTile::Init()
 {
-    SG_OGL_CORE_ASSERT(!m_neighbours.empty(), "[RoadTile::Init()] No neighbours available. Call this function after creating the Tile.")
-    SG_OGL_CORE_ASSERT(m_autoTracks.empty(), "[RoadTile::Init()] Call this function after creating the Tile.")
-    SG_OGL_CORE_ASSERT(m_stopPatterns.empty(), "[RoadTile::Init()] Call this function after creating the Tile.")
+    SG_OGL_ASSERT(!m_neighbours.empty(), "[RoadTile::Init()] No neighbours available. Call this function after creating the Tile.")
+    SG_OGL_ASSERT(m_autoTracks.empty(), "[RoadTile::Init()] Call this function after creating the Tile.")
+    SG_OGL_ASSERT(m_stopPatterns.empty(), "[RoadTile::Init()] Call this function after creating the Tile.")
 
     /*
     // Tile
@@ -908,12 +908,12 @@ bool sg::city::map::tile::RoadTile::DetermineRoadType()
 
 void sg::city::map::tile::RoadTile::AddAutoTrack(const int t_fromNodeIndex, const int t_toNodeIndex, const float t_rotation, const bool t_safeCarAutoTrack)
 {
-    SG_OGL_CORE_ASSERT(t_fromNodeIndex >= 0 && t_fromNodeIndex <= 48, "[RoadTile::AddAutoTrack()] Invalid From index.")
-    SG_OGL_CORE_ASSERT(t_toNodeIndex >= 0 && t_toNodeIndex <= 48, "[RoadTile::AddAutoTrack()] Invalid To index.")
+    SG_OGL_ASSERT(t_fromNodeIndex >= 0 && t_fromNodeIndex <= 48, "[RoadTile::AddAutoTrack()] Invalid From index.")
+    SG_OGL_ASSERT(t_toNodeIndex >= 0 && t_toNodeIndex <= 48, "[RoadTile::AddAutoTrack()] Invalid To index.")
 
     auto& navigationNodes{ m_map->GetNavigationNodes(GetMapIndex()) };
 
-    SG_OGL_CORE_ASSERT(navigationNodes[t_fromNodeIndex] && navigationNodes[t_toNodeIndex], "[RoadTile::AddAutoTrack()] Null pointer.")
+    SG_OGL_ASSERT(navigationNodes[t_fromNodeIndex] && navigationNodes[t_toNodeIndex], "[RoadTile::AddAutoTrack()] Null pointer.")
 
     auto& from{ navigationNodes[t_fromNodeIndex] };
     auto& to{ navigationNodes[t_toNodeIndex] };

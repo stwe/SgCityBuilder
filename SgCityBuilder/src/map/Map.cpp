@@ -7,6 +7,7 @@
 // 
 // 2020 (c) stwe <https://github.com/stwe/SgCityBuilder>
 
+#include <iostream>
 #include <random>
 #include <Color.h>
 #include <Application.h>
@@ -29,7 +30,7 @@
 sg::city::map::Map::Map(ogl::scene::Scene* t_scene)
     : m_scene{ t_scene }
 {
-    SG_OGL_CORE_ASSERT(t_scene, "[Map::Map()] Null pointer.")
+    SG_OGL_ASSERT(t_scene, "[Map::Map()] Null pointer.")
 
     SG_OGL_LOG_DEBUG("[Map::Map()] Construct Map.");
 
@@ -148,8 +149,8 @@ sg::city::map::tile::Tile& sg::city::map::Map::GetTileByMapPosition(const int t_
 
 int sg::city::map::Map::GetTileMapIndexByMapPosition(const int t_mapX, const int t_mapZ) const
 {
-    SG_OGL_CORE_ASSERT(t_mapX < m_mapSize, "[Map::GetTileMapIndexByMapPosition()] Invalid x position.")
-    SG_OGL_CORE_ASSERT(t_mapZ < m_mapSize, "[Map::GetTileMapIndexByMapPosition()] Invalid z position.")
+    SG_OGL_ASSERT(t_mapX < m_mapSize, "[Map::GetTileMapIndexByMapPosition()] Invalid x position.")
+    SG_OGL_ASSERT(t_mapZ < m_mapSize, "[Map::GetTileMapIndexByMapPosition()] Invalid z position.")
 
     return t_mapZ * m_mapSize + t_mapX;
 }
@@ -160,7 +161,7 @@ int sg::city::map::Map::GetTileMapIndexByMapPosition(const int t_mapX, const int
 
 void sg::city::map::Map::CreateMap(const int t_mapSize)
 {
-    SG_OGL_CORE_ASSERT(t_mapSize, "[Map::CreateMap()] Invalid Map size.")
+    SG_OGL_ASSERT(t_mapSize, "[Map::CreateMap()] Invalid Map size.")
 
     m_mapSize = t_mapSize;
 
@@ -241,12 +242,91 @@ void sg::city::map::Map::FindConnectedRegions()
 }
 
 //-------------------------------------------------
+// File I/O
+//-------------------------------------------------
+
+void sg::city::map::Map::SaveMap()
+{
+    // open file
+    std::ofstream outFile;
+    outFile.open(MAP_FILE_NAME, std::ios::out | std::ios::binary);
+
+    // write header info
+    std::string info{ MAP_FILE_HEADER_INFO };
+    outFile.write(reinterpret_cast<char*>(info.data()), MAP_FILE_HEADER_LENGTH);
+
+    // write size of Map
+    outFile.write(reinterpret_cast<char*>(&m_mapSize), sizeof(int));
+
+    // write tiles
+    for (auto& tile : m_tiles)
+    {
+        // write type
+        outFile.write(reinterpret_cast<char*>(&tile->type), sizeof(tile::TileType));
+    }
+
+    // close file
+    outFile.close();
+
+    SG_OGL_LOG_INFO("[Map::SaveMap()] Map saved successfully.");
+}
+
+void sg::city::map::Map::LoadMap()
+{
+    // open file
+    std::ifstream inFile;
+    inFile.open(MAP_FILE_NAME, std::ios::in | std::ios::binary);
+
+    // read info
+    std::string info;
+    info.resize(MAP_FILE_HEADER_LENGTH);
+    inFile.read(reinterpret_cast<char*>(info.data()), MAP_FILE_HEADER_LENGTH);
+    SG_OGL_ASSERT(info == MAP_FILE_HEADER_INFO, "[Map::LoadMap()] Invalid file format.")
+
+    // read size of Map
+    auto mapSize{ 0 };
+    inFile.read(reinterpret_cast<char*>(&mapSize), sizeof(int));
+    SG_OGL_ASSERT(mapSize, "[Map::LoadMap()] Invalid map size.")
+
+    // read tiles
+    std::vector<tile::TileType> types;
+    for (auto i{ 0 }; i < mapSize * mapSize; ++i)
+    {
+        tile::TileType type;
+        inFile.read(reinterpret_cast<char*>(&type), sizeof(tile::TileType));
+        types.push_back(type);
+    }
+
+    // close file
+    inFile.close();
+
+    SG_OGL_LOG_INFO("[Map::LoadMap()] Map loaded successfully.");
+
+    std::cout << "-----------------------------" << std::endl;
+    std::cout << "File: " << MAP_FILE_NAME << std::endl;
+    std::cout << "Info: " << info << std::endl;
+    std::cout << "Map size: " << mapSize << std::endl;
+
+    auto i{ 0 };
+    for (auto z{ 0 }; z < mapSize; ++z)
+    {
+        for (auto x{ 0 }; x < mapSize; ++x)
+        {
+            std::cout << "Type: " << tile::Tile::TileTypeToString(types[i]) << std::endl;
+            i++;
+        }
+    }
+
+    std::cout << "-----------------------------" << std::endl;
+}
+
+//-------------------------------------------------
 // Debug
 //-------------------------------------------------
 
 void sg::city::map::Map::CreateNavigationNodesMesh()
 {
-    SG_OGL_CORE_ASSERT(!m_tileNavigationNodes.empty(), "[Map::CreateNavigationNodesMesh()] No Navigation Nodes available.")
+    SG_OGL_ASSERT(!m_tileNavigationNodes.empty(), "[Map::CreateNavigationNodesMesh()] No Navigation Nodes available.")
 
     VertexContainer vertexContainer;
 
@@ -384,7 +464,7 @@ void sg::city::map::Map::StoreTiles()
 
 void sg::city::map::Map::StoreTileNeighbours()
 {
-    SG_OGL_CORE_ASSERT(!m_tiles.empty(), "[Map::StoreTileNeighbours()] No Tiles available.")
+    SG_OGL_ASSERT(!m_tiles.empty(), "[Map::StoreTileNeighbours()] No Tiles available.")
 
     SG_OGL_LOG_DEBUG("[Map::StoreTileNeighbours()] Store Tile neighbors.");
 
@@ -419,8 +499,8 @@ void sg::city::map::Map::StoreTileNeighbours()
 
 void sg::city::map::Map::StoreTileNavigationNodes()
 {
-    SG_OGL_CORE_ASSERT(!m_tiles.empty(), "[Map::StoreTileNavigationNodes()] No Tiles available.")
-    SG_OGL_CORE_ASSERT(m_tileNavigationNodes.empty(), "[Map::StoreTileNavigationNodes()] Navigation Nodes already exists.")
+    SG_OGL_ASSERT(!m_tiles.empty(), "[Map::StoreTileNavigationNodes()] No Tiles available.")
+    SG_OGL_ASSERT(m_tileNavigationNodes.empty(), "[Map::StoreTileNavigationNodes()] Navigation Nodes already exists.")
 
     SG_OGL_LOG_DEBUG("[Map::StoreTileNavigationNodes()] Store Navigation Nodes for the Tiles.");
 
@@ -478,8 +558,8 @@ void sg::city::map::Map::StoreTileNavigationNodes()
 
 void sg::city::map::Map::LinkTileNavigationNodes()
 {
-    SG_OGL_CORE_ASSERT(!m_tiles.empty(), "[Map::LinkTileNavigationNodes()] No Tiles available.")
-    SG_OGL_CORE_ASSERT(!m_tileNavigationNodes.empty(), "[Map::LinkTileNavigationNodes()] No Navigation Nodes available.")
+    SG_OGL_ASSERT(!m_tiles.empty(), "[Map::LinkTileNavigationNodes()] No Tiles available.")
+    SG_OGL_ASSERT(!m_tileNavigationNodes.empty(), "[Map::LinkTileNavigationNodes()] No Navigation Nodes available.")
 
     SG_OGL_LOG_DEBUG("[Map::LinkTileNavigationNodes()] Link neighboring Navigation Nodes.");
 

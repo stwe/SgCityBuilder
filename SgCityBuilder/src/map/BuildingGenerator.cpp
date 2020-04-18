@@ -22,7 +22,7 @@
 sg::city::map::BuildingGenerator::BuildingGenerator(city::City* t_city)
     : m_city{ t_city }
 {
-    SG_OGL_CORE_ASSERT(t_city, "[BuildingGenerator::BuildingGenerator()] Null pointer.")
+    SG_OGL_ASSERT(t_city, "[BuildingGenerator::BuildingGenerator()] Null pointer.")
     SG_OGL_LOG_DEBUG("[BuildingGenerator::BuildingGenerator()] Construct BuildingGenerator.");
 
     Init();
@@ -161,7 +161,7 @@ void sg::city::map::BuildingGenerator::InitQuadMesh()
 
 void sg::city::map::BuildingGenerator::InitVboForInstancedData()
 {
-    SG_OGL_CORE_ASSERT(m_quadMesh, "[BuildingGenerator::InitVboForInstancedData()] Null pointer.")
+    SG_OGL_ASSERT(m_quadMesh, "[BuildingGenerator::InitVboForInstancedData()] Null pointer.")
 
     // create Vbo for instanced data
     m_vboId = ogl::buffer::Vbo::GenerateVbo();
@@ -203,7 +203,7 @@ void sg::city::map::BuildingGenerator::AddFloor(tile::BuildingTile& t_buildingTi
 {
     const auto floor{ t_buildingTile.floors };
 
-    SG_OGL_CORE_ASSERT(floor <= MAX_INSTANCES_PER_TILE, "[BuildingGenerator::AddFloor()] The maximum number of floors has already been reached.")
+    SG_OGL_ASSERT(floor <= MAX_INSTANCES_PER_TILE, "[BuildingGenerator::AddFloor()] The maximum number of floors has already been reached.")
 
     ogl::math::Transform transform;
     const auto posY{ floor == 0 ? 0.125f : 0.5f };

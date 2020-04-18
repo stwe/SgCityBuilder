@@ -19,7 +19,7 @@
 sg::city::map::tile::BuildingTile::BuildingTile(const float t_mapX, const float t_mapZ, const TileType t_type, Map* t_map)
     : Tile(t_mapX, t_mapZ, t_type, t_map)
 {
-    SG_OGL_CORE_ASSERT(t_type == TileType::RESIDENTIAL, "[BuildingTile::BuildingTile()] Invalid Tile Type.")
+    SG_OGL_ASSERT(t_type == TileType::RESIDENTIAL, "[BuildingTile::BuildingTile()] Invalid Tile Type.")
 }
 
 sg::city::map::tile::BuildingTile::~BuildingTile() noexcept

@@ -285,6 +285,20 @@ void GameState::RenderImGui()
     ImGui::Separator();
     ImGui::Spacing();
 
+    if (ImGui::Button("Save map"))
+    {
+        m_city->GetMap().SaveMap();
+    }
+
+    if (ImGui::Button("Load map"))
+    {
+        m_city->GetMap().LoadMap();
+    }
+
+    ImGui::Spacing();
+    ImGui::Separator();
+    ImGui::Spacing();
+
     if (m_mapPoint.x >= 0)
     {
         const auto& tile{ m_city->GetMap().GetTileByMapPosition(m_mapPoint.x, m_mapPoint.z) };
