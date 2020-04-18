@@ -78,9 +78,14 @@ uint32_t sg::city::map::Map::GetRoadTextureAtlasId() const
     return m_roadTextureAtlasId;
 }
 
-uint32_t sg::city::map::Map::GetBuildingTextureAtlasId() const
+const sg::city::map::Map::BuildingTextureContainer& sg::city::map::Map::GetBuildingTextures() const noexcept
 {
-    return m_buildingTextureAtlasId;
+    return m_buildingTextures;
+}
+
+sg::city::map::Map::BuildingTextureContainer& sg::city::map::Map::GetBuildingTextures() noexcept
+{
+    return m_buildingTextures;
 }
 
 const sg::city::map::Map::TileContainer& sg::city::map::Map::GetTiles() const noexcept
@@ -438,7 +443,9 @@ void sg::city::map::Map::StoreTextures()
     m_tileTypeTextures.emplace(tile::TileType::TRAFFIC, t);
 
     m_roadTextureAtlasId = m_scene->GetApplicationContext()->GetTextureManager().GetTextureIdFromPath("res/texture/road/roads.png");
-    m_buildingTextureAtlasId = m_scene->GetApplicationContext()->GetTextureManager().GetTextureIdFromPath("res/texture/line.png", true);
+
+    m_buildingTextures.push_back(m_scene->GetApplicationContext()->GetTextureManager().GetTextureIdFromPath("res/texture/line.png", true));
+    m_buildingTextures.push_back(m_scene->GetApplicationContext()->GetTextureManager().GetTextureIdFromPath("res/texture/line2.png", true));
 }
 
 void sg::city::map::Map::StoreTiles()

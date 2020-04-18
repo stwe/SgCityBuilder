@@ -52,9 +52,9 @@ uint32_t sg::city::map::BuildingGenerator::GetInstances() const
     return static_cast<int>(m_instanceDatas.size());
 }
 
-uint32_t sg::city::map::BuildingGenerator::GetBuildingTextureAtlasId() const
+sg::city::city::City* sg::city::map::BuildingGenerator::GetCity() const
 {
-    return m_city->GetMap().GetBuildingTextureAtlasId();
+    return m_city;
 }
 
 //-------------------------------------------------
@@ -75,9 +75,12 @@ void sg::city::map::BuildingGenerator::AddBuilding(tile::BuildingTile& t_buildin
     const std::uniform_real_distribution<float> col(0.4, 0.8);
     const auto randomCol{ col(engine) };
 
+    const std::uniform_int_distribution<unsigned int> text(1, 2);
+    const auto textureId{ static_cast<float>(text(engine)) };
+
     for (auto i{ 0 }; i < floors; ++i)
     {
-        AddFloor(t_buildingTile, glm::vec3(randomCol));
+        AddFloor(t_buildingTile, glm::vec3(randomCol), textureId);
     }
 }
 
@@ -199,7 +202,7 @@ void sg::city::map::BuildingGenerator::Init()
 // Floors
 //-------------------------------------------------
 
-void sg::city::map::BuildingGenerator::AddFloor(tile::BuildingTile& t_buildingTile, const glm::vec3& t_color)
+void sg::city::map::BuildingGenerator::AddFloor(tile::BuildingTile& t_buildingTile, const glm::vec3& t_color, const float t_textureId)
 {
     const auto floor{ t_buildingTile.floors };
 
@@ -224,7 +227,7 @@ void sg::city::map::BuildingGenerator::AddFloor(tile::BuildingTile& t_buildingTi
     transform.position = glm::vec3(t_buildingTile.GetWorldX() + 0.5f, posY + offsetY, t_buildingTile.GetWorldZ() + -0.5f);
     transform.scale = glm::vec3(1.0f, floor == 0 ? 0.25f : 1.0f, 1.0f);
 
-    const auto useTexture{ floor == 0 ? 0.0f : 1.0f };
+    const auto useTexture{ floor == 0 ? 0.0f : t_textureId };
     m_instanceDatas.push_back({ static_cast<glm::mat4>(transform), glm::vec4(t_color, useTexture) } );
 
     const auto instances{ GetInstances() };

@@ -51,6 +51,8 @@ namespace sg::city::map
 
         using MeshUniquePtr = std::unique_ptr<ogl::resource::Mesh>;
 
+        using BuildingTextureContainer = std::vector<uint32_t>;
+
         //-------------------------------------------------
         // Const
         //-------------------------------------------------
@@ -118,7 +120,9 @@ namespace sg::city::map
         [[nodiscard]] TileTypeTextureContainer& GetTileTypeTextures() noexcept;
 
         [[nodiscard]] uint32_t GetRoadTextureAtlasId() const;
-        [[nodiscard]] uint32_t GetBuildingTextureAtlasId() const;
+
+        [[nodiscard]] const BuildingTextureContainer& GetBuildingTextures() const noexcept;
+        [[nodiscard]] BuildingTextureContainer& GetBuildingTextures() noexcept;
 
         [[nodiscard]] const TileContainer& GetTiles() const noexcept;
         [[nodiscard]] TileContainer& GetTiles() noexcept;
@@ -215,9 +219,9 @@ namespace sg::city::map
         uint32_t m_roadTextureAtlasId{ 0 };
 
         /**
-         * @brief The Id of the building texture atlas.
+         * @brief The Ids of the building textures.
          */
-        uint32_t m_buildingTextureAtlasId{ 0 };
+        BuildingTextureContainer m_buildingTextures;
 
         /**
          * @brief A container holding the Tile instances.

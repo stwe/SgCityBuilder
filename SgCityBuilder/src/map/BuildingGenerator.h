@@ -72,7 +72,7 @@ namespace sg::city::map
         [[nodiscard]] ogl::resource::Mesh& GetMesh() noexcept;
 
         [[nodiscard]] uint32_t GetInstances() const;
-        [[nodiscard]] uint32_t GetBuildingTextureAtlasId() const;
+        [[nodiscard]] city::City* GetCity() const;
 
         //-------------------------------------------------
         // Add
@@ -115,6 +115,6 @@ namespace sg::city::map
         // Floors
         //-------------------------------------------------
 
-        void AddFloor(tile::BuildingTile& t_buildingTile, const glm::vec3& t_color);
+        void AddFloor(tile::BuildingTile& t_buildingTile, const glm::vec3& t_color, float t_textureId);
     };
 }
