@@ -92,6 +92,8 @@ namespace sg::city::map
         bool wireframeMode{ false };
         bool showRegions{ false };
 
+        std::vector<float> gridValues;
+
         //-------------------------------------------------
         // Ctors. / Dtor.
         //-------------------------------------------------
@@ -269,6 +271,8 @@ namespace sg::city::map
         void StoreTileNavigationNodes();
         void LinkTileNavigationNodes();
         void StoreRandomColors();
+
+        void InitGrid();
 
         //-------------------------------------------------
         // Helper

@@ -170,6 +170,8 @@ void sg::city::map::Map::CreateMap(const int t_mapSize)
 
     m_mapSize = t_mapSize;
 
+    InitGrid();
+
     StoreTextures();
     StoreTiles();
     StoreTileNeighbours();
@@ -639,6 +641,17 @@ void sg::city::map::Map::StoreRandomColors()
     {
         m_randomColors.emplace(i, ogl::Color(r(engine), g(engine), b(engine)));
     }
+}
+
+void sg::city::map::Map::InitGrid()
+{
+    const auto id{ m_scene->GetApplicationContext()->GetTextureManager().GetTextureIdFromPath("res/texture/grid.png") };
+
+    ogl::resource::TextureManager::Bind(id);
+
+    // Create float buffer of red channel heightmap data.
+    gridValues.resize(128 * 128);
+    glGetTexImage(GL_TEXTURE_2D, 0, GL_RED, GL_FLOAT, gridValues.data());
 }
 
 //-------------------------------------------------

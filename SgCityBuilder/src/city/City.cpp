@@ -189,7 +189,7 @@ void sg::city::city::City::Update(const double t_dt, TileIndexContainer& t_chang
 void sg::city::city::City::Render() const
 {
     m_mapRenderer->Render();
-    //m_roadNetworkRenderer->Render();
+    m_roadNetworkRenderer->Render();
     m_buildingsRenderer->Render();
 }
 

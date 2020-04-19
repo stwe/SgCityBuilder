@@ -134,6 +134,25 @@ void GameState::Init()
     m_mousePicker = std::make_unique<sg::city::input::MousePicker>(m_scene.get(), m_city->GetMapSharedPtr());
 
     m_forwardRenderer = std::make_unique<sg::ogl::ecs::system::ForwardRenderSystem>(m_scene.get());
+
+    /*
+    auto i{ 0 };
+    for (auto& tile : m_city->GetMap().GetTiles())
+    {
+        if (m_city->GetMap().gridValues[i] == 1.0f)
+        {
+            SG_OGL_LOG_INFO("[GameState::Init()] Replace Tile on x: {}, z: {}.", tile->GetMapX(), tile->GetMapZ());
+            const auto [changedTileIndex, skip] { m_city->ReplaceTile(tile->GetMapX(), tile->GetMapZ(), sg::city::map::tile::TileType::RESIDENTIAL) };
+
+            if (!skip)
+            {
+                m_changedTiles.push_back(changedTileIndex);
+            }
+        }
+
+        i++;
+    }
+    */
 }
 
 //-------------------------------------------------
