@@ -179,8 +179,9 @@ void sg::city::map::Map::CreateMap(const int t_mapSize)
     StoreTileNavigationNodes();
     LinkTileNavigationNodes();
 
-    // for debug
+#ifdef ENABLE_TRAFFIC_DEBUG
     CreateNavigationNodesMesh();
+#endif
 
     // create an bind a new Vao
     m_mapMesh = std::make_unique<ogl::resource::Mesh>();

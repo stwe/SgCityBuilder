@@ -14,7 +14,7 @@
 #include "map/Map.h"
 #include "automata/Automata.h"
 #include "automata/AutoTrack.h"
-#include "city/Timer.h"
+//#include "city/Timer.h"
 
 //-------------------------------------------------
 // Ctors. / Dtor.
@@ -81,7 +81,7 @@ bool GameState::Update(const double t_dt)
     m_scene->GetCurrentCamera().Update(t_dt);
 
     {
-        sg::city::timer::Timer timer;
+        //sg::city::timer::Timer timer;
         m_city->Update(t_dt, m_changedTileIndex);
     }
 

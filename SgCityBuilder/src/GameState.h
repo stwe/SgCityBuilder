@@ -9,9 +9,17 @@
 
 #pragma once
 
-#ifdef SG_CITY_DEBUG_BUILD
+//-------------------------------------------------
+// Build options
+//-------------------------------------------------
+
+//#define IT_WILL_RUN_SLOWLY
+
+#if defined (SG_CITY_DEBUG_BUILD) && defined (IT_WILL_RUN_SLOWLY)
     #define ENABLE_TRAFFIC_DEBUG
 #endif
+
+//-------------------------------------------------
 
 #include "SgOgl.h"
 #include "map/tile/Tile.h"

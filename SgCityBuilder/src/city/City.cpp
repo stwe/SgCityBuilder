@@ -317,7 +317,7 @@ void sg::city::city::City::RenderAutoTracks() const
     {
         if (tile->type == map::tile::TileType::TRAFFIC)
         {
-            auto* roadTile{ dynamic_cast<sg::city::map::tile::RoadTile*>(tile.get()) };
+            auto* roadTile{ dynamic_cast<map::tile::RoadTile*>(tile.get()) };
             SG_OGL_ASSERT(roadTile, "[City::RenderAutoTracks()] Null pointer.");
 
             roadTile->RenderAutoTracks();

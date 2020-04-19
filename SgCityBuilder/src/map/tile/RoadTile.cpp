@@ -81,9 +81,10 @@ void sg::city::map::tile::RoadTile::Update()
     // is exist a StopPattern, use the index 0 by default
     ApplyStopPattern(0);
 
-    // for debug
+#ifdef ENABLE_TRAFFIC_DEBUG
     CreateAutoTracksMesh();
     m_map->CreateNavigationNodesMesh();
+#endif
 }
 
 void sg::city::map::tile::RoadTile::ApplyStopPattern(const int t_index)
@@ -106,8 +107,9 @@ void sg::city::map::tile::RoadTile::ApplyStopPattern(const int t_index)
         // store given index as current
         m_currentStopPatternIndex = t_index;
 
-        // for debug
+#ifdef ENABLE_TRAFFIC_DEBUG
         m_map->CreateNavigationNodesMesh();
+#endif
     }
 }
 
