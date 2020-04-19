@@ -35,8 +35,6 @@ public:
     using CityUniquePtr = std::unique_ptr<sg::city::city::City>;
     using MousePickerUniquePtr = std::unique_ptr<sg::city::input::MousePicker>;
 
-    using TileIndexContainer = std::vector<int>;
-
     using ForwardRendererUniquePtr = std::unique_ptr<sg::ogl::ecs::system::ForwardRenderSystem>;
 
     //-------------------------------------------------
@@ -73,7 +71,7 @@ private:
     CityUniquePtr m_city;
     MousePickerUniquePtr m_mousePicker;
 
-    TileIndexContainer m_changedTiles;
+    int m_changedTileIndex{ -1 };
 
     ForwardRendererUniquePtr m_forwardRenderer;
 

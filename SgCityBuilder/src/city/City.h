@@ -45,8 +45,6 @@ namespace sg::city::city
         using MapSharedPtr = std::shared_ptr<map::Map>;
         using MapRendererUniquePtr = std::unique_ptr<renderer::MapRenderer>;
 
-        using TileIndexContainer = std::vector<int>;
-
         using AutomataSharedPtr = std::shared_ptr<automata::Automata>;
         using AutomataContainer = std::list<AutomataSharedPtr>;
 
@@ -98,7 +96,7 @@ namespace sg::city::city
         // Logic
         //-------------------------------------------------
 
-        void Update(double t_dt, TileIndexContainer& t_changedTiles);
+        void Update(double t_dt, int& t_changedTileIndex);
         void Render() const;
 
         //-------------------------------------------------

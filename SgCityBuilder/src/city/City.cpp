@@ -74,14 +74,16 @@ sg::city::city::City::MapSharedPtr sg::city::city::City::GetMapSharedPtr() const
 // Logic
 //-------------------------------------------------
 
-void sg::city::city::City::Update(const double t_dt, TileIndexContainer& t_changedTiles)
+void sg::city::city::City::Update(const double t_dt, int& t_changedTileIndex)
 {
     // handle the changed Tiles
 
-    for (auto changedTileIndex : t_changedTiles)
+    if (t_changedTileIndex >= 0)
     {
+        SG_OGL_LOG_WARN(t_changedTileIndex);
+
         // get Tile
-        auto& changedTile{ m_map->GetTiles()[changedTileIndex] };
+        auto& changedTile{ m_map->GetTiles()[t_changedTileIndex] };
 
         // check if the new Tile is of type TRAFFIC
         if (changedTile->type == map::tile::TileType::TRAFFIC)
@@ -109,7 +111,7 @@ void sg::city::city::City::Update(const double t_dt, TileIndexContainer& t_chang
 
             m_roadNetwork->CreateRoadNetworkMesh();
         }
-        else if(changedTile->type == map::tile::TileType::RESIDENTIAL)
+        else if (changedTile->type == map::tile::TileType::RESIDENTIAL)
         {
             auto* buildingTile{ dynamic_cast<map::tile::BuildingTile*>(changedTile.get()) };
             SG_OGL_ASSERT(buildingTile, "[City::Update()] Null pointer.")
@@ -125,7 +127,7 @@ void sg::city::city::City::Update(const double t_dt, TileIndexContainer& t_chang
         }
     }
 
-    t_changedTiles.clear();
+    t_changedTileIndex = -1;
 
 
     // change StopPattern
@@ -230,8 +232,6 @@ auto sg::city::city::City::ReplaceTile(const int t_mapX, const int t_mapZ, map::
 
         tiles[currentTileIndex] = std::move(newTile);
         tiles[currentTileIndex]->GetNeighbours() = neighbours;
-
-        dynamic_cast<map::tile::RoadTile*>(tiles[currentTileIndex].get())->Init();
     }
     else if(t_tileType == map::tile::TileType::RESIDENTIAL)
     {
@@ -246,8 +246,6 @@ auto sg::city::city::City::ReplaceTile(const int t_mapX, const int t_mapZ, map::
 
         tiles[currentTileIndex] = std::move(newTile);
         tiles[currentTileIndex]->GetNeighbours() = neighbours;
-
-        // todo: init?
     }
     else
     {

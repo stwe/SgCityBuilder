@@ -186,45 +186,6 @@ void sg::city::map::tile::RoadTile::RenderAutoTracks() const
 }
 
 //-------------------------------------------------
-// Init
-//-------------------------------------------------
-
-void sg::city::map::tile::RoadTile::Init()
-{
-    SG_OGL_ASSERT(!m_neighbours.empty(), "[RoadTile::Init()] No neighbours available. Call this function after creating the Tile.")
-    SG_OGL_ASSERT(m_autoTracks.empty(), "[RoadTile::Init()] Call this function after creating the Tile.")
-    SG_OGL_ASSERT(m_stopPatterns.empty(), "[RoadTile::Init()] Call this function after creating the Tile.")
-
-    /*
-    // Tile
-
-    // we use the TileType number as value for the texture
-    SetTexture(static_cast<float>(type));
-
-    // we use the TileType color as Tile color
-    SetColor(TILE_TYPE_COLOR.at(type));
-
-    // update Vbo
-    m_map->UpdateMapVboByTileIndex(GetMapIndex());
-    */
-
-
-    // RoadTile
-
-    // set the RoadType (orientation of the road)
-    DetermineRoadType();
-
-    // create AutoTracks
-    CreateAutoTracks();
-
-    // create StopPattern
-    CreateStopPatterns();
-
-    // create AutoTrack mesh for debug
-    CreateAutoTracksMesh();
-}
-
-//-------------------------------------------------
 // Clear
 //-------------------------------------------------
 
