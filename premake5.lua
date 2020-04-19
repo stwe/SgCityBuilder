@@ -59,7 +59,11 @@ project "SgCityBuilder"
         systemversion "latest"
 
     filter "configurations:Debug"
-        defines "SG_OGL_DEBUG_BUILD"
+        defines
+        {
+            "SG_OGL_DEBUG_BUILD",
+            "SG_CITY_DEBUG_BUILD"
+        }
         runtime "Debug"
         symbols "On"
         libdirs

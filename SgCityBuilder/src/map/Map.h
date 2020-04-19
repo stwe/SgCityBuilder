@@ -92,6 +92,11 @@ namespace sg::city::map
         bool wireframeMode{ false };
         bool showRegions{ false };
 
+        /**
+         * @brief Here all indices are pushed from roads so that iterations can be made more quickly later.
+         */
+        std::vector<int> roadIndices;
+
         std::vector<float> gridValues;
 
         //-------------------------------------------------

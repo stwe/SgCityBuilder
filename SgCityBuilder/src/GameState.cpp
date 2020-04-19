@@ -14,6 +14,7 @@
 #include "map/Map.h"
 #include "automata/Automata.h"
 #include "automata/AutoTrack.h"
+#include "city/Timer.h"
 
 //-------------------------------------------------
 // Ctors. / Dtor.
@@ -79,7 +80,10 @@ bool GameState::Update(const double t_dt)
 {
     m_scene->GetCurrentCamera().Update(t_dt);
 
-    m_city->Update(t_dt, m_changedTileIndex);
+    {
+        sg::city::timer::Timer timer;
+        m_city->Update(t_dt, m_changedTileIndex);
+    }
 
     UpdateCars(t_dt);
 
@@ -139,24 +143,21 @@ void GameState::Init()
 
     m_forwardRenderer = std::make_unique<sg::ogl::ecs::system::ForwardRenderSystem>(m_scene.get());
 
-    /*
+    ////////////////////////////////////
+
+    // setup map tiles from a grid file
+
     auto i{ 0 };
     for (auto& tile : m_city->GetMap().GetTiles())
     {
         if (m_city->GetMap().gridValues[i] == 1.0f)
         {
-            SG_OGL_LOG_INFO("[GameState::Init()] Replace Tile on x: {}, z: {}.", tile->GetMapX(), tile->GetMapZ());
-            const auto [changedTileIndex, skip] { m_city->ReplaceTile(tile->GetMapX(), tile->GetMapZ(), sg::city::map::tile::TileType::RESIDENTIAL) };
-
-            if (!skip)
-            {
-                m_changedTiles.push_back(changedTileIndex);
-            }
+            const auto [changedTileIndex, skip] { m_city->ReplaceTile(tile->GetMapX(), tile->GetMapZ(), sg::city::map::tile::TileType::TRAFFIC) };
+            !skip ? m_changedTileIndex = changedTileIndex : m_changedTileIndex = -1;
         }
 
         i++;
     }
-    */
 }
 
 //-------------------------------------------------

@@ -76,40 +76,35 @@ sg::city::city::City::MapSharedPtr sg::city::city::City::GetMapSharedPtr() const
 
 void sg::city::city::City::Update(const double t_dt, int& t_changedTileIndex)
 {
-    // handle the changed Tiles
+    // handle a changed Tile
 
     if (t_changedTileIndex >= 0)
     {
-        SG_OGL_LOG_WARN(t_changedTileIndex);
-
         // get Tile
         auto& changedTile{ m_map->GetTiles()[t_changedTileIndex] };
 
         // check if the new Tile is of type TRAFFIC
         if (changedTile->type == map::tile::TileType::TRAFFIC)
         {
-            // if this is the case, clear AutoTracks and StopPattern from all TRAFFIC Tiles
-            for (auto& tile : m_map->GetTiles())
-            {
-                if (tile->type == map::tile::TileType::TRAFFIC)
-                {
-                    auto* roadTile{ dynamic_cast<map::tile::RoadTile*>(tile.get()) };
-                    SG_OGL_ASSERT(roadTile, "[City::Update()] Null pointer.")
+            ///////////////////// !! very expensive !! /////////////////////
 
-                    roadTile->ClearTracksAndStops();
-                }
+            // the indices of the roads are in a separate vector to avoid unnecessary loops
+
+            auto& tiles{ m_map->GetTiles() };
+
+            for (auto roadIndex : m_map->roadIndices)
+            {
+                dynamic_cast<map::tile::RoadTile*>(tiles[roadIndex].get())->ClearTracksAndStops();
             }
 
-            // and finally: update all TRAFFIC Tiles
-            for (auto& tile : m_map->GetTiles())
+            for (auto roadIndex : m_map->roadIndices)
             {
-                if (tile->type == map::tile::TileType::TRAFFIC)
-                {
-                    tile->Update();
-                }
+                dynamic_cast<map::tile::RoadTile*>(tiles[roadIndex].get())->Update();
             }
 
             m_roadNetwork->CreateRoadNetworkMesh();
+
+            //////////////////////////////////////////////////////////
         }
         else if (changedTile->type == map::tile::TileType::RESIDENTIAL)
         {
@@ -118,7 +113,6 @@ void sg::city::city::City::Update(const double t_dt, int& t_changedTileIndex)
 
             m_buildingGenerator->AddBuilding(*buildingTile);
 
-            // todo: so far nothing to do in Update()
             changedTile->Update();
         }
         else
@@ -132,6 +126,7 @@ void sg::city::city::City::Update(const double t_dt, int& t_changedTileIndex)
 
     // change StopPattern
 
+    /*
     for (auto& tile : m_map->GetTiles())
     {
         if (tile->type == map::tile::TileType::TRAFFIC)
@@ -163,6 +158,7 @@ void sg::city::city::City::Update(const double t_dt, int& t_changedTileIndex)
             }
         }
     }
+    */
 
 
     // connect regions
@@ -221,7 +217,6 @@ auto sg::city::city::City::ReplaceTile(const int t_mapX, const int t_mapZ, map::
 
     if (t_tileType == map::tile::TileType::TRAFFIC)
     {
-        // create a RoadTile
         auto newTile{ std::make_unique<map::tile::RoadTile>(
                 static_cast<float>(t_mapX),
                 static_cast<float>(t_mapZ),
@@ -232,10 +227,11 @@ auto sg::city::city::City::ReplaceTile(const int t_mapX, const int t_mapZ, map::
 
         tiles[currentTileIndex] = std::move(newTile);
         tiles[currentTileIndex]->GetNeighbours() = neighbours;
+
+        m_map->roadIndices.push_back(currentTileIndex);
     }
     else if(t_tileType == map::tile::TileType::RESIDENTIAL)
     {
-        // create a BuildingTile
         auto newTile{ std::make_unique<map::tile::BuildingTile>(
                 static_cast<float>(t_mapX),
                 static_cast<float>(t_mapZ),

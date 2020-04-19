@@ -213,8 +213,6 @@ void sg::city::map::tile::Tile::SetUv(const glm::vec2& t_bL, const glm::vec2& t_
 
 void sg::city::map::tile::Tile::Update()
 {
-    SG_OGL_LOG_INFO("[Tile::Update()] Start Tile update process.");
-
     // if the type has changed, the color and texture must also be changed
 
     // we use the TileType number as value for the texture

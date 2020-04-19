@@ -9,7 +9,9 @@
 
 #pragma once
 
-#define ENABLE_TRAFFIC_DEBUG
+#ifdef SG_CITY_DEBUG_BUILD
+    #define ENABLE_TRAFFIC_DEBUG
+#endif
 
 #include "SgOgl.h"
 #include "map/tile/Tile.h"
@@ -27,7 +29,7 @@ namespace sg::city::input
 class GameState : public sg::ogl::state::State
 {
 public:
-    static constexpr auto MAP_SIZE{ 8 };
+    static constexpr auto MAP_SIZE{ 128 };
 
     using FirstPersonCameraSharedPtr = std::shared_ptr<sg::ogl::camera::FirstPersonCamera>;
     using SceneUniquePtr = std::unique_ptr<sg::ogl::scene::Scene>;

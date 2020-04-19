@@ -74,8 +74,6 @@ int sg::city::map::tile::RoadTile::GetCurrentStopPatternIndex() const
 
 void sg::city::map::tile::RoadTile::Update()
 {
-    SG_OGL_LOG_INFO("[RoadTile::Update()] Start RoadTile update process.");
-
     DetermineRoadType();
     CreateAutoTracks();
     CreateStopPatterns();
