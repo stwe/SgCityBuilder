@@ -7,6 +7,7 @@
 // 
 // 2020 (c) stwe <https://github.com/stwe/SgCityBuilder>
 
+#include <random>
 #include "GameState.h"
 #include "input/MousePicker.h"
 #include "city/City.h"
@@ -112,6 +113,12 @@ void GameState::Render()
     // render cars
     m_forwardRenderer->Render();
 
+    // render trees
+    m_instancingRenderSystem->Render();
+
+    // render skybox
+    m_skyboxRenderSystem->Render();
+
     RenderImGui();
 }
 
@@ -144,7 +151,76 @@ void GameState::Init()
 #endif
 
     m_mousePicker = std::make_unique<sg::city::input::MousePicker>(m_scene.get(), m_city->GetMapSharedPtr());
+
+    // create renderer
     m_forwardRenderer = std::make_unique<sg::ogl::ecs::system::ForwardRenderSystem>(m_scene.get());
+    m_skyboxRenderSystem = std::make_unique<sg::ogl::ecs::system::SkyboxRenderSystem>(m_scene.get());
+    m_instancingRenderSystem = std::make_unique<sg::ogl::ecs::system::InstancingRenderSystem>(m_scene.get());
+
+    // create directional light
+    CreateDirectionalLight();
+
+    // create skybox
+    CreateSkybox(),
+
+    // create trees
+    GetApplicationContext()->GetEntityFactory().CreateModelEntity(
+        500,
+        "res/model/Tree_01/billboardmodel.obj",
+        CreateTreePositions(500),
+        true
+    );
+}
+
+void GameState::CreateDirectionalLight()
+{
+    m_sun = std::make_shared<sg::ogl::light::Sun>();
+    m_sun->direction = glm::vec3(0.55f, -1.0f, -1.0f);
+    m_sun->diffuseIntensity = glm::vec3(1.2f, 1.2f, 1.2f);
+    GetApplicationContext()->GetEntityFactory().CreateSunEntity(m_sun);
+    m_scene->SetCurrentDirectionalLight(m_sun);
+}
+
+void GameState::CreateSkybox() const
+{
+    const std::vector<std::string> cubemapFileNames{
+        "res/skybox/sky1/sRight.png",
+        "res/skybox/sky1/sLeft.png",
+        "res/skybox/sky1/sUp.png",
+        "res/skybox/sky1/sDown.png",
+        "res/skybox/sky1/sBack.png",
+        "res/skybox/sky1/sFront.png"
+    };
+
+    GetApplicationContext()->GetEntityFactory().CreateSkyboxEntity(cubemapFileNames);
+}
+
+std::vector<glm::mat4> GameState::CreateTreePositions(const uint32_t t_instances)
+{
+    std::random_device seeder;
+    std::mt19937 engine(seeder());
+
+    const std::uniform_real_distribution<float> posX(1.0f, 126.0f);
+    const std::uniform_real_distribution<float> posZ(-50.0f, -1.0f);
+
+    std::vector<glm::mat4> matrices;
+    auto instances{ 0u };
+
+    while (instances < t_instances)
+    {
+        const auto pos{ glm::vec3(posX(engine), 0.0f, posZ(engine)) };
+
+        sg::ogl::math::Transform transform;
+        transform.position = glm::vec3(pos.x, 1.0f, pos.z);
+        transform.rotation = glm::vec3(180.0, 0.0f, 0.0f);
+        transform.scale = glm::vec3(1.0f);
+
+        matrices.push_back(static_cast<glm::mat4>(transform));
+
+        instances++;
+    }
+
+    return matrices;
 }
 
 //-------------------------------------------------

@@ -15,7 +15,7 @@
 
 #if defined (SG_CITY_DEBUG_BUILD)
     #define ENABLE_TRAFFIC_DEBUG
-    #define LOAD_MAP_8_8
+    //#define LOAD_MAP_8_8
 #endif
 
 //-------------------------------------------------
@@ -43,6 +43,11 @@ public:
     using MousePickerUniquePtr = std::unique_ptr<sg::city::input::MousePicker>;
 
     using ForwardRendererUniquePtr = std::unique_ptr<sg::ogl::ecs::system::ForwardRenderSystem>;
+
+    using SkyboxRenderSystemUniquePtr = std::unique_ptr<sg::ogl::ecs::system::SkyboxRenderSystem>;
+    using InstancingRenderSystemUniquePtr = std::unique_ptr<sg::ogl::ecs::system::InstancingRenderSystem>;
+
+    using DirectionalLightSharedPtr = std::shared_ptr<sg::ogl::light::Sun>;
 
     //-------------------------------------------------
     // Const
@@ -89,6 +94,10 @@ private:
     int m_changedTileIndex{ -1 };
 
     ForwardRendererUniquePtr m_forwardRenderer;
+    SkyboxRenderSystemUniquePtr m_skyboxRenderSystem;
+    InstancingRenderSystemUniquePtr m_instancingRenderSystem;
+
+    DirectionalLightSharedPtr m_sun;
 
     sg::city::map::tile::TileType m_currentEditTileType{ sg::city::map::tile::TileType::RESIDENTIAL };
     std::vector<bool> m_buttons{ false, true, false, false, false };
@@ -103,6 +112,9 @@ private:
     //-------------------------------------------------
 
     void Init();
+    void CreateDirectionalLight();
+    void CreateSkybox() const;
+    static std::vector<glm::mat4> CreateTreePositions(uint32_t t_instances);
 
     //-------------------------------------------------
     // Cars
