@@ -14,6 +14,7 @@
 #include <ecs/component/Components.h>
 #include <ecs/factory/EntityFactory.h>
 #include <scene/Scene.h>
+#include <math/Transform.h>
 #include "City.h"
 #include "map/Map.h"
 #include "map/RoadNetwork.h"
@@ -348,6 +349,9 @@ void sg::city::city::City::Init()
     // create a road for each traffic Tile
     StoreRoads();
 
+    // create plants from the plants positions
+    CreatePlants();
+
     // create Renderer
     m_mapRenderer = std::make_unique<renderer::MapRenderer>(m_scene);
     m_roadNetworkRenderer = std::make_unique<renderer::RoadNetworkRenderer>(m_scene);
@@ -377,6 +381,31 @@ void sg::city::city::City::StoreRoads()
     if (!m_map->roadIndices.empty())
     {
         Update(0.016f, m_map->roadIndices.back());
+    }
+}
+
+void sg::city::city::City::CreatePlants() const
+{
+    if (!m_map->plantPositions.empty())
+    {
+        std::vector<glm::mat4> matrices;
+
+        for (auto& plant : m_map->plantPositions)
+        {
+            ogl::math::Transform transform;
+            transform.position = glm::vec3(plant.x, 2.0f, -plant.z);
+            transform.rotation = glm::vec3(180.0, 0.0f, 0.0f);
+            transform.scale = glm::vec3(2.0f);
+
+            matrices.push_back(static_cast<glm::mat4>(transform));
+        }
+
+        m_scene->GetApplicationContext()->GetEntityFactory().CreateModelEntity(
+            static_cast<uint32_t>(matrices.size()),
+            "res/model/Tree_01/billboardmodel.obj",
+            matrices,
+            true
+        );
     }
 }
 

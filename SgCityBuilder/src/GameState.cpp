@@ -7,7 +7,6 @@
 // 
 // 2020 (c) stwe <https://github.com/stwe/SgCityBuilder>
 
-#include <random>
 #include "GameState.h"
 #include "input/MousePicker.h"
 #include "city/City.h"
@@ -134,9 +133,9 @@ void GameState::Init()
 
     m_firstPersonCamera = std::make_shared<sg::ogl::camera::FirstPersonCamera>(
         GetApplicationContext(),
-        glm::vec3(3.0f, 3.0f, 1.0f),
-        -87.0f,
-        -32.0f
+        glm::vec3(56.0f, 3.0f, -81.0f),
+        -49.0f,
+        -14.0f
     );
     m_firstPersonCamera->SetCameraVelocity(4.0f);
     m_firstPersonCamera->SetMouseSensitivity(0.05f);
@@ -161,15 +160,7 @@ void GameState::Init()
     CreateDirectionalLight();
 
     // create skybox
-    CreateSkybox(),
-
-    // create trees
-    GetApplicationContext()->GetEntityFactory().CreateModelEntity(
-        500,
-        "res/model/Tree_01/billboardmodel.obj",
-        CreateTreePositions(500),
-        true
-    );
+    CreateSkybox();
 }
 
 void GameState::CreateDirectionalLight()
@@ -193,34 +184,6 @@ void GameState::CreateSkybox() const
     };
 
     GetApplicationContext()->GetEntityFactory().CreateSkyboxEntity(cubemapFileNames);
-}
-
-std::vector<glm::mat4> GameState::CreateTreePositions(const uint32_t t_instances)
-{
-    std::random_device seeder;
-    std::mt19937 engine(seeder());
-
-    const std::uniform_real_distribution<float> posX(1.0f, 126.0f);
-    const std::uniform_real_distribution<float> posZ(-50.0f, -1.0f);
-
-    std::vector<glm::mat4> matrices;
-    auto instances{ 0u };
-
-    while (instances < t_instances)
-    {
-        const auto pos{ glm::vec3(posX(engine), 0.0f, posZ(engine)) };
-
-        sg::ogl::math::Transform transform;
-        transform.position = glm::vec3(pos.x, 1.0f, pos.z);
-        transform.rotation = glm::vec3(180.0, 0.0f, 0.0f);
-        transform.scale = glm::vec3(1.0f);
-
-        matrices.push_back(static_cast<glm::mat4>(transform));
-
-        instances++;
-    }
-
-    return matrices;
 }
 
 //-------------------------------------------------

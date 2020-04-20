@@ -184,6 +184,7 @@ namespace sg::city::city
         void Init();
         void StoreBuildings() const;
         void StoreRoads();
+        void CreatePlants() const;
 
         //-------------------------------------------------
         // Entity

@@ -482,6 +482,7 @@ void sg::city::map::Map::StoreTiles()
             const auto index{ GetTileMapIndexByMapPosition(x, z) };
             const auto color{ mapValues[index] };
 
+            // create Tiles
             if (color == 1.0f)
             {
                 auto tile{ std::make_unique<tile::RoadTile>(
@@ -516,6 +517,12 @@ void sg::city::map::Map::StoreTiles()
                 };
 
                 m_tiles.push_back(std::move(tile));
+            }
+
+            // store plant positions
+            if (color > 0.2 && color < 0.3f) // 0.25f ==> Tree
+            {
+                plantPositions.emplace_back(x, 0.0f, z);
             }
         }
     }

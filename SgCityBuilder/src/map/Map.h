@@ -98,6 +98,8 @@ namespace sg::city::map
          */
         std::vector<int> roadIndices;
 
+        std::vector<glm::vec3> plantPositions;
+
         MapValuesContainer mapValues;
 
         //-------------------------------------------------

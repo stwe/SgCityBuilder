@@ -114,7 +114,6 @@ private:
     void Init();
     void CreateDirectionalLight();
     void CreateSkybox() const;
-    static std::vector<glm::mat4> CreateTreePositions(uint32_t t_instances);
 
     //-------------------------------------------------
     // Cars
