@@ -13,10 +13,9 @@
 // Build options
 //-------------------------------------------------
 
-//#define IT_WILL_RUN_SLOWLY
-
-#if defined (SG_CITY_DEBUG_BUILD) && defined (IT_WILL_RUN_SLOWLY)
+#if defined (SG_CITY_DEBUG_BUILD)
     #define ENABLE_TRAFFIC_DEBUG
+    #define LOAD_MAP_8_8
 #endif
 
 //-------------------------------------------------
@@ -37,8 +36,6 @@ namespace sg::city::input
 class GameState : public sg::ogl::state::State
 {
 public:
-    static constexpr auto MAP_SIZE{ 128 };
-
     using FirstPersonCameraSharedPtr = std::shared_ptr<sg::ogl::camera::FirstPersonCamera>;
     using SceneUniquePtr = std::unique_ptr<sg::ogl::scene::Scene>;
 
@@ -46,6 +43,14 @@ public:
     using MousePickerUniquePtr = std::unique_ptr<sg::city::input::MousePicker>;
 
     using ForwardRendererUniquePtr = std::unique_ptr<sg::ogl::ecs::system::ForwardRenderSystem>;
+
+    //-------------------------------------------------
+    // Const
+    //-------------------------------------------------
+
+    static constexpr auto CITY_NAME{ "SgCity" };
+    static constexpr auto MAP_8_8_FILE_NAME{ "res/config/Map8x8.png" };
+    static constexpr auto MAP_FILE_NAME{ "res/config/CityMap1.png" };
 
     //-------------------------------------------------
     // Ctors. / Dtor.

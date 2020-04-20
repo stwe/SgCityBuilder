@@ -137,27 +137,14 @@ void GameState::Init()
     m_scene = std::make_unique<sg::ogl::scene::Scene>(GetApplicationContext());
     m_scene->SetCurrentCamera(m_firstPersonCamera);
 
-    m_city = std::make_unique<sg::city::city::City>("SgCity", m_scene.get(), MAP_SIZE);
+#ifdef LOAD_MAP_8_8
+    m_city = std::make_unique<sg::city::city::City>(CITY_NAME, MAP_8_8_FILE_NAME, m_scene.get());
+#else
+    m_city = std::make_unique<sg::city::city::City>(CITY_NAME, MAP_FILE_NAME, m_scene.get());
+#endif
 
     m_mousePicker = std::make_unique<sg::city::input::MousePicker>(m_scene.get(), m_city->GetMapSharedPtr());
-
     m_forwardRenderer = std::make_unique<sg::ogl::ecs::system::ForwardRenderSystem>(m_scene.get());
-
-    ////////////////////////////////////
-
-    // setup map tiles from a grid file
-
-    auto i{ 0 };
-    for (auto& tile : m_city->GetMap().GetTiles())
-    {
-        if (m_city->GetMap().gridValues[i] == 1.0f)
-        {
-            const auto [changedTileIndex, skip] { m_city->ReplaceTile(tile->GetMapX(), tile->GetMapZ(), sg::city::map::tile::TileType::TRAFFIC) };
-            !skip ? m_changedTileIndex = changedTileIndex : m_changedTileIndex = -1;
-        }
-
-        i++;
-    }
 }
 
 //-------------------------------------------------

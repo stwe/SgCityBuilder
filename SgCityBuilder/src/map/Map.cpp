@@ -22,21 +22,20 @@
 #include "shader/LineShader.h"
 #include "shader/NodeShader.h"
 #include "automata/AutoNode.h"
+#include "tile/RoadTile.h"
+#include "tile/BuildingTile.h"
 
 //-------------------------------------------------
 // Ctors. / Dtor.
 //-------------------------------------------------
 
-sg::city::map::Map::Map(ogl::scene::Scene* t_scene)
+sg::city::map::Map::Map(ogl::scene::Scene* t_scene, std::string t_mapFileName)
     : m_scene{ t_scene }
+    , m_mapFileName{ std::move(t_mapFileName) }
 {
     SG_OGL_ASSERT(t_scene, "[Map::Map()] Null pointer.")
 
     SG_OGL_LOG_DEBUG("[Map::Map()] Construct Map.");
-
-    // shader needed for debug
-    m_scene->GetApplicationContext()->GetShaderManager().AddShaderProgram<shader::NodeShader>();
-    m_scene->GetApplicationContext()->GetShaderManager().AddShaderProgram<shader::LineShader>();
 }
 
 sg::city::map::Map::~Map() noexcept
@@ -164,14 +163,25 @@ int sg::city::map::Map::GetTileMapIndexByMapPosition(const int t_mapX, const int
 // Create
 //-------------------------------------------------
 
-void sg::city::map::Map::CreateMap(const int t_mapSize)
+void sg::city::map::Map::CreateMap()
 {
-    SG_OGL_ASSERT(t_mapSize, "[Map::CreateMap()] Invalid Map size.")
+    // shader needed for debug
+    m_scene->GetApplicationContext()->GetShaderManager().AddShaderProgram<shader::NodeShader>();
+    m_scene->GetApplicationContext()->GetShaderManager().AddShaderProgram<shader::LineShader>();
 
-    m_mapSize = t_mapSize;
+    // load map file as texture
+    m_mapTextureId = m_scene->GetApplicationContext()->GetTextureManager().GetTextureIdFromPath(m_mapFileName);
 
-    InitGrid();
+    // get texture meta data
+    const auto w{ m_scene->GetApplicationContext()->GetTextureManager().GetMetadata(m_mapFileName).width };
+    const auto h{ m_scene->GetApplicationContext()->GetTextureManager().GetMetadata(m_mapFileName).height };
 
+    SG_OGL_ASSERT(w == h, "[Map::CreateMap()] Width and height must have the same value.");
+
+    m_mapSize = h;
+
+    // init tiles
+    StoreMapFileValues();
     StoreTextures();
     StoreTiles();
     StoreTileNeighbours();
@@ -429,6 +439,15 @@ void sg::city::map::Map::RenderNavigationNodes() const
 // Init
 //-------------------------------------------------
 
+void sg::city::map::Map::StoreMapFileValues()
+{
+    ogl::resource::TextureManager::Bind(m_mapTextureId);
+
+    // Create float buffer of red channel texture data.
+    mapValues.resize(GetNrOfAllTiles());
+    glGetTexImage(GL_TEXTURE_2D, 0, GL_RED, GL_FLOAT, mapValues.data());
+}
+
 void sg::city::map::Map::StoreTextures()
 {
     SG_OGL_LOG_DEBUG("[Map::StoreTileTypeTextures()] Load all textures.");
@@ -453,21 +472,51 @@ void sg::city::map::Map::StoreTextures()
 
 void sg::city::map::Map::StoreTiles()
 {
-    SG_OGL_LOG_DEBUG("[Map::StoreTiles()] Create ans store {}x{} Tiles for the map.", m_mapSize, m_mapSize);
+    SG_OGL_ASSERT(!mapValues.empty(), "[Map::StoreTiles()] Load a map file before.");
+    SG_OGL_LOG_DEBUG("[Map::StoreTiles()] Create {}x{} Tiles from the file {}.", m_mapSize, m_mapSize, m_mapFileName);
 
     for (auto z{ 0 }; z < m_mapSize; ++z)
     {
         for (auto x{ 0 }; x < m_mapSize; ++x)
         {
-            auto tile{ std::make_unique<tile::Tile>(
-                    static_cast<float>(x),
-                    static_cast<float>(z),
-                    tile::TileType::NONE,
-                    this
-                )
-            };
+            const auto index{ GetTileMapIndexByMapPosition(x, z) };
+            const auto color{ mapValues[index] };
 
-            m_tiles.push_back(std::move(tile));
+            if (color == 1.0f)
+            {
+                auto tile{ std::make_unique<tile::RoadTile>(
+                        static_cast<float>(x),
+                        static_cast<float>(z),
+                        this
+                    )
+                };
+
+                m_tiles.push_back(std::move(tile));
+                roadIndices.push_back(index);
+            }
+            else if (color > 0.4f && color < 0.6f)
+            {
+                auto tile{ std::make_unique<tile::BuildingTile>(
+                        static_cast<float>(x),
+                        static_cast<float>(z),
+                        this
+                    )
+                };
+
+                m_tiles.push_back(std::move(tile));
+            }
+            else
+            {
+                auto tile{ std::make_unique<tile::Tile>(
+                        static_cast<float>(x),
+                        static_cast<float>(z),
+                        tile::TileType::NONE,
+                        this
+                    )
+                };
+
+                m_tiles.push_back(std::move(tile));
+            }
         }
     }
 }
@@ -642,17 +691,6 @@ void sg::city::map::Map::StoreRandomColors()
     {
         m_randomColors.emplace(i, ogl::Color(r(engine), g(engine), b(engine)));
     }
-}
-
-void sg::city::map::Map::InitGrid()
-{
-    const auto id{ m_scene->GetApplicationContext()->GetTextureManager().GetTextureIdFromPath("res/texture/grid.png") };
-
-    ogl::resource::TextureManager::Bind(id);
-
-    // Create float buffer of red channel heightmap data.
-    gridValues.resize(128 * 128);
-    glGetTexImage(GL_TEXTURE_2D, 0, GL_RED, GL_FLOAT, gridValues.data());
 }
 
 //-------------------------------------------------

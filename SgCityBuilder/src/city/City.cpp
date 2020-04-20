@@ -30,15 +30,16 @@
 // Ctors. / Dtor.
 //-------------------------------------------------
 
-sg::city::city::City::City(std::string t_name, ogl::scene::Scene* t_scene, const int t_mapSize)
+sg::city::city::City::City(std::string t_name, std::string t_mapFileName, ogl::scene::Scene* t_scene)
     : m_name{ std::move(t_name) }
+    , m_mapFileName{ std::move(t_mapFileName) }
     , m_scene{ t_scene }
 {
     SG_OGL_ASSERT(t_scene, "[City::City()] Null pointer.")
 
     SG_OGL_LOG_DEBUG("[City::City()] Construct City.");
 
-    Init(m_scene, t_mapSize);
+    Init();
 }
 
 sg::city::city::City::~City() noexcept
@@ -163,7 +164,8 @@ void sg::city::city::City::Update(const double t_dt, int& t_changedTileIndex)
 
     // connect regions
 
-    m_map->FindConnectedRegions();
+    // todo must be fixed
+    //m_map->FindConnectedRegions();
 
 
     // create some Automatas
@@ -220,7 +222,6 @@ auto sg::city::city::City::ReplaceTile(const int t_mapX, const int t_mapZ, map::
         auto newTile{ std::make_unique<map::tile::RoadTile>(
                 static_cast<float>(t_mapX),
                 static_cast<float>(t_mapZ),
-                t_tileType,
                 m_map.get()
             )
         };
@@ -235,7 +236,6 @@ auto sg::city::city::City::ReplaceTile(const int t_mapX, const int t_mapZ, map::
         auto newTile{ std::make_unique<map::tile::BuildingTile>(
                 static_cast<float>(t_mapX),
                 static_cast<float>(t_mapZ),
-                t_tileType,
                 m_map.get()
             )
         };
@@ -329,30 +329,55 @@ void sg::city::city::City::RenderAutoTracks() const
 // Init
 //-------------------------------------------------
 
-void sg::city::city::City::Init(ogl::scene::Scene* t_scene, const int t_mapSize)
+void sg::city::city::City::Init()
 {
     // create Map
-    m_map = std::make_shared<map::Map>(t_scene);
-    m_map->CreateMap(t_mapSize);
+    m_map = std::make_shared<map::Map>(m_scene, m_mapFileName);
+    m_map->CreateMap();
     m_map->position = glm::vec3(0.0f);
     m_map->rotation = glm::vec3(0.0f);
     m_map->scale = glm::vec3(1.0f);
 
-    // create RoadNetwork
+    // create RoadNetwork and BuildingGenerator
     m_roadNetwork = std::make_shared<map::RoadNetwork>(this);
-
-    // create BuildingGenerator
     m_buildingGenerator = std::make_shared<map::BuildingGenerator>(this);
 
+    // create a building for each residential Tile
+    StoreBuildings();
+
+    // create a road for each traffic Tile
+    StoreRoads();
+
     // create Renderer
-    m_mapRenderer = std::make_unique<renderer::MapRenderer>(t_scene);
-    m_roadNetworkRenderer = std::make_unique<renderer::RoadNetworkRenderer>(t_scene);
-    m_buildingsRenderer = std::make_unique<renderer::BuildingsRenderer>(t_scene);
+    m_mapRenderer = std::make_unique<renderer::MapRenderer>(m_scene);
+    m_roadNetworkRenderer = std::make_unique<renderer::RoadNetworkRenderer>(m_scene);
+    m_buildingsRenderer = std::make_unique<renderer::BuildingsRenderer>(m_scene);
 
     // create entities
     CreateMapEntity();
     CreateRoadNetworkEntity();
     CreateBuildingsEntity();
+}
+
+void sg::city::city::City::StoreBuildings() const
+{
+    for (auto& tile : m_map->GetTiles())
+    {
+        if (tile->type == map::tile::TileType::RESIDENTIAL)
+        {
+            m_buildingGenerator->AddBuilding(*dynamic_cast<map::tile::BuildingTile*>(tile.get()));
+        }
+    }
+}
+
+void sg::city::city::City::StoreRoads()
+{
+    // das letzte Tile uebergeben -> alle Roads werden einmal neu erstellt
+    // todo: refactor Update Funktion
+    if (!m_map->roadIndices.empty())
+    {
+        Update(0.016f, m_map->roadIndices.back());
+    }
 }
 
 //-------------------------------------------------

@@ -73,7 +73,7 @@ namespace sg::city::city
         // Ctors. / Dtor.
         //-------------------------------------------------
 
-        City(std::string t_name, ogl::scene::Scene* t_scene, int t_mapSize = 64);
+        City(std::string t_name, std::string t_mapFileName, ogl::scene::Scene* t_scene);
 
         City(const City& t_other) = delete;
         City(City&& t_other) noexcept = delete;
@@ -132,6 +132,12 @@ namespace sg::city::city
         std::string m_name;
 
         /**
+         * @brief The name of the Map file.
+         *        Contains different pixel colors for the different tile types.
+         */
+        std::string m_mapFileName;
+
+        /**
          * @brief The parent Scene object.
          */
         ogl::scene::Scene* m_scene{ nullptr };
@@ -175,7 +181,9 @@ namespace sg::city::city
         // Init
         //-------------------------------------------------
 
-        void Init(ogl::scene::Scene* t_scene, int t_mapSize);
+        void Init();
+        void StoreBuildings() const;
+        void StoreRoads();
 
         //-------------------------------------------------
         // Entity

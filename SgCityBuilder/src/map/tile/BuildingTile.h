@@ -28,7 +28,7 @@ namespace sg::city::map::tile
 
         BuildingTile() = delete;
 
-        BuildingTile(float t_mapX, float t_mapZ, TileType t_type, Map* t_map);
+        BuildingTile(float t_mapX, float t_mapZ, Map* t_map);
 
         BuildingTile(const BuildingTile& t_other) = delete;
         BuildingTile(BuildingTile&& t_other) noexcept = delete;

@@ -24,10 +24,9 @@
 // Ctors. / Dtor.
 //-------------------------------------------------
 
-sg::city::map::tile::RoadTile::RoadTile(const float t_mapX, const float t_mapZ, const TileType t_type, Map* t_map)
-    : Tile(t_mapX, t_mapZ, t_type, t_map)
+sg::city::map::tile::RoadTile::RoadTile(const float t_mapX, const float t_mapZ, Map* t_map)
+    : Tile(t_mapX, t_mapZ, TileType::TRAFFIC, t_map)
 {
-    SG_OGL_ASSERT(t_type == TileType::TRAFFIC, "[RoadTile::RoadTile()] Invalid Tile Type.")
 }
 
 sg::city::map::tile::RoadTile::~RoadTile() noexcept

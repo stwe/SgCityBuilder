@@ -37,6 +37,7 @@ namespace sg::city::map
     {
     public:
         using VertexContainer = std::vector<float>;
+        using MapValuesContainer = std::vector<float>;
 
         using TileTypeTextureContainer = std::unordered_map<tile::TileType, uint32_t, tile::TileTypeHash>;
 
@@ -97,7 +98,7 @@ namespace sg::city::map
          */
         std::vector<int> roadIndices;
 
-        std::vector<float> gridValues;
+        MapValuesContainer mapValues;
 
         //-------------------------------------------------
         // Ctors. / Dtor.
@@ -105,7 +106,7 @@ namespace sg::city::map
 
         Map() = delete;
 
-        explicit Map(ogl::scene::Scene* t_scene);
+        Map(ogl::scene::Scene* t_scene, std::string t_mapFileName);
 
         Map(const Map& t_other) = delete;
         Map(Map&& t_other) noexcept = delete;
@@ -167,7 +168,7 @@ namespace sg::city::map
         // Create
         //-------------------------------------------------
 
-        void CreateMap(int t_mapSize);
+        void CreateMap();
 
         //-------------------------------------------------
         // Update
@@ -209,6 +210,17 @@ namespace sg::city::map
          * @brief Pointer to the parent Scene.
          */
         ogl::scene::Scene* m_scene{ nullptr };
+
+        /**
+         * @brief The name of the Map file.
+         *        Contains different pixel colors for the different tile types.
+         */
+        std::string m_mapFileName;
+
+        /**
+         * @brief The Id of the map texture.
+         */
+        uint32_t m_mapTextureId{ 0 };
 
         /**
          * @brief The number of tiles in the x and z direction.
@@ -270,14 +282,13 @@ namespace sg::city::map
         // Init
         //-------------------------------------------------
 
+        void StoreMapFileValues();
         void StoreTextures();
         void StoreTiles();
         void StoreTileNeighbours();
         void StoreTileNavigationNodes();
         void LinkTileNavigationNodes();
         void StoreRandomColors();
-
-        void InitGrid();
 
         //-------------------------------------------------
         // Helper
@@ -286,27 +297,6 @@ namespace sg::city::map
         [[nodiscard]] int32_t GetVerticesCountOfMap() const;
 
         void DepthSearch(tile::Tile& t_startTile, int t_region);
-
-        //-------------------------------------------------
-        // File utils
-        //-------------------------------------------------
-
-        template<typename T>
-        static void VectorWrite(std::ofstream& t_outFile, const std::vector<T>& t_data)
-        {
-            const std::size_t count = t_data.size();
-            t_outFile.write(reinterpret_cast<const char*>(&count), sizeof(std::size_t));
-            t_outFile.write(reinterpret_cast<const char*>(t_data.data()), count * sizeof(T));
-        }
-
-        template<typename T>
-        static void VectorRead(std::ifstream& t_inFile, std::vector<T>& t_data)
-        {
-            std::size_t count;
-            t_inFile.read(reinterpret_cast<char*>(&count), sizeof(std::size_t));
-            t_data.resize(count);
-            t_inFile.read(reinterpret_cast<char*>(t_data.data()), count * sizeof(T));
-        }
 
         //-------------------------------------------------
         // Vbo

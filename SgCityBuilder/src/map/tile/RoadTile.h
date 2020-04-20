@@ -81,7 +81,7 @@ namespace sg::city::map::tile
 
         RoadTile() = delete;
 
-        RoadTile(float t_mapX, float t_mapZ, TileType t_type, Map* t_map);
+        RoadTile(float t_mapX, float t_mapZ, Map* t_map);
 
         RoadTile(const RoadTile& t_other) = delete;
         RoadTile(RoadTile&& t_other) noexcept = delete;
