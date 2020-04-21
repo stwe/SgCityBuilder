@@ -10,6 +10,7 @@ layout (location = 7) in vec4 aInstanceColor;
 
 // Out
 
+out vec3 vPosition;
 out vec2 vUv;
 out vec3 vColor;
 out float vUseTexture;
@@ -23,8 +24,10 @@ uniform mat4 viewMatrix;
 
 void main()
 {
-    gl_Position = projectionMatrix * viewMatrix * aInstanceMatrix * vec4(aPosition, 1.0);
+    vec4 worldPosition = aInstanceMatrix * vec4(aPosition, 1.0);
+    gl_Position = projectionMatrix * viewMatrix * worldPosition;
 
+    vPosition = vec3(worldPosition);
     vUv = aUv;
     vColor = aInstanceColor.xyz;
     vUseTexture = aInstanceColor.w;

@@ -27,9 +27,13 @@ namespace sg::city::shader
             auto& mapComponent{ t_scene.GetApplicationContext()->registry.get<ecs::MapComponent>(t_entity) };
 
             const auto projectionMatrix{ t_scene.GetApplicationContext()->GetWindow().GetProjectionMatrix() };
-            const auto mvp{ projectionMatrix * t_scene.GetCurrentCamera().GetViewMatrix() * static_cast<glm::mat4>(transformComponent) };
+            const auto worldMatrix{ static_cast<glm::mat4>(transformComponent) };
+            const auto mvp{ projectionMatrix * t_scene.GetCurrentCamera().GetViewMatrix() * worldMatrix };
 
             SetUniform("mvpMatrix", mvp);
+            SetUniform("worldMatrix", worldMatrix);
+            SetUniform("cameraPosition", t_scene.GetCurrentCamera().GetPosition());
+            SetUniform("directionalLight", t_scene.GetCurrentDirectionalLight());
 
             SetUniform("showRegionColor", mapComponent.map->showRegions);
 

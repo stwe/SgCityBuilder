@@ -10,6 +10,7 @@ layout (location = 4) in vec2 aUv;
 
 // Out
 
+out vec3 vWorldPosition;
 out vec3 vPosition;
 out vec3 vColor;
 out float vTexture;
@@ -18,12 +19,16 @@ out vec2 vUv;
 // Uniforms
 
 uniform mat4 mvpMatrix;
+uniform mat4 worldMatrix;
 
 // Main
 
 void main()
 {
     gl_Position = mvpMatrix * vec4(aPosition, 1.0);
+
+    vWorldPosition = vec3(worldMatrix * vec4(aPosition, 1.0));
+
     vPosition = aPosition;
     vColor = aColor;
     vTexture = aTexture;

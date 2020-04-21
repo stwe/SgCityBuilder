@@ -372,6 +372,12 @@ void GameState::RenderImGui()
         m_city->GetMap().wireframeMode = !m_city->GetMap().wireframeMode;
     }
 
+    ImGui::Spacing();
+    ImGui::Separator();
+    ImGui::Spacing();
+
+    ImGui::SliderFloat3("Sun direction", reinterpret_cast<float*>(&m_scene->GetCurrentDirectionalLight().direction), -1.0f, 1.0f);
+
     ImGui::End();
 
     ImGui::Render();
