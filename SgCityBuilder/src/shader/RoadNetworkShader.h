@@ -20,9 +20,13 @@ namespace sg::city::shader
             auto& roadNetworkComponent{ t_scene.GetApplicationContext()->registry.get<ecs::RoadNetworkComponent>(t_entity) };
 
             const auto projectionMatrix{ t_scene.GetApplicationContext()->GetWindow().GetProjectionMatrix() };
-            const auto mvp{ projectionMatrix * t_scene.GetCurrentCamera().GetViewMatrix() * static_cast<glm::mat4>(transformComponent) };
+            const auto worldMatrix{ static_cast<glm::mat4>(transformComponent) };
+            const auto mvp{ projectionMatrix * t_scene.GetCurrentCamera().GetViewMatrix() * worldMatrix };
 
             SetUniform("mvpMatrix", mvp);
+            SetUniform("worldMatrix", worldMatrix);
+            SetUniform("cameraPosition", t_scene.GetCurrentCamera().GetPosition());
+            SetUniform("directionalLight", t_scene.GetCurrentDirectionalLight());
 
             SetUniform("roadTextureAtlas", 0);
             ogl::resource::TextureManager::BindForReading(roadNetworkComponent.roadNetwork->GetRoadTextureAtlasId(), GL_TEXTURE0);
