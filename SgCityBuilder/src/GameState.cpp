@@ -133,9 +133,9 @@ void GameState::Init()
 
     m_firstPersonCamera = std::make_shared<sg::ogl::camera::FirstPersonCamera>(
         GetApplicationContext(),
-        glm::vec3(56.0f, 3.0f, -81.0f),
-        -49.0f,
-        -14.0f
+        glm::vec3(6.0f, 2.0f, -5.0f),
+        -200.0f,
+        -43.0f
     );
     m_firstPersonCamera->SetCameraVelocity(4.0f);
     m_firstPersonCamera->SetMouseSensitivity(0.05f);

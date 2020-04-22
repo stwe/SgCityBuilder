@@ -13,9 +13,8 @@
 // Build options
 //-------------------------------------------------
 
-#if defined (SG_CITY_DEBUG_BUILD)
-    #define ENABLE_TRAFFIC_DEBUG
-    //#define LOAD_MAP_8_8
+#ifdef ENABLE_TRAFFIC_DEBUG
+    #define LOAD_MAP_8_8
 #endif
 
 //-------------------------------------------------
