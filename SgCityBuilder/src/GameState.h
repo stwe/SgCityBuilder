@@ -9,17 +9,8 @@
 
 #pragma once
 
-//-------------------------------------------------
-// Build options
-//-------------------------------------------------
-
-#ifdef ENABLE_TRAFFIC_DEBUG
-    #define LOAD_MAP_8_8
-#endif
-
-//-------------------------------------------------
-
 #include "SgOgl.h"
+#include "Build.h"
 #include "map/tile/Tile.h"
 
 namespace sg::city::city

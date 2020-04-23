@@ -36,6 +36,14 @@ void sg::city::automata::Automata::Update(const float t_dt)
     auto canMove{ true };
     auto distanceToAutomataInFront{ 1.0f };
 
+    // regelmaessig neue Automaten erstellen
+    lifetime -= t_dt;
+    if (lifetime <= 0.0f)
+    {
+        deleteAutomata = true;
+        return;
+    }
+
     /*
 
        N2  Start Node

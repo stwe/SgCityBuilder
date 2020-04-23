@@ -15,6 +15,7 @@
 #include <scene/Scene.h>
 #include <math/Transform.h>
 #include "RoadTile.h"
+#include "Build.h"
 #include "map/Map.h"
 #include "automata/AutoNode.h"
 #include "automata/AutoTrack.h"

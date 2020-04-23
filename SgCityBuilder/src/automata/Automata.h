@@ -24,6 +24,12 @@ namespace sg::city::automata
         using AutoTrackSharedPtr = std::shared_ptr<AutoTrack>;
 
         //-------------------------------------------------
+        // Const
+        //-------------------------------------------------
+
+        static constexpr auto DEFAULT_LIFETIME{ 50.0f };
+
+        //-------------------------------------------------
         // Public member
         //-------------------------------------------------
 
@@ -37,6 +43,8 @@ namespace sg::city::automata
 
         bool deleteAutomata{ false };
         bool isEntity{ false };
+
+        float lifetime{ DEFAULT_LIFETIME };
 
         //-------------------------------------------------
         // Ctors. / Dtor.

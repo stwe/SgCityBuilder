@@ -62,8 +62,7 @@ project "SgCityBuilder"
         defines
         {
             "SG_OGL_DEBUG_BUILD",
-            "SG_CITY_DEBUG_BUILD",
-            "ENABLE_TRAFFIC_DEBUG"
+            "SG_CITY_DEBUG_BUILD"
         }
         runtime "Debug"
         symbols "On"
