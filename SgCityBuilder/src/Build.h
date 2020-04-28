@@ -10,4 +10,4 @@
 #pragma once
 
 //#define ENABLE_TRAFFIC_DEBUG
-//#define LOAD_MAP_8_8
+#define LOAD_MAP_8_8

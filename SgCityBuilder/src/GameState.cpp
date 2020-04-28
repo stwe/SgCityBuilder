@@ -61,11 +61,7 @@ bool GameState::Input()
 
             if (!skip)
             {
-                m_changedTileIndex = changedTileIndex;
-            }
-            else
-            {
-                m_changedTileIndex = -1;
+                m_changedTiles.push_back(changedTileIndex);
             }
 
             // delete mouse state
@@ -82,7 +78,7 @@ bool GameState::Update(const double t_dt)
 
     {
         //sg::city::timer::Timer timer;
-        m_city->Update(t_dt, m_changedTileIndex);
+        m_city->Update(t_dt, m_changedTiles);
     }
 
     UpdateCars(t_dt);
@@ -97,7 +93,7 @@ void GameState::Render()
 
 #ifdef ENABLE_TRAFFIC_DEBUG
     // only render the AutoTracks after update of changed Tile is complete
-    if (m_changedTileIndex == -1 && m_renderAutoTracks)
+    if (m_changedTiles.empty() && m_renderAutoTracks)
     {
         m_city->RenderAutoTracks();
     }

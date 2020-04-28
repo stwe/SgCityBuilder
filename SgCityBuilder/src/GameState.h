@@ -39,6 +39,8 @@ public:
 
     using DirectionalLightSharedPtr = std::shared_ptr<sg::ogl::light::Sun>;
 
+    using TileIndexContainer = std::vector<int>;
+
     //-------------------------------------------------
     // Const
     //-------------------------------------------------
@@ -81,7 +83,7 @@ private:
     CityUniquePtr m_city;
     MousePickerUniquePtr m_mousePicker;
 
-    int m_changedTileIndex{ -1 };
+    TileIndexContainer m_changedTiles;
 
     ForwardRendererUniquePtr m_forwardRenderer;
     SkyboxRenderSystemUniquePtr m_skyboxRenderSystem;

@@ -54,6 +54,8 @@ namespace sg::city::city
         using BuildingGeneratorSharedPtr = std::shared_ptr<map::BuildingGenerator>;
         using BuildingsRendererUniquePtr = std::unique_ptr<renderer::BuildingsRenderer>;
 
+        using TileIndexContainer = std::vector<int>;
+
         //-------------------------------------------------
         // Const
         //-------------------------------------------------
@@ -96,7 +98,7 @@ namespace sg::city::city
         // Logic
         //-------------------------------------------------
 
-        void Update(double t_dt, int& t_changedTileIndex);
+        void Update(double t_dt, TileIndexContainer& t_tileIndexContainer);
         void Render() const;
 
         //-------------------------------------------------

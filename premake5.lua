@@ -1,5 +1,10 @@
+include("conanbuildinfo.premake.lua")
+
 workspace "SgCityBuilder"
+    conan_basic_setup()
+
     architecture "x64"
+    startproject "SgCityBuilder"
 
     configurations
     {
@@ -22,6 +27,8 @@ project "SgCityBuilder"
     targetdir ("bin/" .. outputdir .. "/%{prj.name}")
     objdir ("obj/" .. outputdir .. "/%{prj.name}")
 
+    linkoptions { conan_exelinkflags }
+
     files
     {
         "%{prj.name}/src/**.h",
@@ -31,18 +38,8 @@ project "SgCityBuilder"
     includedirs
     {
         "%{prj.name}/src",
-        "%{prj.name}/vendor/sgogl/src",
-        "%{prj.name}/vendor/sgogl/src/SgOglLib",
-        "%{prj.name}/vendor/sgogl/vendor/spdlog/include",
-        "%{prj.name}/vendor/sgogl/vendor/glew/include",
-        "%{prj.name}/vendor/sgogl/vendor/glfw/include",
-        "%{prj.name}/vendor/sgogl/vendor/tinyxml2/include",
-        "%{prj.name}/vendor/sgogl/vendor/glm",
-        "%{prj.name}/vendor/sgogl/vendor/assimp/include",
-        "%{prj.name}/vendor/sgogl/vendor/entt",
-        "%{prj.name}/vendor/sgogl/vendor/imgui",
-        "%{prj.name}/vendor/sgogl/vendor/gli",
-        "%{prj.name}/vendor/sgogl/vendor/freetype/include"
+        "SgOglLib/SgOglLib/src",
+        "SgOglLib/SgOglLib/src/SgOglLib",
     }
 
     links
@@ -68,7 +65,7 @@ project "SgCityBuilder"
         symbols "On"
         libdirs
         {
-            "%{prj.name}/vendor/sgogl/lib/debug",
+            "bin/" .. outputdir .. "/SgOglLib/",
         }
 
     filter "configurations:Release"
@@ -76,5 +73,51 @@ project "SgCityBuilder"
         optimize "On"
         libdirs
         {
-            "%{prj.name}/vendor/sgogl/lib/release",
+            "bin/" .. outputdir .. "/SgOglLib/",
         }
+
+project "SgOglLib"
+    location "SgOglLib"
+    architecture "x64"
+    kind "StaticLib"
+    language "C++"
+    cppdialect "C++17"
+
+    targetdir ("bin/" .. outputdir .. "/%{prj.name}")
+    objdir ("obj/" .. outputdir .. "/%{prj.name}")
+
+    linkoptions { conan_exelinkflags }
+
+    files
+    {
+        "%{prj.name}/%{prj.name}/src/**.h",
+        "%{prj.name}/%{prj.name}/src/**.cpp"
+    }
+
+    includedirs
+    {
+        "%{prj.name}/%{prj.name}/src",
+        "%{prj.name}/%{prj.name}/src/SgOglLib",
+        "%{prj.name}/%{prj.name}/vendor/gli"
+    }
+
+    linkoptions
+    {
+        "/IGNORE:4099"
+    }
+
+    filter "system:windows"
+        systemversion "latest"
+        defines
+        {
+            "GLFW_INCLUDE_NONE"
+        }
+
+    filter "configurations:Debug"
+        defines "SG_OGL_DEBUG_BUILD"
+        runtime "Debug"
+        symbols "on"
+
+    filter "configurations:Release"
+        runtime "Release"
+        optimize "on"

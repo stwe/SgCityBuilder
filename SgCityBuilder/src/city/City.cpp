@@ -76,14 +76,14 @@ sg::city::city::City::MapSharedPtr sg::city::city::City::GetMapSharedPtr() const
 // Logic
 //-------------------------------------------------
 
-void sg::city::city::City::Update(const double t_dt, int& t_changedTileIndex)
+void sg::city::city::City::Update(const double t_dt, TileIndexContainer& t_tileIndexContainer)
 {
     // handle a changed Tile
 
-    if (t_changedTileIndex >= 0)
+    for (auto tileIndex : t_tileIndexContainer)
     {
         // get Tile
-        auto& changedTile{ m_map->GetTiles()[t_changedTileIndex] };
+        auto& changedTile{ m_map->GetTiles()[tileIndex] };
 
         // check if the new Tile is of type TRAFFIC
         if (changedTile->type == map::tile::TileType::TRAFFIC)
@@ -123,7 +123,10 @@ void sg::city::city::City::Update(const double t_dt, int& t_changedTileIndex)
         }
     }
 
-    t_changedTileIndex = -1;
+    if (!t_tileIndexContainer.empty())
+    {
+        t_tileIndexContainer.clear();
+    }
 
 
     // change StopPattern
@@ -202,6 +205,13 @@ auto sg::city::city::City::ReplaceTile(const int t_mapX, const int t_mapZ, map::
 {
     auto& tiles{ m_map->GetTiles() };
     const auto currentTileIndex{ m_map->GetTileMapIndexByMapPosition(t_mapX, t_mapZ) };
+
+    // there must be nothing on the tile yet - skip
+    if (tiles[currentTileIndex]->type != map::tile::TileType::NONE)
+    {
+        SG_OGL_LOG_INFO("[City::ReplaceTile()] There is already something on this tile. Skip replace.");
+        return { currentTileIndex, true };
+    }
 
     // if the type does not change - skip
     if (tiles[currentTileIndex]->type == t_tileType)
@@ -377,10 +387,13 @@ void sg::city::city::City::StoreBuildings() const
 void sg::city::city::City::StoreRoads()
 {
     // das letzte Tile uebergeben -> alle Roads werden einmal neu erstellt
+
     // todo: refactor Update Funktion
     if (!m_map->roadIndices.empty())
     {
-        Update(0.016f, m_map->roadIndices.back());
+        TileIndexContainer tiles;
+        tiles.push_back(m_map->roadIndices.back());
+        Update(0.016f, tiles);
     }
 }
 
