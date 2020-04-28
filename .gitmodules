@@ -1,0 +1,3 @@
+[submodule "SgOglLib"]
+	path = SgOglLib
+	url = https://github.com/stwe/SgOgl.git
