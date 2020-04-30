@@ -72,10 +72,10 @@ void sg::city::map::BuildingGenerator::AddBuilding(tile::BuildingTile& t_buildin
     std::random_device seeder;
     std::mt19937 engine(seeder());
 
-    const std::uniform_real_distribution<float> col(0.4, 0.8);
+    std::uniform_real_distribution<float> col(0.4, 0.8);
     const auto randomCol{ col(engine) };
 
-    const std::uniform_int_distribution<unsigned int> text(1, 2);
+    std::uniform_int_distribution<unsigned int> text(1, 2);
     const auto textureId{ static_cast<float>(text(engine)) };
 
     for (auto i{ 0 }; i < floors; ++i)

@@ -9,6 +9,7 @@
 
 #pragma once
 
+#include <list>
 #include "Tile.h"
 
 namespace sg::city::automata

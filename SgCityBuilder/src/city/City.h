@@ -11,6 +11,7 @@
 
 #include <string>
 #include <memory>
+#include <list>
 #include "map/tile/Tile.h"
 
 namespace sg::ogl::scene

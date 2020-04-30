@@ -9,12 +9,8 @@
 
 #pragma once
 
+#include "Color.h"
 #include "tile/Tile.h"
-
-namespace sg::ogl
-{
-    struct Color;
-}
 
 namespace sg::ogl::scene
 {

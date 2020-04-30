@@ -690,9 +690,9 @@ void sg::city::map::Map::StoreRandomColors()
     std::random_device seeder;
     std::mt19937 engine(seeder());
 
-    const std::uniform_int_distribution<unsigned int> r(7, 164);
-    const std::uniform_int_distribution<unsigned int> g(1, 160);
-    const std::uniform_int_distribution<unsigned int> b(124, 254);
+    std::uniform_int_distribution<unsigned int> r(7, 164);
+    std::uniform_int_distribution<unsigned int> g(1, 160);
+    std::uniform_int_distribution<unsigned int> b(124, 254);
 
     for (auto i{ 0 }; i < MAX_REGION_COLORS; ++i)
     {
